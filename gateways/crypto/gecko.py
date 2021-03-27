@@ -9,18 +9,12 @@ class GeckoClient:
 
     def __init__(self, config: RestConfig = GeckoConfig):
         self.config = config
+        self.url = self.config.BASE_URL
+
         self.session = requests.Session()
-        self.url = self.config.base_url
+        self.session.mount('http://', config.ADAPTER)
 
-        if config.adapter:
-            self.session.mount('http://', config.adapter)
-
-    @property
-    def configuration(self):
-        return print(self.config.__dict__)
-
-
-    def _build_url(self):
+    def _build_url(self, endpoint):
         pass
 
     def _make_request(self, url):
@@ -28,6 +22,8 @@ class GeckoClient:
             response = self.session.get(url)
             response.raise_for_status()
             content = json.loads(response.content.decode('utf-8'))
+
+            print(content)
             return content
         except Exception as e:
             print(e)
@@ -37,3 +33,4 @@ class GeckoClient:
 
 g  = GeckoClient()
 g.ping()
+g.configuration
