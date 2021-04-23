@@ -23,4 +23,5 @@ class Asset(ABC):
         self.asset_type = asset_type
 
 
-class Portfolio: pass
+class Portfolio:
+    pass
