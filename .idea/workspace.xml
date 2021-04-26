@@ -2,11 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8f6f0362-636d-4b5b-a588-b94a716f8ecc" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/gateways/crypto/geckoboy.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gateways/gh/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gateways/gh/gth.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateways/crypto/garbage.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateways/crypto/view.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateways/crypto/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/gateways/crypto/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateways/crypto/cg_coins.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateways/crypto/configs.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gateways/crypto/gecko.py" beforeDir="false" afterPath="$PROJECT_DIR$/gateways/crypto/gecko.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateways/crypto/geckoboy.py" beforeDir="false" afterPath="$PROJECT_DIR$/gateways/crypto/geckoboy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateways/crypto/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/gateways/crypto/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateways/tests/utils/test_gecko_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/gateways/tests/utils/test_gecko_utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,11 +39,53 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ignore_missing_gitignore" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/gateways/gh/gth.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.geckoboy">
+  <component name="RunManager" selected="Python.__init__">
+    <configuration name="__init__" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="smart-money" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Jakub\Anaconda3\envs\Projects\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/gateways/crypto" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gateways/crypto/__init__.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="gecko" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="smart-money" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Jakub\Anaconda3\envs\Projects\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/gateways/crypto" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gateways/crypto/gecko.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="geckoboy" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="smart-money" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -105,6 +152,8 @@
     <list>
       <item itemvalue="Python.llama" />
       <item itemvalue="Python.geckoboy" />
+      <item itemvalue="Python.gecko" />
+      <item itemvalue="Python.__init__" />
       <item itemvalue="Python.gth" />
     </list>
   </component>
@@ -122,89 +171,100 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="-1641" y="-135" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1619205542020">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state x="2199" y="-218" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1619377746572">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state x="-1641" y="-135" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619205542020" />
+    <state x="-1641" y="-135" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619284220452" />
     <state x="223" y="68" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619175992573" />
+    <state x="2199" y="-218" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619377746572" />
     <state x="541" y="216" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1616871267801">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="541" y="216" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1616871267801" />
-    <state x="-1103" y="212" width="769" height="607" key="#xdebugger.evaluate" timestamp="1619207342678">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state x="2794" y="-27" width="900" height="583" key="#xdebugger.evaluate" timestamp="1619461160348">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state x="-1103" y="212" width="769" height="607" key="#xdebugger.evaluate/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207342678" />
+    <state x="-1080" y="212" width="800" height="607" key="#xdebugger.evaluate/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293914413" />
     <state x="685" y="235" width="750" height="582" key="#xdebugger.evaluate/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619176517171" />
+    <state x="2794" y="-27" width="900" height="583" key="#xdebugger.evaluate/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461160348" />
     <state x="516" y="269" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1619180701027">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="516" y="269" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619180701027" />
-    <state x="-1234" y="-9" key="FileChooserDialogImpl" timestamp="1619205541304">
+    <state width="672" height="466" key="DebuggerActiveHint" timestamp="1619284625827">
       <screen x="-1920" y="-221" width="1920" height="1040" />
     </state>
-    <state x="-1234" y="-9" key="FileChooserDialogImpl/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619205541304" />
+    <state width="672" height="466" key="DebuggerActiveHint/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619284625826" />
+    <state x="2606" y="-92" key="FileChooserDialogImpl" timestamp="1619420872548">
+      <screen x="1920" y="-304" width="1920" height="1040" />
+    </state>
+    <state x="-1234" y="-9" key="FileChooserDialogImpl/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619284219962" />
     <state x="549" y="168" key="FileChooserDialogImpl/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619175992045" />
-    <state width="1877" height="430" key="GridCell.Tab.0.bottom" timestamp="1619207418862">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state x="2606" y="-92" key="FileChooserDialogImpl/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619420872548" />
+    <state width="1877" height="331" key="GridCell.Tab.0.bottom" timestamp="1619461950644">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418862" />
+    <state width="1877" height="362" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
-    <state width="1877" height="430" key="GridCell.Tab.0.center" timestamp="1619207418862">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="331" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461950644" />
+    <state width="1877" height="331" key="GridCell.Tab.0.center" timestamp="1619461950643">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418862" />
+    <state width="1877" height="362" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
-    <state width="1877" height="430" key="GridCell.Tab.0.left" timestamp="1619207418862">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="331" key="GridCell.Tab.0.center/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461950643" />
+    <state width="1877" height="331" key="GridCell.Tab.0.left" timestamp="1619461950643">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418862" />
+    <state width="1877" height="362" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
-    <state width="1877" height="430" key="GridCell.Tab.0.right" timestamp="1619207418862">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="331" key="GridCell.Tab.0.left/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461950643" />
+    <state width="1877" height="331" key="GridCell.Tab.0.right" timestamp="1619461950644">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418862" />
+    <state width="1877" height="362" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
-    <state width="1877" height="430" key="GridCell.Tab.1.bottom" timestamp="1619207418863">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="331" key="GridCell.Tab.0.right/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461950644" />
+    <state width="1877" height="362" key="GridCell.Tab.1.bottom" timestamp="1619461364399">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.1.bottom/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418863" />
+    <state width="1877" height="362" key="GridCell.Tab.1.bottom/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.1.bottom/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181317950" />
-    <state width="1877" height="430" key="GridCell.Tab.1.center" timestamp="1619207418863">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="362" key="GridCell.Tab.1.bottom/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461364399" />
+    <state width="1877" height="362" key="GridCell.Tab.1.center" timestamp="1619461364399">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.1.center/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418863" />
+    <state width="1877" height="362" key="GridCell.Tab.1.center/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.1.center/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181317950" />
-    <state width="1877" height="430" key="GridCell.Tab.1.left" timestamp="1619207418862">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="362" key="GridCell.Tab.1.center/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461364399" />
+    <state width="1877" height="362" key="GridCell.Tab.1.left" timestamp="1619461364399">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.1.left/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418862" />
+    <state width="1877" height="362" key="GridCell.Tab.1.left/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.1.left/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181317949" />
-    <state width="1877" height="430" key="GridCell.Tab.1.right" timestamp="1619207418863">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="362" key="GridCell.Tab.1.left/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461364399" />
+    <state width="1877" height="362" key="GridCell.Tab.1.right" timestamp="1619461364399">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="1877" height="430" key="GridCell.Tab.1.right/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619207418863" />
+    <state width="1877" height="362" key="GridCell.Tab.1.right/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.1.right/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181317950" />
-    <state width="969" height="529" key="XDebugger.FullValuePopup" timestamp="1619206437594">
-      <screen x="-1920" y="-221" width="1920" height="1040" />
+    <state width="1877" height="362" key="GridCell.Tab.1.right/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619461364399" />
+    <state width="969" height="529" key="XDebugger.FullValuePopup" timestamp="1619460361239">
+      <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state width="969" height="529" key="XDebugger.FullValuePopup/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619206437594" />
+    <state width="969" height="529" key="XDebugger.FullValuePopup/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293244080" />
     <state width="775" height="419" key="XDebugger.FullValuePopup/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619180893167" />
+    <state width="969" height="529" key="XDebugger.FullValuePopup/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619460361239" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/gateways/crypto/geckoboy.py</url>
-          <line>32</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/gateways/crypto/geckoboy.py</url>
-          <line>82</line>
-          <option name="timeStamp" value="19" />
-        </line-breakpoint>
-      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>

@@ -14,3 +14,5 @@ def test_should_return_none_if_no_discord_or_no_object():
 
     assert find_discord(info.get("chat_url")) is None
     assert find_discord(info2.get("chat_url")) is None
+
+
