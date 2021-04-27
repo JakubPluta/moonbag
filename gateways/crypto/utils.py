@@ -25,8 +25,10 @@ def calculate_time_delta(date: str):
 
 
 def get_eth_addresses_for_cg_coins(file):
-    with open(file, 'r') as f:
+    with open(file, "r") as f:
         data = json.load(f)
         df = pd.DataFrame(data)
-        df['ethereum'] = df['platforms'].apply(lambda x: x.get('ethereum') if 'ethereum' in x else None)
+        df["ethereum"] = df["platforms"].apply(
+            lambda x: x.get("ethereum") if "ethereum" in x else None
+        )
         return df

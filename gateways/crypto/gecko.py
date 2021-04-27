@@ -1,9 +1,15 @@
 from pycoingecko import CoinGeckoAPI
 import json
-from utils import find_discord, filter_list, calculate_time_delta, get_eth_addresses_for_cg_coins
+from utils import (
+    find_discord,
+    filter_list,
+    calculate_time_delta,
+    get_eth_addresses_for_cg_coins,
+)
 import pandas as pd
 
 COINS = "gecko_coins.json"
+
 
 class Exchanges:
     def __init__(self):
@@ -16,17 +22,17 @@ class Exchanges:
 
     @staticmethod
     def _create_df(exchange: dict):
-        df = pd.DataFrame(exchange, index=[0]).set_index('id')
+        df = pd.DataFrame(exchange, index=[0]).set_index("id")
         return df
 
     def add_exchange(self, exchange: dict):
-        if exchange.get('id') and exchange.get('id') not in self._ids:
+        if exchange.get("id") and exchange.get("id") not in self._ids:
             exchange = self._create_df(exchange)
             self._exchanges.append(exchange)
 
     @property
     def exchanges(self):
-        return pd.concat(self._exchanges).sort_values(by='trust_score_rank')
+        return pd.concat(self._exchanges).sort_values(by="trust_score_rank")
 
 
 class GeckoRepo:
@@ -38,8 +44,10 @@ class GeckoRepo:
         try:
             data = get_eth_addresses_for_cg_coins(COINS)
         except FileNotFoundError as e:
-            data = pd.DataFrame(self.client.get_coins_list(include_platforms='true'))
-            data['ethereum'] = data['platforms'].apply(lambda x: x.get('ethereum') if 'ethereum' in x else None)
+            data = pd.DataFrame(self.client.get_coins_list(include_platforms="true"))
+            data["ethereum"] = data["platforms"].apply(
+                lambda x: x.get("ethereum") if "ethereum" in x else None
+            )
         return data
 
     def _get_trends(self):
@@ -54,13 +62,13 @@ class GeckoRepo:
     def get_trends(self, return_json=False):
         dfs, jsons = [], []
         for coin in self._get_trends():
-            jsn = self.coin_info(coin.get('id'))
+            jsn = self.coin_info(coin.get("id"))
             df = pd.json_normalize(jsn)
             jsons.append(jsn)
             dfs.append(df)
         if return_json:
-            return pd.concat(dfs).set_index('id'), jsons
-        return pd.concat(dfs).set_index('id')
+            return pd.concat(dfs).set_index("id"), jsons
+        return pd.concat(dfs).set_index("id")
 
     def get_coin_info(self, coin_id: str):
         params = dict(localization="false", tickers="false", sparkline=True)
@@ -186,9 +194,8 @@ class GeckoRepo:
         print(self._ex.exchanges)
 
 
-
 gecoin = GeckoRepo()
 # gr.feed_exchanges()
 # gr.show_exchanges()
 
-#print(gecoin.get_coin_data('uniswap'))
+# print(gecoin.get_coin_data('uniswap'))

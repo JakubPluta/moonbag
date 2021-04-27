@@ -1,15 +1,17 @@
 from pycoingecko import CoinGeckoAPI
 import json
-from gateways.crypto.utils import find_discord, filter_list, calculate_time_delta, get_eth_addresses_for_cg_coins
+from gateways.crypto.utils import (
+    find_discord,
+    filter_list,
+    calculate_time_delta,
+    get_eth_addresses_for_cg_coins,
+)
 import datetime as dt
 from datetime import timezone
 from dateutil import parser
 
 
 cg = CoinGeckoAPI()
-
-
-
 
 
 def get_trends():
@@ -133,7 +135,7 @@ def coin_info(coin_id: str):
 
 from pprint import pprint
 
-#r = coin_info("sushi")
+# r = coin_info("sushi")
 
 d = cg.get_exchanges_list()
 
@@ -143,7 +145,14 @@ import pandas as pd
 
 
 class Exchanges:
-    _columns = ['name', 'country', 'url',  'trust_score', 'trust_score_rank','trade_volume_24h_btc']
+    _columns = [
+        "name",
+        "country",
+        "url",
+        "trust_score",
+        "trust_score_rank",
+        "trade_volume_24h_btc",
+    ]
 
     def __init__(self):
         self.client = CoinGeckoAPI()
@@ -152,17 +161,16 @@ class Exchanges:
 
     def get_exchanges(self):
         self._meta = self.client.get_exchanges_list(per_page=250)
-        return pd.DataFrame(self._meta).set_index('id')
+        return pd.DataFrame(self._meta).set_index("id")
 
     @property
     def exchanges(self):
-        return self._exchanges[self._columns].sort_values(by='trust_score_rank')
+        return self._exchanges[self._columns].sort_values(by="trust_score_rank")
 
     def check_exchange(self, id):
         for i in self._meta:
-            if id == i.get('id'):
+            if id == i.get("id"):
                 return self.client.get_exchanges_by_id(id)
-
 
 
 ex = Exchanges()
@@ -170,4 +178,4 @@ ex = Exchanges()
 ex.get_exchanges()
 print(ex.exchanges)
 
-print(ex.check_exchange('binance'))
+print(ex.check_exchange("binance"))

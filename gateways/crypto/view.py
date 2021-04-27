@@ -2,21 +2,22 @@ import argparse
 import pprint
 import logging
 from gecko import gecoin
-logger = logging.getLogger('coingecko')
+
+logger = logging.getLogger("coingecko")
+
 
 def help():
     print("Session started!")
     print("moon        crypto")
     print("help        help me please")
     print("quit        shut me down bro")
-    print('\n')
-
+    print("\n")
 
 
 def main():
-    main_parser = argparse.ArgumentParser(prog='coingecko',add_help=False,)
+    main_parser = argparse.ArgumentParser(prog="coingecko", add_help=False,)
 
-    main_parser.add_argument('option', choices=['moon','help','quit'])
+    main_parser.add_argument("option", choices=["moon", "help", "quit"])
 
     print("Hello on the Moon!\nLets start research :)\n")
     print()
@@ -24,7 +25,7 @@ def main():
 
     while True:
         cmd_line = False
-        user_input = input('> ')
+        user_input = input("> ")
 
         try:
             (ns_known_args, l_args) = main_parser.parse_known_args(user_input.split())
@@ -32,10 +33,20 @@ def main():
             logger.log(3, e)
             continue
 
-        if ns_known_args.option == 'moon':
+        if ns_known_args.option == "moon":
 
-            parser = argparse.ArgumentParser(prog='moonbag',description="Let's use Coingecko to screen my crypto gems ")
-            parser.add_argument('-c', '--coin', action='store', dest='symbol', default='terra-luna',help="Coin Symbol")
+            parser = argparse.ArgumentParser(
+                prog="moonbag",
+                description="Let's use Coingecko to screen my crypto gems ",
+            )
+            parser.add_argument(
+                "-c",
+                "--coin",
+                action="store",
+                dest="symbol",
+                default="terra-luna",
+                help="Coin Symbol",
+            )
 
             try:
                 (ns_parser, l_unknown_args) = parser.parse_known_args(l_args)
@@ -53,12 +64,13 @@ def main():
                 logger.log(3, e)
                 continue
 
-        elif arg.cmd == 'help':
+        elif arg.cmd == "help":
             help()
 
-        elif arg.cmd == 'quit' or "q":
+        elif arg.cmd == "quit" or "q":
             print("Moon is always with you my friend!\nSee you soon\n")
             break
+
 
 if __name__ == "__main__":
     main()
