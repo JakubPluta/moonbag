@@ -3,9 +3,18 @@ import bs4
 from bs4 import BeautifulSoup
 import pandas as pd
 pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+import re
+pd.set_option('display.width', None)
 
 
-def _gecko_scraper(url):
+def clean_question_marks(dct: dict):
+    if isinstance(dct, dict):
+        for k, v in dct.items():
+            if v == '?':
+                dct[k] = None
+
+def gecko_scraper(url):
     req = requests.get(url)
     soup = BeautifulSoup(req.text, features='lxml')
     return soup
@@ -13,7 +22,7 @@ def _gecko_scraper(url):
 def get_top_crypto_categories():
     base = "https://www.coingecko.com"
     url = "https://www.coingecko.com/en/categories"
-    soup = _gecko_scraper(url)
+    soup = gecko_scraper(url)
     rows = soup.find('tbody').find_all('tr')
     results = []
 
@@ -40,6 +49,7 @@ def get_top_crypto_categories():
             volume_24h=volume,
 
         )
+        clean_question_marks(coin)
         results.append(coin)
     return pd.DataFrame(results).set_index('rank')
 
@@ -48,7 +58,7 @@ def get_recently_added():
 
     base = "https://www.coingecko.com"
     url = 'https://www.coingecko.com/en/coins/recently_added'
-    soup = _gecko_scraper(url)
+    soup = gecko_scraper(url)
     rows = soup.find('tbody').find_all('tr')
     results = []
 
@@ -76,9 +86,7 @@ def get_recently_added():
 
             )
         # clean dict
-        for k, v in coin.items():
-            if v == '?':
-                coin[k] = None
+        clean_question_marks(coin)
         results.append(coin)
     return pd.DataFrame(results)
 
@@ -87,7 +95,7 @@ def get_recently_added():
 
 def get_stable_coins():
     url = 'https://www.coingecko.com/en/stablecoins'
-    soup = _gecko_scraper(url)
+    soup = gecko_scraper(url)
     rows = soup.find('tbody').find_all('tr')
     results = []
     for row in rows:
@@ -109,10 +117,48 @@ def get_stable_coins():
             number_of_exchanges = exchanges
 
         )
-        for k, v in stable.items():
-            if v == '?':
-                stable[k] = None
+        clean_question_marks(stable)
         results.append(stable)
-    return pd.DataFrame(results)
+    return pd.DataFrame(results).set_index('rank')
 
+
+def get_stable_coins2():
+    cols = ['rank', 'name', 'symbol', 'price', 'volume_24h', 'number_of_exchanges', 'market_cap', 'market_cap_change_30d']
+    url = 'https://www.coingecko.com/en/stablecoins'
+    soup = gecko_scraper(url)
+    rows = soup.find('tbody').find_all('tr')
+    results = []
+    for row in rows:
+        rank, name, symbol, *args, price, volume24h, exchanges, mcap, change = row.text.split()
+        results.append([rank, name, symbol, price, volume24h, exchanges, mcap, change])
+    return pd.DataFrame(results, columns=cols)
+
+
+def get_yield_farms():
+    def _parse_row(row):
+        parsed = []
+        for n, i in enumerate(row):
+            txt = i.text.strip()
+            record = re.sub(r'(\n){2,10}', ' ', txt).replace('  ', ' ').replace('\n', ' ')
+            parsed.append(record)
+        return parsed[:-1]
+
+    cols = ['rank','name','pool','audits','collateral','il risk','value locked','returns']
+    url = 'https://www.coingecko.com/en/yield-farming'
+    soup = gecko_scraper(url)
+    rows = soup.find('tbody').find_all('tr')
+    results = []
+    for r in rows:
+        row = r.find_all('td')
+        res = _parse_row(row)
+        results.append(res)
+    df = pd.DataFrame(results, columns=cols).set_index('rank')
+    df.replace({'N/A': None}, inplace=True)
+    df['audits'] = df['audits'].replace(to_replace=r'^[0-9]\s',value='', regex=True)
+    df.applymap(lambda x: x.rstrip() if isinstance(x, str) else x)
+    df.replace(to_replace=r'(\s){2,}',value=' ', regex=True, inplace=True)
+    df['yearly returns'] = df['returns'].apply(lambda x: " ".join(x.split(" ")[:2]))
+    df['hourly returns'] = df['returns'].apply(lambda x: " ".join(x.split(" ")[2:]))
+    df['collateral'] = df['collateral'].apply(lambda x: ','.join(x.split()))
+    return df.drop(['returns','il risk'], axis=1)
 
