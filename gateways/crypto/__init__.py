@@ -227,3 +227,41 @@ def get_top_volume_coins():
         clean_question_marks(coin)
         results.append(coin)
     return pd.DataFrame(results).set_index("rank")
+
+
+def btc_price():
+    req = requests.get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false"
+    )
+    return req.json()["bitcoin"]["usd"]
+
+
+def discover_coins(category="trending"):
+    categories = {
+        "trending": 0,
+        "most_voted": 1,
+        "positive_sentiment": 2,
+        "recently_added": 3,
+        "most_visited": 4,
+    }
+
+    if category not in categories:
+        raise ValueError(f"Wrong category name\nPlease chose one from list: {categories.keys()}")
+
+    base = "https://www.coingecko.com"
+    url = "https://www.coingecko.com/en/discover"
+    soup = gecko_scraper(url)
+    popular = soup.find_all("div", class_="col-12 col-sm-6 col-md-6 col-lg-4")[
+        categories[category]
+    ]
+    rows = popular.find_all("a")
+    results = []
+    for row in rows:
+        name, *args, price = row.text.strip().split("\n")
+        url = base + row["href"]
+        if price.startswith("BTC"):
+            price = price.replace("BTC", "").replace(",", ".")
+        results.append([name, price, url])
+    return pd.DataFrame(results, columns=["name", "price btc", "url"])
+
+
