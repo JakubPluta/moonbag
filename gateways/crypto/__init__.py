@@ -291,4 +291,32 @@ def get_top_gainers(period='1h'):
         results.append([symbol, name ,volume, price, change, url])
     return pd.DataFrame(results,columns=['symbol','name','volume', 'price',f'change_{period}','url'])
 
-print(get_top_gainers('1y'))
+
+def get_top_losers(period='1h'):
+    periods = {
+        '1h' : '?time=h1',
+        '1d' : '?time=h24',
+        '7d' : '?time=d7',
+        '14d' : '?time=d14',
+        '30d' : '?time=d30',
+        '60d' : '?time=d60',
+        '1y' : '?time=y1',
+    }
+    if period not in periods:
+        raise ValueError(f"Wrong time period\nPlease chose one from list: {periods.keys()}")
+
+    base = "https://www.coingecko.com"
+    url = f"https://www.coingecko.com/en/coins/trending{periods.get(period)}"
+    soup = gecko_scraper(url)
+    top_gainers = soup.find_all("tbody")[1]
+    rows = top_gainers.find_all('tr')
+    results = []
+    for row in rows:
+        url = base + row.find('a')['href']
+        record = [r for r in row.text.strip().split('\n') if r not in ["", " "]]
+        symbol, name, *args ,volume, price, change = record
+        results.append([symbol, name ,volume, price, change, url])
+    return pd.DataFrame(results,columns=['symbol','name','volume', 'price',f'change_{period}','url'])
+
+
+print(get_top_losers('1h'))
