@@ -246,7 +246,9 @@ def discover_coins(category="trending"):
     }
 
     if category not in categories:
-        raise ValueError(f"Wrong category name\nPlease chose one from list: {categories.keys()}")
+        raise ValueError(
+            f"Wrong category name\nPlease chose one from list: {categories.keys()}"
+        )
 
     base = "https://www.coingecko.com"
     url = "https://www.coingecko.com/en/discover"
@@ -265,58 +267,167 @@ def discover_coins(category="trending"):
     return pd.DataFrame(results, columns=["name", "price btc", "url"])
 
 
-def get_top_gainers(period='1h'):
+def get_top_gainers(period="1h"):
     periods = {
-        '1h' : '?time=h1',
-        '1d' : '?time=h24',
-        '7d' : '?time=d7',
-        '14d' : '?time=d14',
-        '30d' : '?time=d30',
-        '60d' : '?time=d60',
-        '1y' : '?time=y1',
+        "1h": "?time=h1",
+        "1d": "?time=h24",
+        "7d": "?time=d7",
+        "14d": "?time=d14",
+        "30d": "?time=d30",
+        "60d": "?time=d60",
+        "1y": "?time=y1",
     }
     if period not in periods:
-        raise ValueError(f"Wrong time period\nPlease chose one from list: {periods.keys()}")
+        raise ValueError(
+            f"Wrong time period\nPlease chose one from list: {periods.keys()}"
+        )
 
     base = "https://www.coingecko.com"
     url = f"https://www.coingecko.com/en/coins/trending{periods.get(period)}"
     soup = gecko_scraper(url)
     top_gainers = soup.find_all("tbody")[0]
-    rows = top_gainers.find_all('tr')
+    rows = top_gainers.find_all("tr")
     results = []
     for row in rows:
-        url = base + row.find('a')['href']
-        record = [r for r in row.text.strip().split('\n') if r not in ["", " "]]
-        symbol, name, *args ,volume, price, change = record
-        results.append([symbol, name ,volume, price, change, url])
-    return pd.DataFrame(results,columns=['symbol','name','volume', 'price',f'change_{period}','url'])
+        url = base + row.find("a")["href"]
+        record = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
+        symbol, name, *args, volume, price, change = record
+        results.append([symbol, name, volume, price, change, url])
+    return pd.DataFrame(
+        results,
+        columns=["symbol", "name", "volume", "price", f"change_{period}", "url"],
+    )
 
 
-def get_top_losers(period='1h'):
+def get_top_losers(period="1h"):
     periods = {
-        '1h' : '?time=h1',
-        '1d' : '?time=h24',
-        '7d' : '?time=d7',
-        '14d' : '?time=d14',
-        '30d' : '?time=d30',
-        '60d' : '?time=d60',
-        '1y' : '?time=y1',
+        "1h": "?time=h1",
+        "1d": "?time=h24",
+        "7d": "?time=d7",
+        "14d": "?time=d14",
+        "30d": "?time=d30",
+        "60d": "?time=d60",
+        "1y": "?time=y1",
     }
     if period not in periods:
-        raise ValueError(f"Wrong time period\nPlease chose one from list: {periods.keys()}")
+        raise ValueError(
+            f"Wrong time period\nPlease chose one from list: {periods.keys()}"
+        )
 
     base = "https://www.coingecko.com"
     url = f"https://www.coingecko.com/en/coins/trending{periods.get(period)}"
     soup = gecko_scraper(url)
     top_gainers = soup.find_all("tbody")[1]
-    rows = top_gainers.find_all('tr')
+    rows = top_gainers.find_all("tr")
     results = []
     for row in rows:
-        url = base + row.find('a')['href']
-        record = [r for r in row.text.strip().split('\n') if r not in ["", " "]]
-        symbol, name, *args ,volume, price, change = record
-        results.append([symbol, name ,volume, price, change, url])
-    return pd.DataFrame(results,columns=['symbol','name','volume', 'price',f'change_{period}','url'])
+        url = base + row.find("a")["href"]
+        record = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
+        symbol, name, *args, volume, price, change = record
+        results.append([symbol, name, volume, price, change, url])
+    return pd.DataFrame(
+        results,
+        columns=["symbol", "name", "volume", "price", f"change_{period}", "url"],
+    )
 
 
-print(get_top_losers('1h'))
+def get_defi_coins():
+    base = "https://www.coingecko.com"
+    url = "https://www.coingecko.com/en/defi"
+    soup = gecko_scraper(url)
+    rows = soup.find("tbody").find_all("tr")
+    results = []
+    for row in rows:
+        url = base + row.find("a")["href"]
+        (
+            rank,
+            *names,
+            symbol,
+            symbol2,
+            price,
+            change,
+            change1,
+            change2,
+            volume,
+            mcap,
+            full,
+            ratio,
+        ) = row.text.strip().split()
+        results.append(
+            [
+                rank,
+                " ".join(names),
+                symbol,
+                price,
+                change,
+                change1,
+                change2,
+                volume,
+                mcap,
+                full,
+                ratio,
+                url,
+            ]
+        )
+
+    return pd.DataFrame(
+        results,
+        columns=[
+            "rank",
+            "name",
+            "symbol",
+            "price",
+            "change_1h",
+            "change_24h",
+            "change_7d",
+            "volume_24h",
+            "market_cap",
+            "fully_diluted_market_cap",
+            "macp/tvl ratio",
+            "url",
+        ],
+    ).set_index("rank")
+
+
+def get_dexes():
+    url = 'https://www.coingecko.com/en/dex'
+    soup = gecko_scraper(url)
+    rows = soup.find("tbody").find_all("tr")
+    results = []
+    for row in rows:
+        row_txt = row.text.strip()
+        if 'Trading Incentives' in row_txt:
+            row_txt = row_txt.replace('Trading Incentives','')
+
+        record = row_txt.split('\n')
+        record = [r for r in record if r not in [' ','']]
+        if len(record) == 8:
+            record.insert(-3, 'N/A')
+
+        rank, *names, volume_24h, num_coins, num_pairs, visits, most_trader_pairs, market_share_by_volume = record
+        results.append(
+            [
+                rank,
+                " ".join(names).strip(),
+                volume_24h,
+                num_coins,
+                num_pairs,
+                visits,
+                most_trader_pairs,
+                market_share_by_volume,
+                url,
+            ]
+        )
+    df = pd.DataFrame(results, columns= ['rank','name','volume_24h','number_of_coins',
+                                           'number_of_pairs','number_of_visits','most_traded_pairs','market_share_by_volume',
+                                           'url'])
+
+    # @todo make it clean - > so ugly ....
+    df['most_traded_pairs'] = df['most_traded_pairs'].str.replace('\d+', '', regex=True)
+    df['most_traded_pairs'] = df['most_traded_pairs'].str.replace('.','', regex=True)
+    df['most_traded_pairs']= df['most_traded_pairs'].str.replace(',', '', regex=True)
+    df['most_traded_pairs'] = df['most_traded_pairs'].str.replace('$', '', regex=True)
+    return df.set_index('rank')
+
+
+print(get_dexes())
