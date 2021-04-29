@@ -1,7 +1,8 @@
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
 import re
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -513,7 +514,7 @@ def get_nft_of_the_day():
     soup = gecko_scraper(url)
     row = soup.find("div", class_="tw-px-4 tw-py-5 sm:tw-p-6")
     try:
-        *author, description, other = [
+        *author, description, _ = [
             r for r in row.text.strip().split("\n") if r not in ["", " "]
         ]
     except ValueError:
@@ -539,20 +540,22 @@ def get_nft_market_status():
 
 
 def _get_news(page=1):
-    url = f'https://www.coingecko.com/en/news?page={page}'
+    url = f"https://www.coingecko.com/en/news?page={page}"
     soup = gecko_scraper(url)
     row = soup.find_all("article")
     results = []
     for r in row:
-        header = r.find('header')
-        link =  header.find('a')['href']
-        text = [t for t in header.text.strip().split('\n') if t not in ['',' ']]
-        article = r.find('div', class_='post-body').text.strip()
+        header = r.find("header")
+        link = header.find("a")["href"]
+        text = [t for t in header.text.strip().split("\n") if t not in ["", " "]]
+        article = r.find("div", class_="post-body").text.strip()
         title, *by = text
-        author, posted = ' '.join(by).split('(')
-        posted = posted.strip().replace(')','')
-        results.append([title, author.strip(),posted ,article,link])
-    return pd.DataFrame(results, columns=['title','author','posted','article', 'url'])
+        author, posted = " ".join(by).split("(")
+        posted = posted.strip().replace(")", "")
+        results.append([title, author.strip(), posted, article, link])
+    return pd.DataFrame(
+        results, columns=["title", "author", "posted", "article", "url"]
+    )
 
 
 def get_news(n_of_pages=10):
@@ -561,13 +564,11 @@ def get_news(n_of_pages=10):
         dfs.append(_get_news(page))
     return pd.concat(dfs, ignore_index=True)
 
-# https://www.codingforentrepreneurs.com/blog/python-asyncio-web-scraping/
-
 
 def get_btc_holdings_public_companies_overview():
-    url = 'https://www.coingecko.com/en/public-companies-bitcoin'
+    url = "https://www.coingecko.com/en/public-companies-bitcoin"
     soup = gecko_scraper(url)
-    rows = soup.find_all("span", class_='overview-box d-inline-block p-3 mr-2')
+    rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
     kpis = {}
     for row in rows:
         r = row.text.strip().split()
@@ -579,9 +580,9 @@ def get_btc_holdings_public_companies_overview():
 
 
 def get_eth_holdings_public_companies_overview():
-    url = 'https://www.coingecko.com/en/public-companies-ethereum'
+    url = "https://www.coingecko.com/en/public-companies-ethereum"
     soup = gecko_scraper(url)
-    rows = soup.find_all("span", class_='overview-box d-inline-block p-3 mr-2')
+    rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
     kpis = {}
     for row in rows:
         r = row.text.strip().split()
@@ -592,34 +593,95 @@ def get_eth_holdings_public_companies_overview():
     return kpis
 
 
-
 def get_companies_with_btc():
-    url = 'https://www.coingecko.com/en/public-companies-bitcoin'
+    url = "https://www.coingecko.com/en/public-companies-bitcoin"
     soup = gecko_scraper(url)
     rows = soup.find("tbody").find_all("tr")
     results = []
     for row in rows:
-        link = row.find('a')['href']
-        r = [r for r in row.text.strip().split('\n') if r not in ['',' ']]
-        rank, *name, symbol, country, total_btc, entry_value, today_value, pct_of_supply = r
-        results.append([rank, ' '.join(name), symbol,country, total_btc, entry_value, today_value, pct_of_supply, link])
-    return pd.DataFrame(results, columns=[
-        'rank','company','ticker','country','total_btc', 'entry_value','today_value','pct_of_supply','url'
-    ]).set_index('rank')
+        link = row.find("a")["href"]
+        r = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
+        (
+            rank,
+            *name,
+            symbol,
+            country,
+            total_btc,
+            entry_value,
+            today_value,
+            pct_of_supply,
+        ) = r
+        results.append(
+            [
+                rank,
+                " ".join(name),
+                symbol,
+                country,
+                total_btc,
+                entry_value,
+                today_value,
+                pct_of_supply,
+                link,
+            ]
+        )
+    return pd.DataFrame(
+        results,
+        columns=[
+            "rank",
+            "company",
+            "ticker",
+            "country",
+            "total_btc",
+            "entry_value",
+            "today_value",
+            "pct_of_supply",
+            "url",
+        ],
+    ).set_index("rank")
 
 
 def get_companies_with_eth():
-    url = 'https://www.coingecko.com/en/public-companies-ethereum'
+    url = "https://www.coingecko.com/en/public-companies-ethereum"
     soup = gecko_scraper(url)
     rows = soup.find("tbody").find_all("tr")
     results = []
     for row in rows:
-        link = row.find('a')['href']
-        r = [r for r in row.text.strip().split('\n') if r not in ['',' ']]
-        rank, *name, symbol, country, total_btc, entry_value, today_value, pct_of_supply = r
-        results.append([rank, ' '.join(name), symbol,country, total_btc, entry_value, today_value, pct_of_supply, link])
-    return pd.DataFrame(results, columns=[
-        'rank','company','ticker','country','total_eth', 'entry_value','today_value','pct_of_supply','url'
-    ]).set_index('rank')
-
-
+        link = row.find("a")["href"]
+        r = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
+        (
+            rank,
+            *name,
+            symbol,
+            country,
+            total_btc,
+            entry_value,
+            today_value,
+            pct_of_supply,
+        ) = r
+        results.append(
+            [
+                rank,
+                " ".join(name),
+                symbol,
+                country,
+                total_btc,
+                entry_value,
+                today_value,
+                pct_of_supply,
+                link,
+            ]
+        )
+    return pd.DataFrame(
+        results,
+        columns=[
+            "rank",
+            "company",
+            "ticker",
+            "country",
+            "total_eth",
+            "entry_value",
+            "today_value",
+            "pct_of_supply",
+            "url",
+        ],
+    ).set_index("rank")

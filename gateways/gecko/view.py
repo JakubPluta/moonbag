@@ -8,7 +8,7 @@ logger = logging.getLogger("coingecko")
 
 def help():
     print("Session started!")
-    print("moon        crypto")
+    print("moon        gecko")
     print("help        help me please")
     print("quit        shut me down bro")
     print("\n")
@@ -37,7 +37,7 @@ def main():
 
             parser = argparse.ArgumentParser(
                 prog="moonbag",
-                description="Let's use Coingecko to screen my crypto gems ",
+                description="Let's use Coingecko to screen my gecko gems ",
             )
             parser.add_argument(
                 "-c",

@@ -1,4 +1,4 @@
-from gateways.crypto.utils import find_discord
+from gateways.gecko.utils import find_discord
 
 
 def test_should_properly_return_discord_if_exists():
