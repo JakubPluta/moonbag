@@ -12,6 +12,17 @@ def find_discord(item: list) -> list or None:
             return discord[0]
 
 
+def join_list_elements(elem):
+    if not elem:
+        raise ValueError("Elem is empty")
+    if isinstance(elem, dict):
+        return ', '.join([k for k, v in elem.items()])
+    elif isinstance(elem, list):
+        return ', '.join([k for k in elem])
+    else:
+        return None
+
+
 def filter_list(lst: list) -> list:
     if isinstance(lst, list) and len(lst) > 0:
         return [i for i in lst if i != ""]
@@ -32,3 +43,9 @@ def get_eth_addresses_for_cg_coins(file):
             lambda x: x.get("ethereum") if "ethereum" in x else None
         )
         return df
+
+def clean_question_marks(dct: dict):
+    if isinstance(dct, dict):
+        for k, v in dct.items():
+            if v == "?":
+                dct[k] = None
