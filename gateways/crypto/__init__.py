@@ -390,21 +390,30 @@ def get_defi_coins():
 
 
 def get_dexes():
-    url = 'https://www.coingecko.com/en/dex'
+    url = "https://www.coingecko.com/en/dex"
     soup = gecko_scraper(url)
     rows = soup.find("tbody").find_all("tr")
     results = []
     for row in rows:
         row_txt = row.text.strip()
-        if 'Trading Incentives' in row_txt:
-            row_txt = row_txt.replace('Trading Incentives','')
+        if "Trading Incentives" in row_txt:
+            row_txt = row_txt.replace("Trading Incentives", "")
 
-        record = row_txt.split('\n')
-        record = [r for r in record if r not in [' ','']]
+        record = row_txt.split("\n")
+        record = [r for r in record if r not in [" ", ""]]
         if len(record) == 8:
-            record.insert(-3, 'N/A')
+            record.insert(-3, "N/A")
 
-        rank, *names, volume_24h, num_coins, num_pairs, visits, most_trader_pairs, market_share_by_volume = record
+        (
+            rank,
+            *names,
+            volume_24h,
+            num_coins,
+            num_pairs,
+            visits,
+            most_trader_pairs,
+            market_share_by_volume,
+        ) = record
         results.append(
             [
                 rank,
@@ -418,16 +427,137 @@ def get_dexes():
                 url,
             ]
         )
-    df = pd.DataFrame(results, columns= ['rank','name','volume_24h','number_of_coins',
-                                           'number_of_pairs','number_of_visits','most_traded_pairs','market_share_by_volume',
-                                           'url'])
+    df = pd.DataFrame(
+        results,
+        columns=[
+            "rank",
+            "name",
+            "volume_24h",
+            "number_of_coins",
+            "number_of_pairs",
+            "number_of_visits",
+            "most_traded_pairs",
+            "market_share_by_volume",
+            "url",
+        ],
+    )
 
     # @todo make it clean - > so ugly ....
-    df['most_traded_pairs'] = df['most_traded_pairs'].str.replace('\d+', '', regex=True)
-    df['most_traded_pairs'] = df['most_traded_pairs'].str.replace('.','', regex=True)
-    df['most_traded_pairs']= df['most_traded_pairs'].str.replace(',', '', regex=True)
-    df['most_traded_pairs'] = df['most_traded_pairs'].str.replace('$', '', regex=True)
-    return df.set_index('rank')
+    df["most_traded_pairs"] = df["most_traded_pairs"].str.replace("\d+", "", regex=True)
+    df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(".", "", regex=True)
+    df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(",", "", regex=True)
+    df["most_traded_pairs"] = df["most_traded_pairs"].str.replace("$", "", regex=True)
+
+    return df.set_index("rank")
 
 
-print(get_dexes())
+def get_top_nfts():
+    base = "https://www.coingecko.com/"
+    url = "https://www.coingecko.com/en/nft"
+    soup = gecko_scraper(url)
+    rows = soup.find("tbody").find_all("tr")
+    results = []
+    for row in rows:
+        url = base + row.find("a")["href"]
+        cleaned_row = [i for i in row.text.strip().split("\n") if i not in [" ", ""]]
+        if len(cleaned_row) == 9:
+            cleaned_row.insert(5, "N/A")
+
+        (
+            rank,
+            *names,
+            symbol,
+            symbol2,
+            price,
+            change,
+            change1,
+            change2,
+            volume,
+            mcap,
+        ) = cleaned_row
+        results.append(
+            [
+                rank,
+                " ".join(names),
+                symbol,
+                price,
+                change,
+                change1,
+                change2,
+                volume,
+                mcap,
+                url,
+            ]
+        )
+
+    return pd.DataFrame(
+        results,
+        columns=[
+            "rank",
+            "name",
+            "symbol",
+            "price",
+            "change_1h",
+            "change_24h",
+            "change_7d",
+            "volume_24h",
+            "market_cap",
+            "url",
+        ],
+    )
+
+
+def get_nft_of_the_day():
+    base = "https://www.coingecko.com/"
+    url = "https://www.coingecko.com/en/nft"
+    soup = gecko_scraper(url)
+    row = soup.find("div", class_="tw-px-4 tw-py-5 sm:tw-p-6")
+    try:
+        *author, description, other = [
+            r for r in row.text.strip().split("\n") if r not in ["", " "]
+        ]
+    except ValueError:
+        return {}
+    return {
+        "author": " ".join(author),
+        "desc": description,
+        "url": base + row.find("a")["href"],
+        "img": row.find("img")["src"],
+    }
+
+
+def get_nft_market_status():
+    url = "https://www.coingecko.com/en/nft"
+    soup = gecko_scraper(url)
+    row = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
+    kpis = {}
+    for r in row:
+        value, *kpi = r.text.strip().split()
+        name = " ".join(kpi)
+        kpis[name] = value
+    return kpis
+
+
+def _get_news(page=1):
+    url = f'https://www.coingecko.com/en/news?page={page}'
+    soup = gecko_scraper(url)
+    row = soup.find_all("article")
+    results = []
+    for r in row:
+        header = r.find('header')
+        link =  header.find('a')['href']
+        text = [t for t in header.text.strip().split('\n') if t not in ['',' ']]
+        article = r.find('div', class_='post-body').text.strip()
+        title, *by = text
+        author, posted = ' '.join(by).split('(')
+        posted = posted.strip().replace(')','')
+        results.append([title, author.strip(),posted ,article,link])
+    return pd.DataFrame(results, columns=['title','author','posted','article', 'url'])
+
+
+def get_news(n_of_pages=10):
+    dfs = []
+    for page in range(1, n_of_pages):
+        dfs.append(_get_news(page))
+    return pd.concat(dfs, ignore_index=True)
+
