@@ -561,3 +561,65 @@ def get_news(n_of_pages=10):
         dfs.append(_get_news(page))
     return pd.concat(dfs, ignore_index=True)
 
+# https://www.codingforentrepreneurs.com/blog/python-asyncio-web-scraping/
+
+
+def get_btc_holdings_public_companies_overview():
+    url = 'https://www.coingecko.com/en/public-companies-bitcoin'
+    soup = gecko_scraper(url)
+    rows = soup.find_all("span", class_='overview-box d-inline-block p-3 mr-2')
+    kpis = {}
+    for row in rows:
+        r = row.text.strip().split()
+        if r:
+            value, *kpi = r
+            name = " ".join(kpi)
+            kpis[name] = value
+    return kpis
+
+
+def get_eth_holdings_public_companies_overview():
+    url = 'https://www.coingecko.com/en/public-companies-ethereum'
+    soup = gecko_scraper(url)
+    rows = soup.find_all("span", class_='overview-box d-inline-block p-3 mr-2')
+    kpis = {}
+    for row in rows:
+        r = row.text.strip().split()
+        if r:
+            value, *kpi = r
+            name = " ".join(kpi)
+            kpis[name] = value
+    return kpis
+
+
+
+def get_companies_with_btc():
+    url = 'https://www.coingecko.com/en/public-companies-bitcoin'
+    soup = gecko_scraper(url)
+    rows = soup.find("tbody").find_all("tr")
+    results = []
+    for row in rows:
+        link = row.find('a')['href']
+        r = [r for r in row.text.strip().split('\n') if r not in ['',' ']]
+        rank, *name, symbol, country, total_btc, entry_value, today_value, pct_of_supply = r
+        results.append([rank, ' '.join(name), symbol,country, total_btc, entry_value, today_value, pct_of_supply, link])
+    return pd.DataFrame(results, columns=[
+        'rank','company','ticker','country','total_btc', 'entry_value','today_value','pct_of_supply','url'
+    ]).set_index('rank')
+
+
+def get_companies_with_eth():
+    url = 'https://www.coingecko.com/en/public-companies-ethereum'
+    soup = gecko_scraper(url)
+    rows = soup.find("tbody").find_all("tr")
+    results = []
+    for row in rows:
+        link = row.find('a')['href']
+        r = [r for r in row.text.strip().split('\n') if r not in ['',' ']]
+        rank, *name, symbol, country, total_btc, entry_value, today_value, pct_of_supply = r
+        results.append([rank, ' '.join(name), symbol,country, total_btc, entry_value, today_value, pct_of_supply, link])
+    return pd.DataFrame(results, columns=[
+        'rank','company','ticker','country','total_eth', 'entry_value','today_value','pct_of_supply','url'
+    ]).set_index('rank')
+
+
