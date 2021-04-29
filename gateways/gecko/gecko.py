@@ -10,23 +10,23 @@ from gateways.gecko.utils import (
     calculate_time_delta,
     get_eth_addresses_for_cg_coins,
     clean_question_marks,
-    join_list_elements
+    join_list_elements,
 )
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
 pd.set_option("display.width", None)
-pd.set_option('display.float_format', lambda x: '%.1f' % x)
+pd.set_option("display.float_format", lambda x: "%.1f" % x)
 
 
 periods = {
-            "1h": "?time=h1",
-            "1d": "?time=h24",
-            "7d": "?time=d7",
-            "14d": "?time=d14",
-            "30d": "?time=d30",
-            "60d": "?time=d60",
-            "1y": "?time=y1",
+    "1h": "?time=h1",
+    "1d": "?time=h24",
+    "7d": "?time=d7",
+    "14d": "?time=d14",
+    "30d": "?time=d30",
+    "60d": "?time=d60",
+    "1y": "?time=y1",
 }
 
 categories = {
@@ -40,7 +40,7 @@ categories = {
 
 class GeckoOverview:
     BASE = "https://www.coingecko.com"
-    
+
     def __init__(self):
         self.client = CoinGeckoAPI()
 
@@ -49,15 +49,17 @@ class GeckoOverview:
         req = requests.get(url)
         soup = BeautifulSoup(req.text, features="lxml")
         return soup
-    
+
     def get_top_crypto_categories(self):
         url = "https://www.coingecko.com/en/categories"
         soup = self.gecko_scraper(url)
         rows = soup.find("tbody").find_all("tr")
         results = []
-    
+
         for row in rows:
-            rank = row.find("td", class_="table-left tw-text-left tw-text-xs").text.strip()
+            rank = row.find(
+                "td", class_="table-left tw-text-left tw-text-xs"
+            ).text.strip()
             name = row.find("td", class_="coin-name").text.strip()
             href = self.BASE + row.find("td", class_="coin-name").a["href"]
             top_coins_urls = [
@@ -66,9 +68,9 @@ class GeckoOverview:
                     "div", class_="tw-flex tw-justify-center lg:ml-4"
                 ).find_all("a", href=True)
             ]
-    
+
             top_coins = ", ".join([url.split("/")[-1] for url in top_coins_urls])
-    
+
             hour, day, week = [change.text.strip() for change in row.find_all("span")]
             mcap, volume = [
                 stats.text.strip()
@@ -88,13 +90,13 @@ class GeckoOverview:
             clean_question_marks(coin)
             results.append(coin)
         return pd.DataFrame(results).set_index("rank")
-    
+
     def get_recently_added(self):
         url = "https://www.coingecko.com/en/coins/recently_added"
         soup = self.gecko_scraper(url)
         rows = soup.find("tbody").find_all("tr")
         results = []
-    
+
         for row in rows:
             url = self.BASE + row.find("td", class_="py-0 coin-name").a["href"]
             name = row.find("td", class_="py-0 coin-name").a.text.strip()
@@ -117,7 +119,7 @@ class GeckoOverview:
             mcap = row.find(
                 "td", class_="td-market_cap cap col-market cap-price text-right"
             ).text.strip()
-    
+
             coin = dict(
                 name=name,
                 price=price,
@@ -140,8 +142,12 @@ class GeckoOverview:
         rows = soup.find("tbody").find_all("tr")
         results = []
         for row in rows:
-            rank = row.find("td", class_="table-number text-center text-xs").text.strip()
-            name, symbol, *_ = row.find("td", class_="py-0 coin-name").text.strip().split()
+            rank = row.find(
+                "td", class_="table-number text-center text-xs"
+            ).text.strip()
+            name, symbol, *_ = (
+                row.find("td", class_="py-0 coin-name").text.strip().split()
+            )
             price = row.find("td", class_="td-price price text-right").text.strip()
             day = row.find(
                 "td", class_="td-liquidity_score lit text-right %> col-market"
@@ -173,11 +179,13 @@ class GeckoOverview:
             for n, i in enumerate(row):
                 txt = i.text.strip()
                 record = (
-                    re.sub(r"(\n){2,10}", " ", txt).replace("  ", " ").replace("\n", " ")
+                    re.sub(r"(\n){2,10}", " ", txt)
+                    .replace("  ", " ")
+                    .replace("\n", " ")
                 )
                 parsed.append(record)
             return parsed[:-1]
-    
+
         cols = [
             "rank",
             "name",
@@ -198,7 +206,9 @@ class GeckoOverview:
             results.append(res)
         df = pd.DataFrame(results, columns=cols).set_index("rank")
         df.replace({"N/A": None}, inplace=True)
-        df["audits"] = df["audits"].replace(to_replace=r"^[0-9]\s", value="", regex=True)
+        df["audits"] = df["audits"].replace(
+            to_replace=r"^[0-9]\s", value="", regex=True
+        )
         df.applymap(lambda x: x.rstrip() if isinstance(x, str) else x)
         df.replace(to_replace=r"(\s){2,}", value=" ", regex=True, inplace=True)
         df["yearly returns"] = df["returns"].apply(lambda x: " ".join(x.split(" ")[:2]))
@@ -212,7 +222,9 @@ class GeckoOverview:
         rows = soup.find("tbody").find_all("tr")
         results = []
         for row in rows:
-            rank = row.find("td", class_="table-number text-center text-xs").text.strip()
+            rank = row.find(
+                "td", class_="table-number text-center text-xs"
+            ).text.strip()
             name = row.find(
                 "a",
                 class_="tw-hidden lg:tw-flex font-bold tw-items-center tw-justify-between",
@@ -234,7 +246,7 @@ class GeckoOverview:
             mcap = row.find(
                 "td", class_="td-market_cap cap col-market cap-price text-right"
             ).text.strip()
-    
+
             coin = dict(
                 rank=rank,
                 name=name,
@@ -263,7 +275,7 @@ class GeckoOverview:
             raise ValueError(
                 f"Wrong category name\nPlease chose one from list: {categories.keys()}"
             )
-    
+
         self.BASE = "https://www.coingecko.com"
         url = "https://www.coingecko.com/en/discover"
         soup = self.gecko_scraper(url)
@@ -359,7 +371,7 @@ class GeckoOverview:
                     url,
                 ]
             )
-    
+
         return pd.DataFrame(
             results,
             columns=[
@@ -387,12 +399,12 @@ class GeckoOverview:
             row_txt = row.text.strip()
             if "Trading Incentives" in row_txt:
                 row_txt = row_txt.replace("Trading Incentives", "")
-    
+
             record = row_txt.split("\n")
             record = [r for r in record if r not in [" ", ""]]
             if len(record) == 8:
                 record.insert(-3, "N/A")
-    
+
             (
                 rank,
                 *names,
@@ -430,13 +442,21 @@ class GeckoOverview:
                 "url",
             ],
         )
-    
+
         # @todo make it clean - > so ugly ....
-        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace("\d+", "", regex=True)
-        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(".", "", regex=True)
-        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(",", "", regex=True)
-        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace("$", "", regex=True)
-    
+        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(
+            "\d+", "", regex=True
+        )
+        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(
+            ".", "", regex=True
+        )
+        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(
+            ",", "", regex=True
+        )
+        df["most_traded_pairs"] = df["most_traded_pairs"].str.replace(
+            "$", "", regex=True
+        )
+
         return df.set_index("rank")
 
     def get_top_nfts(self):
@@ -446,10 +466,12 @@ class GeckoOverview:
         results = []
         for row in rows:
             url = self.BASE + row.find("a")["href"]
-            cleaned_row = [i for i in row.text.strip().split("\n") if i not in [" ", ""]]
+            cleaned_row = [
+                i for i in row.text.strip().split("\n") if i not in [" ", ""]
+            ]
             if len(cleaned_row) == 9:
                 cleaned_row.insert(5, "N/A")
-    
+
             (
                 rank,
                 *names,
@@ -476,7 +498,7 @@ class GeckoOverview:
                     url,
                 ]
             )
-    
+
         return pd.DataFrame(
             results,
             columns=[
@@ -679,8 +701,8 @@ class GeckoOverview:
         platforms = info.get("platforms")
         market_data = info.get("market_data")
 
-        #repos = links.get("repos_url")
-        #dev = info.get("developer_data")
+        # repos = links.get("repos_url")
+        # dev = info.get("developer_data")
 
         return dict(
             mcap_rank=info.get("market_cap_rank"),
@@ -690,36 +712,32 @@ class GeckoOverview:
             contract=info.get("contract_address"),
             categories=join_list_elements(info.get("categories")),
             platforms=join_list_elements(platforms),
-
-
             total_supply=market_data.get("total_supply"),
             max_supply=market_data.get("max_supply"),
             circulating_supply=market_data.get("circulating_supply"),
-
             change_pct_24h=market_data.get("price_change_percentage_24h"),
             change_pct_7d=market_data.get("price_change_percentage_7d"),
-
-            homepage=filter_list(links.get("homepage"))[0] if links.get("homepage") else None,
+            homepage=filter_list(links.get("homepage"))[0]
+            if links.get("homepage")
+            else None,
             sentiment=info.get("sentiment_votes_up_percentage"),
             description=info.get("description").get("en"),
-
-            #twitter='https://twitter.com/' + links.get("twitter_screen_name") if links.get("twitter_screen_name") else None,
-            #telegram=links.get("telegram_channel_identifier"),
-            #subreddit=links.get("subreddit_url"),
-            #github=repos.get("github") if repos else None,
+            # twitter='https://twitter.com/' + links.get("twitter_screen_name") if links.get("twitter_screen_name") else None,
+            # telegram=links.get("telegram_channel_identifier"),
+            # subreddit=links.get("subreddit_url"),
+            # github=repos.get("github") if repos else None,
             # forums=filter_list(links.get("official_forum_url"))
             # if links.get("official_forum_url")
             # else None,
             # discord=find_discord(links.get("chat_url")),
             # community_data=info.get("community_data"),
             # public_interest=info.get("public_interest_stats"),
-
             ath_price_usd=market_data.get("ath").get("usd"),
-            pct_from_ath_usd= market_data.get("ath_change_percentage").get("usd"),
-            ath_date_usd= market_data.get("ath_date").get("usd"),
-            days_from_ath_usd = calculate_time_delta(market_data.get("ath_date").get("usd")),
-
-
+            pct_from_ath_usd=market_data.get("ath_change_percentage").get("usd"),
+            ath_date_usd=market_data.get("ath_date").get("usd"),
+            days_from_ath_usd=calculate_time_delta(
+                market_data.get("ath_date").get("usd")
+            ),
         )
 
     def get_trends(self):
@@ -734,21 +752,85 @@ class GeckoOverview:
         return pd.concat(dfs).set_index("mcap_rank")
 
     def get_coin_list(self):
-        return pd.DataFrame(self.client.get_coins_list(),columns=['id','symbol','name']).set_index('id')
+        return pd.DataFrame(
+            self.client.get_coins_list(), columns=["id", "symbol", "name"]
+        ).set_index("id")
 
     def get_exchanges(self):
         df = pd.DataFrame(self.client.get_exchanges_list(per_page=250))
-        df.replace({float(np.NaN) :  None},inplace=True)
-        return df[['trust_score_rank','trust_score','id','name', 'country','year_established','trade_volume_24h_btc','url']].set_index('trust_score_rank')
+        df.replace({float(np.NaN): None}, inplace=True)
+        return df[
+            [
+                "trust_score_rank",
+                "trust_score",
+                "id",
+                "name",
+                "country",
+                "year_established",
+                "trade_volume_24h_btc",
+                "url",
+            ]
+        ].set_index("trust_score_rank")
 
     def get_financial_platforms(self):
-        return pd.DataFrame(self.client.get_finance_platforms()).set_index('name')
+        return pd.DataFrame(self.client.get_finance_platforms()).set_index("name")
 
     def get_finance_products(self):
-        return pd.DataFrame(self.client.get_finance_products(per_page=250),columns=[
-            'platform','identifier','supply_rate_percentage', 'borrow_rate_percentage'
-        ])
+        return pd.DataFrame(
+            self.client.get_finance_products(per_page=250),
+            columns=[
+                "platform",
+                "identifier",
+                "supply_rate_percentage",
+                "borrow_rate_percentage",
+            ],
+        )
+
+    def get_indexes(self):
+        return pd.DataFrame(self.client.get_indexes(per_page=250))
+
+    def get_derivatives(self):
+        return pd.DataFrame(self.client.get_derivatives(include_tickers="unexpired"))
+
+    def get_exchange_rates(self):
+        return (
+            pd.DataFrame(self.client.get_exchange_rates()["rates"])
+            .T.reset_index()
+            .drop("index", axis=1)
+        )
+
+    def get_global_info(self, json=False):
+        results = self.client.get_global()
+        for key in ["total_market_cap", "total_volume", "market_cap_percentage"]:
+            del results[key]
+        if json:
+            return results
+        return pd.Series(results)
+
+    def get_global_markets_info(self):
+        columns = ["total_market_cap", "total_volume", "market_cap_percentage"]
+        data = []
+        results = self.client.get_global()
+        for key in columns:
+            data.append(results.get(key))
+        df = pd.DataFrame(data).T
+        df.columns = columns
+        return df
+
+    def get_global_defi_info(self, json=False):
+        results = self.client.get_global_decentralized_finance_defi()
+        for k, v in results.items():
+            try:
+                results[k] = round(float(v), 4)
+            except (ValueError, TypeError):
+                pass
+        if json:
+            return results
+        df = pd.Series(results).reset_index()
+        df.columns = ["statistic", "value"]
+        return df
+
 
 cg = GeckoOverview()
 
-print(cg.get_finance_products())
+print(cg.get_global_defi_info())

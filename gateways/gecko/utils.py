@@ -16,9 +16,9 @@ def join_list_elements(elem):
     if not elem:
         raise ValueError("Elem is empty")
     if isinstance(elem, dict):
-        return ', '.join([k for k, v in elem.items()])
+        return ", ".join([k for k, v in elem.items()])
     elif isinstance(elem, list):
-        return ', '.join([k for k in elem])
+        return ", ".join([k for k in elem])
     else:
         return None
 
@@ -43,6 +43,7 @@ def get_eth_addresses_for_cg_coins(file):
             lambda x: x.get("ethereum") if "ethereum" in x else None
         )
         return df
+
 
 def clean_question_marks(dct: dict):
     if isinstance(dct, dict):
