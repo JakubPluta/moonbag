@@ -50,3 +50,16 @@ def clean_question_marks(dct: dict):
         for k, v in dct.items():
             if v == "?":
                 dct[k] = None
+
+
+def get_url(url, elem):
+    return url + elem.find("a")["href"]
+
+
+def changes_parser(changes):
+    if isinstance(changes, list) and len(changes) < 3:
+        for i in range(3 - len(changes)):
+            changes.append(None)
+    else:
+        changes = [None for i in range(3)]
+    return changes
