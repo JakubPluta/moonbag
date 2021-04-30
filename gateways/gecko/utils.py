@@ -77,6 +77,13 @@ def collateral_auditors_parse(args):
     return auditors, collateral
 
 
+def swap_columns(df):
+    cols = list(df.columns)
+    cols = [cols[-1]] + cols[:-1]
+    df = df[cols]
+    return df
+
+
 def changes_parser(changes):
     if isinstance(changes, list) and len(changes) < 3:
         for i in range(3 - len(changes)):

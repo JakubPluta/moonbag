@@ -5,16 +5,11 @@ import numpy as np
 from bs4 import BeautifulSoup
 from pycoingecko import CoinGeckoAPI
 from gateways.gecko.utils import (
-    find_discord,
-    filter_list,
-    calculate_time_delta,
-    get_eth_addresses_for_cg_coins,
-    clean_question_marks,
-    join_list_elements,
     changes_parser,
     replace_qm,
     clean_row,
     collateral_auditors_parse,
+    swap_columns
 )
 
 pd.set_option("display.max_columns", None)
@@ -39,6 +34,18 @@ CATEGORIES = {
     "positive_sentiment": 2,
     "recently_added": 3,
     "most_visited": 4,
+}
+
+
+COLUMNS = {
+    'rank' : 'rank',
+    'name' : 'name',
+    'symbol' : 'symbol',
+    'price' : 'price',
+    "change_1h" : "change_1h",
+    "change_24h" : "change_24h",
+    "volume_24h" : "volume_24h",
+    "market_cap" : "market_cap",
 }
 
 
@@ -83,6 +90,61 @@ class Overview:
                 price = price.replace("BTC", "").replace(",", ".")
             results.append([name, price, url])
         return pd.DataFrame(results, columns=["name", "price btc", "url"])
+
+    def _get_news(self, page=1):
+        url = f"https://www.coingecko.com/en/news?page={page}"
+        soup = self.gecko_scraper(url)
+        row = soup.find_all("article")
+        results = []
+        for r in row:
+            header = r.find("header")
+            link = header.find("a")["href"]
+            text = [t for t in header.text.strip().split("\n") if t not in ["", " "]]
+            article = r.find("div", class_="post-body").text.strip()
+            title, *by = text
+            author, posted = " ".join(by).split("(")
+            posted = posted.strip().replace(")", "")
+            results.append([title, author.strip(), posted, article, link])
+        return pd.DataFrame(
+            results, columns=["title", "author", "posted", "article", "url"]
+        )
+
+    def _get_holdings_overview(self, endpoint='bitcoin'):
+        url = "https://www.coingecko.com/en/public-companies-" + endpoint
+        soup = self.gecko_scraper(url)
+        rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
+        kpis = {}
+        for row in rows:
+            r = clean_row(row)
+            if r:
+                value, *kpi = r
+                name = " ".join(kpi)
+                kpis[name] = value
+        return kpis
+
+    def _get_companies_assets(self, endpoint='bitcoin'):
+        url = "https://www.coingecko.com/en/public-companies-" + endpoint
+        rows = self.gecko_scraper(url).find("tbody").find_all("tr")
+        results = []
+        for row in rows:
+            link = row.find("a")["href"]
+            row_cleaned = clean_row(row)
+            row_cleaned.append(link)
+            results.append(row_cleaned)
+        return pd.DataFrame(
+            results,
+            columns=[
+                "rank",
+                "company",
+                "ticker",
+                "country",
+                "total_btc",
+                "entry_value",
+                "today_value",
+                "pct_of_supply",
+                "url",
+            ],
+        ).set_index("rank")
 
     def _get_gainers_and_losers(self, period="1h", typ="gainers"):
         category = {
@@ -314,7 +376,7 @@ class Overview:
     def get_top_gainers(self, period="1h"):
         return self._get_gainers_and_losers(period, typ="gainers")
 
-    def get_defi_coins(self):
+    def get_top_defi_coins(self):
         url = "https://www.coingecko.com/en/defi"
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
@@ -345,7 +407,7 @@ class Overview:
             ],
         ).set_index("rank")
 
-    def get_dexes(self):
+    def get_top_dexes(self):
         columns = [
             "name",
             "rank",
@@ -369,13 +431,12 @@ class Overview:
         df = pd.DataFrame(results)
         df["name"] = df.iloc[:, 1] + " " + df.iloc[:, 2].replace("N/A", "")
         df.drop(df.columns[1:3], axis=1, inplace=True)
-        cols = list(df.columns)
-        cols = [cols[-1]] + cols[:-1]
-        df = df[cols]
+        df = swap_columns(df)
         df.columns = columns
         df["most_traded_pairs"] = df["most_traded_pairs"].apply(
             lambda x: x.split("$")[0]
-        )
+        ).str.replace(',','',regex=True).str.replace('.','',regex=True)
+        df["most_traded_pairs"] = df["most_traded_pairs"].apply(lambda x: None if x.isdigit() else x)
         return df.set_index("rank")
 
     def get_top_nfts(self):
@@ -384,40 +445,13 @@ class Overview:
         rows = soup.find("tbody").find_all("tr")
         results = []
         for row in rows:
-            url = self.BASE + row.find("a")["href"]
-            cleaned_row = [
-                i for i in row.text.strip().split("\n") if i not in [" ", ""]
-            ]
-            if len(cleaned_row) == 9:
-                cleaned_row.insert(5, "N/A")
-
-            (
-                rank,
-                *names,
-                symbol,
-                symbol2,
-                price,
-                change,
-                change1,
-                change2,
-                volume,
-                mcap,
-            ) = cleaned_row
-            results.append(
-                [
-                    rank,
-                    " ".join(names),
-                    symbol,
-                    price,
-                    change,
-                    change1,
-                    change2,
-                    volume,
-                    mcap,
-                    url,
-                ]
-            )
-
+            link = self.BASE + row.find("a")["href"]
+            row_cleaned = clean_row(row)
+            if len(row_cleaned) == 9:
+                row_cleaned.insert(5, "N/A")
+            row_cleaned.append(link)
+            row_cleaned.pop(3)
+            results.append(row_cleaned)
         return pd.DataFrame(
             results,
             columns=[
@@ -432,16 +466,17 @@ class Overview:
                 "market_cap",
                 "url",
             ],
-        )
+        ).set_index('rank')
 
     def get_nft_of_the_day(self):
         url = "https://www.coingecko.com/en/nft"
         soup = self.gecko_scraper(url)
         row = soup.find("div", class_="tw-px-4 tw-py-5 sm:tw-p-6")
         try:
-            *author, description, _ = [
-                r for r in row.text.strip().split("\n") if r not in ["", " "]
-            ]
+            *author, description, _ = clean_row(row)
+            if len(author) >= 3:
+                author, description = author[:3], author[3]
+            print(author)
         except ValueError:
             return {}
         return {
@@ -457,28 +492,10 @@ class Overview:
         row = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
         kpis = {}
         for r in row:
-            value, *kpi = r.text.strip().split()
+            value, *kpi = clean_row(r)
             name = " ".join(kpi)
             kpis[name] = value
         return kpis
-
-    def _get_news(self, page=1):
-        url = f"https://www.coingecko.com/en/news?page={page}"
-        soup = self.gecko_scraper(url)
-        row = soup.find_all("article")
-        results = []
-        for r in row:
-            header = r.find("header")
-            link = header.find("a")["href"]
-            text = [t for t in header.text.strip().split("\n") if t not in ["", " "]]
-            article = r.find("div", class_="post-body").text.strip()
-            title, *by = text
-            author, posted = " ".join(by).split("(")
-            posted = posted.strip().replace(")", "")
-            results.append([title, author.strip(), posted, article, link])
-        return pd.DataFrame(
-            results, columns=["title", "author", "posted", "article", "url"]
-        )
 
     def get_news(self, n_of_pages=10):
         dfs = []
@@ -487,122 +504,16 @@ class Overview:
         return pd.concat(dfs, ignore_index=True)
 
     def get_btc_holdings_public_companies_overview(self):
-        url = "https://www.coingecko.com/en/public-companies-bitcoin"
-        soup = self.gecko_scraper(url)
-        rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
-        kpis = {}
-        for row in rows:
-            r = row.text.strip().split()
-            if r:
-                value, *kpi = r
-                name = " ".join(kpi)
-                kpis[name] = value
-        return kpis
+        return self._get_holdings_overview('bitcoin')
 
     def get_eth_holdings_public_companies_overview(self):
-        url = "https://www.coingecko.com/en/public-companies-ethereum"
-        soup = self.gecko_scraper(url)
-        rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
-        kpis = {}
-        for row in rows:
-            r = row.text.strip().split()
-            if r:
-                value, *kpi = r
-                name = " ".join(kpi)
-                kpis[name] = value
-        return kpis
+        return self._get_holdings_overview('ethereum')
 
     def get_companies_with_btc(self):
-        url = "https://www.coingecko.com/en/public-companies-bitcoin"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
-        results = []
-        for row in rows:
-            link = row.find("a")["href"]
-            r = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
-            (
-                rank,
-                *name,
-                symbol,
-                country,
-                total_btc,
-                entry_value,
-                today_value,
-                pct_of_supply,
-            ) = r
-            results.append(
-                [
-                    rank,
-                    " ".join(name),
-                    symbol,
-                    country,
-                    total_btc,
-                    entry_value,
-                    today_value,
-                    pct_of_supply,
-                    link,
-                ]
-            )
-        return pd.DataFrame(
-            results,
-            columns=[
-                "rank",
-                "company",
-                "ticker",
-                "country",
-                "total_btc",
-                "entry_value",
-                "today_value",
-                "pct_of_supply",
-                "url",
-            ],
-        ).set_index("rank")
+        return self._get_companies_assets('bitcoin')
 
     def get_companies_with_eth(self):
-        url = "https://www.coingecko.com/en/public-companies-ethereum"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
-        results = []
-        for row in rows:
-            link = row.find("a")["href"]
-            r = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
-            (
-                rank,
-                *name,
-                symbol,
-                country,
-                total_btc,
-                entry_value,
-                today_value,
-                pct_of_supply,
-            ) = r
-            results.append(
-                [
-                    rank,
-                    " ".join(name),
-                    symbol,
-                    country,
-                    total_btc,
-                    entry_value,
-                    today_value,
-                    pct_of_supply,
-                    link,
-                ]
-            )
-        return pd.DataFrame(
-            results,
-            columns=[
-                "rank",
-                "company",
-                "ticker",
-                "country",
-                "total_eth",
-                "entry_value",
-                "today_value",
-                "pct_of_supply",
-                "url",
-            ],
-        ).set_index("rank")
+        return self._get_companies_assets('ethereum')
 
     def get_coin_list(self):
         return pd.DataFrame(
@@ -683,15 +594,3 @@ class Overview:
         df.columns = ["statistic", "value"]
         return df
 
-
-BASE = "https://www.coingecko.com"
-
-
-def gecko_scraper(url):
-    req = requests.get(url)
-    soup = BeautifulSoup(req.text, features="lxml")
-    return soup
-
-
-cg = Overview()
-print(cg.get_dexes())
