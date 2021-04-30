@@ -54,6 +54,59 @@ class Overview:
         soup = BeautifulSoup(req.text, features="lxml")
         return soup
 
+    @staticmethod
+    def get_btc_price():
+        req = requests.get(
+            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_market_cap"
+            "=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false"
+        )
+        return req.json()["bitcoin"]["usd"]
+
+    def _discover_coins(self, category="trending"):
+        if category not in CATEGORIES:
+            raise ValueError(
+                f"Wrong category name\nPlease chose one from list: {CATEGORIES.keys()}"
+            )
+
+        self.BASE = "https://www.coingecko.com"
+        url = "https://www.coingecko.com/en/discover"
+        soup = self.gecko_scraper(url)
+        popular = soup.find_all("div", class_="col-12 col-sm-6 col-md-6 col-lg-4")[
+            CATEGORIES[category]
+        ]
+        rows = popular.find_all("a")
+        results = []
+        for row in rows:
+            name, *args, price = row.text.strip().split("\n")
+            url = self.BASE + row["href"]
+            if price.startswith("BTC"):
+                price = price.replace("BTC", "").replace(",", ".")
+            results.append([name, price, url])
+        return pd.DataFrame(results, columns=["name", "price btc", "url"])
+
+    def _get_gainers_and_losers(self, period="1h", typ='gainers'):
+        category = {
+            'gainers': 0,
+            'losers': 1,
+        }
+
+        if period not in PERIODS:
+            raise ValueError(
+                f"Wrong time period\nPlease chose one from list: {PERIODS.keys()}"
+            )
+
+        url = f"https://www.coingecko.com/en/coins/trending{PERIODS.get(period)}"
+        rows = self.gecko_scraper(url).find_all("tbody")[category.get(typ)].find_all("tr")
+        results = []
+        for row in rows:
+            url = self.BASE + row.find("a")["href"]
+            symbol, name, *args, volume, price, change = clean_row(row)
+            results.append([symbol, name, volume, price, change, url])
+        return pd.DataFrame(
+            results,
+            columns=["symbol", "name", "volume", "price", f"change_{period}", "url"],
+        )
+
     def get_top_crypto_categories(self):
         columns = [
             "rank",
@@ -98,7 +151,7 @@ class Overview:
 
         return pd.DataFrame(results, columns=columns).set_index("rank")
 
-    def get_recently_added(self):
+    def get_recently_added_coins(self):
         columns = [
             "name",
             "symbol",
@@ -185,160 +238,50 @@ class Overview:
         return pd.DataFrame(results, columns=columns).set_index('rank').replace({'': None})
 
     def get_top_volume_coins(self):
+        columns = ['rank', 'name', 'symbol', 'price', 'change_1h', 'change_24h', 'change_7d', 'volume_24h',
+                   'market_cap']
         url = "https://www.coingecko.com/pl/waluty/high_volume"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
+        rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
         for row in rows:
-            rank = row.find(
-                "td", class_="table-number text-center text-xs"
-            ).text.strip()
-            name = row.find(
-                "a",
-                class_="tw-hidden lg:tw-flex font-bold tw-items-center tw-justify-between",
-            ).text.strip()
-            symbol = row.find("a", class_="d-lg-none font-bold").text.strip()
-            price = row.find("td", class_="td-price price text-right").text.strip()
-            last_1h = row.find(
-                "td", class_="td-change1h change1h stat-percent text-right col-market"
-            ).text.strip()
-            last_24h = row.find(
-                "td", class_="td-change24h change24h stat-percent text-right col-market"
-            ).text.strip()
-            last_week = row.find(
-                "td", class_="td-change7d change7d stat-percent text-right col-market"
-            ).text.strip()
-            volume_24h = row.find(
-                "td", class_="td-liquidity_score lit text-right %> col-market"
-            ).text.strip()
-            mcap = row.find(
-                "td", class_="td-market_cap cap col-market cap-price text-right"
-            ).text.strip()
+            row_cleaned = clean_row(row)
+            row_cleaned.insert(0, '?') if len(row_cleaned) == 9 else row_cleaned
+            row_cleaned.pop(3)
+            results.append(row_cleaned)
+        return pd.DataFrame(results,
+                            columns=columns
+                            ).set_index("rank")
 
-            coin = dict(
-                rank=rank,
-                name=name,
-                symbol=symbol,
-                price=price,
-                change_1h=last_1h,
-                change_24h=last_24h,
-                change_7d=last_week,
-                volume_24h=volume_24h,
-                market_cap=mcap,
-            )
-            clean_question_marks(coin)
-            results.append(coin)
-        return pd.DataFrame(results).set_index("rank")
+    def get_trending_coins(self):
+        return self._discover_coins('trending')
 
-    @staticmethod
-    def get_btc_price(self):
-        req = requests.get(
-            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_market_cap"
-            "=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false"
-        )
-        return req.json()["bitcoin"]["usd"]
+    def get_most_voted_coins(self):
+        return self._discover_coins('most_voted')
 
-    def discover_coins(self, category="trending"):
-        if category not in CATEGORIES:
-            raise ValueError(
-                f"Wrong category name\nPlease chose one from list: {CATEGORIES.keys()}"
-            )
+    def get_positive_sentiment_coins(self):
+        return self._discover_coins('positive_sentiment')
 
-        self.BASE = "https://www.coingecko.com"
-        url = "https://www.coingecko.com/en/discover"
-        soup = self.gecko_scraper(url)
-        popular = soup.find_all("div", class_="col-12 col-sm-6 col-md-6 col-lg-4")[
-            CATEGORIES[category]
-        ]
-        rows = popular.find_all("a")
-        results = []
-        for row in rows:
-            name, *args, price = row.text.strip().split("\n")
-            url = self.BASE + row["href"]
-            if price.startswith("BTC"):
-                price = price.replace("BTC", "").replace(",", ".")
-            results.append([name, price, url])
-        return pd.DataFrame(results, columns=["name", "price btc", "url"])
-
-    def get_top_gainers(self, period="1h"):
-        if period not in PERIODS:
-            raise ValueError(
-                f"Wrong time period\nPlease chose one from list: {PERIODS.keys()}"
-            )
-
-        url = f"https://www.coingecko.com/en/coins/trending{PERIODS.get(period)}"
-        soup = self.gecko_scraper(url)
-        top_gainers = soup.find_all("tbody")[0]
-        rows = top_gainers.find_all("tr")
-        results = []
-        for row in rows:
-            url = self.BASE + row.find("a")["href"]
-            record = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
-            symbol, name, *args, volume, price, change = record
-            results.append([symbol, name, volume, price, change, url])
-        return pd.DataFrame(
-            results,
-            columns=["symbol", "name", "volume", "price", f"change_{period}", "url"],
-        )
+    def get_most_visited_coins(self):
+        return self._discover_coins('most_visited')
 
     def get_top_losers(self, period="1h"):
+        return self._get_gainers_and_losers(period, typ='losers')
 
-        if period not in PERIODS:
-            raise ValueError(
-                f"Wrong time period\nPlease chose one from list: {PERIODS.keys()}"
-            )
-        url = f"https://www.coingecko.com/en/coins/trending{PERIODS.get(period)}"
-        soup = self.gecko_scraper(url)
-        top_gainers = soup.find_all("tbody")[1]
-        rows = top_gainers.find_all("tr")
-        results = []
-        for row in rows:
-            url = self.BASE + row.find("a")["href"]
-            record = [r for r in row.text.strip().split("\n") if r not in ["", " "]]
-            symbol, name, *args, volume, price, change = record
-            results.append([symbol, name, volume, price, change, url])
-        return pd.DataFrame(
-            results,
-            columns=["symbol", "name", "volume", "price", f"change_{period}", "url"],
-        )
+    def get_top_gainers(self, period="1h"):
+        return self._get_gainers_and_losers(period, typ='gainers')
 
     def get_defi_coins(self):
         url = "https://www.coingecko.com/en/defi"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
+        rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
         for row in rows:
             url = self.BASE + row.find("a")["href"]
-            (
-                rank,
-                *names,
-                symbol,
-                symbol2,
-                price,
-                change,
-                change1,
-                change2,
-                volume,
-                mcap,
-                full,
-                ratio,
-            ) = row.text.strip().split()
-            results.append(
-                [
-                    rank,
-                    " ".join(names),
-                    symbol,
-                    price,
-                    change,
-                    change1,
-                    change2,
-                    volume,
-                    mcap,
-                    full,
-                    ratio,
-                    url,
-                ]
-            )
+            row_cleaned = clean_row(row)
+            row_cleaned.pop(2)
+            row_cleaned.append(url)
+            if len(row_cleaned) == 11:
+                row_cleaned.insert(4, '?')
+            results.append(row_cleaned)
 
         return pd.DataFrame(
             results,
@@ -353,7 +296,7 @@ class Overview:
                 "volume_24h",
                 "market_cap",
                 "fully_diluted_market_cap",
-                "macp/tvl ratio",
+                "market_cap_to_tvl_ratio",
                 "url",
             ],
         ).set_index("rank")
@@ -808,8 +751,5 @@ def gecko_scraper(url):
     return soup
 
 
-
-cg = Overview()
-print(cg.get_yield_farms())
 
 

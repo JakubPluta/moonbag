@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8f6f0362-636d-4b5b-a588-b94a716f8ecc" name="Default Changelist" comment="">
+    <list default="true" id="8f6f0362-636d-4b5b-a588-b94a716f8ecc" name="Default Changelist" comment="a little more abstract bs4 queries">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateways/gecko/gecko.py" beforeDir="false" afterPath="$PROJECT_DIR$/gateways/gecko/gecko.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateways/gecko/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/gateways/gecko/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -264,10 +263,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="516" y="269" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619180701027" />
-    <state x="2534" y="-189" key="CommitChangelistDialog2" timestamp="1619773671343">
+    <state x="2534" y="-189" key="CommitChangelistDialog2" timestamp="1619781231494">
       <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
-    <state x="2534" y="-189" key="CommitChangelistDialog2/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619773671343" />
+    <state x="2534" y="-189" key="CommitChangelistDialog2/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619781231494" />
     <state width="672" height="466" key="DebuggerActiveHint" timestamp="1619284625827">
       <screen x="-1920" y="-221" width="1920" height="1040" />
     </state>
@@ -278,34 +277,34 @@
     <state x="-1234" y="-9" key="FileChooserDialogImpl/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619284219962" />
     <state x="549" y="168" key="FileChooserDialogImpl/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619175992045" />
     <state x="2606" y="-92" key="FileChooserDialogImpl/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619694801314" />
-    <state width="1718" height="426" key="GridCell.Tab.0.bottom" timestamp="1619781225197">
+    <state width="1717" height="426" key="GridCell.Tab.0.bottom" timestamp="1619793188505">
       <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
     <state width="1877" height="362" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
     <state width="1101" height="161" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.-304.1920.1040@0.0.1536.824" timestamp="1619618774645" />
-    <state width="1718" height="426" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619781225197" />
-    <state width="1718" height="426" key="GridCell.Tab.0.center" timestamp="1619781225197">
+    <state width="1717" height="426" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619793188505" />
+    <state width="1717" height="426" key="GridCell.Tab.0.center" timestamp="1619793188505">
       <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
     <state width="1877" height="362" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
     <state width="1101" height="161" key="GridCell.Tab.0.center/0.0.1536.824/1920.-304.1920.1040@0.0.1536.824" timestamp="1619618774644" />
-    <state width="1718" height="426" key="GridCell.Tab.0.center/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619781225197" />
-    <state width="1718" height="426" key="GridCell.Tab.0.left" timestamp="1619781225197">
+    <state width="1717" height="426" key="GridCell.Tab.0.center/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619793188505" />
+    <state width="1717" height="426" key="GridCell.Tab.0.left" timestamp="1619793188505">
       <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
     <state width="1877" height="362" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
     <state width="1101" height="161" key="GridCell.Tab.0.left/0.0.1536.824/1920.-304.1920.1040@0.0.1536.824" timestamp="1619618774644" />
-    <state width="1718" height="426" key="GridCell.Tab.0.left/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619781225197" />
-    <state width="1718" height="426" key="GridCell.Tab.0.right" timestamp="1619781225197">
+    <state width="1717" height="426" key="GridCell.Tab.0.left/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619793188505" />
+    <state width="1717" height="426" key="GridCell.Tab.0.right" timestamp="1619793188505">
       <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
     <state width="1877" height="362" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-221.1920.1040@-1920.-221.1920.1040" timestamp="1619293946222" />
     <state width="1493" height="310" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-221.1920.1040@0.0.1536.824" timestamp="1619181326302" />
     <state width="1101" height="161" key="GridCell.Tab.0.right/0.0.1536.824/1920.-304.1920.1040@0.0.1536.824" timestamp="1619618774645" />
-    <state width="1718" height="426" key="GridCell.Tab.0.right/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619781225197" />
+    <state width="1717" height="426" key="GridCell.Tab.0.right/0.0.1536.824/1920.-304.1920.1040@1920.-304.1920.1040" timestamp="1619793188505" />
     <state width="1367" height="273" key="GridCell.Tab.1.bottom" timestamp="1619770015619">
       <screen x="1920" y="-304" width="1920" height="1040" />
     </state>
@@ -347,13 +346,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/gateways/gecko/gecko.py</url>
-          <line>100</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
