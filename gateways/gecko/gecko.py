@@ -12,6 +12,9 @@ from gateways.gecko.utils import (
     clean_question_marks,
     join_list_elements,
     changes_parser,
+    replace_qm,
+    clean_row,
+    collateral_auditors_parse
 )
 
 pd.set_option("display.max_columns", None)
@@ -64,8 +67,7 @@ class Overview:
             "url",
         ]
         url = "https://www.coingecko.com/en/categories"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
+        rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
 
         for row in rows:
@@ -110,16 +112,13 @@ class Overview:
         ]
 
         url = "https://www.coingecko.com/en/coins/recently_added"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
+        rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
 
         for row in rows:
             url = self.BASE + row.find("a")["href"]
-            # todo this is repeatable - add common method in utils
-            row_cleaned = [
-                r for r in row.text.strip().split("\n") if r not in ["", " "]
-            ]
+
+            row_cleaned = clean_row(row)
             (
                 name,
                 symbol,
@@ -144,88 +143,46 @@ class Overview:
                     url,
                 ]
             )
-
-        return pd.DataFrame(results, columns=columns)
+        return replace_qm(pd.DataFrame(results, columns=columns))
 
     def get_stable_coins(self):
+        columns = ['rank', 'name', 'symbol', 'price', 'volume_24h', 'exchanges', 'market_cap', 'change_30d', 'link']
         url = "https://www.coingecko.com/en/stablecoins"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
+        rows = self.gecko_scraper(url).soup.find("tbody").find_all("tr")
         results = []
         for row in rows:
-            rank = row.find(
-                "td", class_="table-number text-center text-xs"
-            ).text.strip()
-            name, symbol, *_ = (
-                row.find("td", class_="py-0 coin-name").text.strip().split()
-            )
-            price = row.find("td", class_="td-price price text-right").text.strip()
-            day = row.find(
-                "td", class_="td-liquidity_score lit text-right %> col-market"
-            ).text.strip()
-            mcap = row.find("td", class_="text-right col-market").text.strip()
-            month = row.find(
-                "td", class_="stat-percent text-right col-market text-primary"
-            ).text.strip()
-            exchanges = row.find(
-                "td", class_="text-right col-market text-primary"
-            ).text.strip()
-            stable = dict(
-                rank=rank,
-                name=name,
-                symbol=symbol,
-                price=price,
-                volume_24h=day,
-                market_cap_change_30d=month,
-                market_cap=mcap,
-                number_of_exchanges=exchanges,
-            )
-            clean_question_marks(stable)
-            results.append(stable)
-        return pd.DataFrame(results).set_index("rank")
+            link = self.BASE + row.find('a')['href']
+            row_cleaned = clean_row(row)
+            row_cleaned.append(None) if len(row_cleaned) == 8 else row_cleaned
+            rank, name, *symbols, price, volume_24h, exchanges, market_cap, change_30d = row_cleaned
+            symbol = symbols[0] if symbols else symbols
+            results.append([rank, name, symbol, price, volume_24h, exchanges, market_cap, change_30d, link])
+        return replace_qm(pd.DataFrame(results, columns=columns).set_index('rank'))
 
     def get_yield_farms(self):
-        def _parse_row(row):
-            parsed = []
-            for n, i in enumerate(row):
-                txt = i.text.strip()
-                record = (
-                    re.sub(r"(\n){2,10}", " ", txt)
-                    .replace("  ", " ")
-                    .replace("\n", " ")
-                )
-                parsed.append(record)
-            return parsed[:-1]
-
-        cols = [
+        columns = [
             "rank",
             "name",
             "pool",
             "audits",
             "collateral",
-            "il risk",
             "value locked",
-            "returns",
+            "returns_year",
+            "returns_hour",
         ]
         url = "https://www.coingecko.com/en/yield-farming"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
+        rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
-        for r in rows:
-            row = r.find_all("td")
-            res = _parse_row(row)
-            results.append(res)
-        df = pd.DataFrame(results, columns=cols).set_index("rank")
-        df.replace({"N/A": None}, inplace=True)
-        df["audits"] = df["audits"].replace(
-            to_replace=r"^[0-9]\s", value="", regex=True
-        )
-        df.applymap(lambda x: x.rstrip() if isinstance(x, str) else x)
-        df.replace(to_replace=r"(\s){2,}", value=" ", regex=True, inplace=True)
-        df["yearly returns"] = df["returns"].apply(lambda x: " ".join(x.split(" ")[:2]))
-        df["hourly returns"] = df["returns"].apply(lambda x: " ".join(x.split(" ")[2:]))
-        df["collateral"] = df["collateral"].apply(lambda x: ",".join(x.split()))
-        return df.drop(["returns", "il risk"], axis=1)
+        for row in rows:
+            row_cleaned = clean_row(row)[:-2]
+            if len(row_cleaned) == 7:
+                row_cleaned.insert(2, None)
+            rank, name, pool, *others, il_risk, value_locked, apy1, apy2 = row_cleaned
+            auditors, collateral = collateral_auditors_parse(others)
+            auditors = ', '.join([aud.strip() for aud in auditors])
+            collateral = ', '.join([coll.strip() for coll in collateral])
+            results.append([rank, name, pool, auditors, collateral, value_locked, apy1, apy2])
+        return pd.DataFrame(results, columns=columns).set_index('rank').replace({'': None})
 
     def get_top_volume_coins(self):
         url = "https://www.coingecko.com/pl/waluty/high_volume"
@@ -849,3 +806,10 @@ def gecko_scraper(url):
     req = requests.get(url)
     soup = BeautifulSoup(req.text, features="lxml")
     return soup
+
+
+
+cg = Overview()
+print(cg.get_yield_farms())
+
+

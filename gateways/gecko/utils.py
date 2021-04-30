@@ -52,8 +52,31 @@ def clean_question_marks(dct: dict):
                 dct[k] = None
 
 
+def replace_qm(df):
+    df.replace({'?':None ,' ?':None},inplace=True)
+    return df
+
+
 def get_url(url, elem):
     return url + elem.find("a")["href"]
+
+
+def clean_row(row):
+    return [
+        r for r in row.text.strip().split("\n") if r not in ["", " "]
+    ]
+
+
+def collateral_auditors_parse(args):
+    if args and args[0] == 'N/A':
+        collateral = args[1:]
+        auditors = []
+    else:
+        n_elem = int(args[0])
+        auditors = args[1:n_elem + 1]
+        collateral = args[n_elem + 1:]
+
+    return auditors, collateral
 
 
 def changes_parser(changes):
