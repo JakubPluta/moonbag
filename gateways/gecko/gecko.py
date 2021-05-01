@@ -685,13 +685,25 @@ class Overview:
 
 class Coin:
     def __init__(self, symbol):
-        self.symbol = symbol
         self.client = CoinGeckoAPI()
         self._coin_list = self.client.get_coins_list()
+        self.coin = self._validate_coin(symbol)
 
     def _validate_coin(self, symbol):
-        if symbol in self._coin_list.keys() or self._coin_list.values():
-            pass
+        for dct in self._coin_list:
+            if symbol.lower() in list(dct.values()):
+                return dct.get('id')
+
+    @property
+    @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
+    def coin_list(self):
+        return [a['id'] for a in self._coin_list]
+
+    def get_coin_info(self):
+        return self.client.get_coin_by_id(self.coin)
 
 
 
+a = Coin('terra-luna')
+
+print(a.get_coin_info())
