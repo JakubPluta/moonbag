@@ -687,23 +687,28 @@ class Coin:
     def __init__(self, symbol):
         self.client = CoinGeckoAPI()
         self._coin_list = self.client.get_coins_list()
-        self.coin = self._validate_coin(symbol)
+        self._coin_symbol = self._validate_coin(symbol)
+
+        if self._coin_symbol:
+            self.coin = self._get_coin_info()
 
     def _validate_coin(self, symbol):
+        coin = None
         for dct in self._coin_list:
             if symbol.lower() in list(dct.values()):
-                return dct.get('id')
+                coin = dct.get('id')
+        if not coin:
+            raise ValueError(f"Could not find coin with the given id: {symbol}\nTo check available coins use: coin_list method")
+        return coin
 
     @property
     @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
     def coin_list(self):
-        return [a['id'] for a in self._coin_list]
+        return [token.get('id') for token in self._coin_list]
 
-    def get_coin_info(self):
-        return self.client.get_coin_by_id(self.coin)
+    @retry(tries=2, delay=3, max_delay=5)
+    @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
+    def _get_coin_info(self):
+        params = dict(localization="false",tickers="false", sparkline=True)
+        return self.client.get_coin_by_id(self._coin_symbol, **params)
 
-
-
-a = Coin('terra-luna')
-
-print(a.get_coin_info())
