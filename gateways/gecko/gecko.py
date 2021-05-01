@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
 from pycoingecko import CoinGeckoAPI
+from retry import retry
 from gateways.gecko.utils import (
     changes_parser,
     replace_qm,
@@ -38,14 +39,30 @@ CATEGORIES = {
 
 
 COLUMNS = {
+    'id' : 'id',
     'rank' : 'rank',
     'name' : 'name',
     'symbol' : 'symbol',
     'price' : 'price',
     "change_1h" : "change_1h",
     "change_24h" : "change_24h",
+    "change_7d" : "change_7d",
     "volume_24h" : "volume_24h",
     "market_cap" : "market_cap",
+    "country" : "country",
+    "total_market_cap" : "total_market_cap",
+    "total_volume" : "total_volume",
+    "market_cap_percentage" : "market_cap_percentage",
+    "company" : "company",
+    "ticker" : "ticker",
+    "last_added" : "last_added" ,
+    "title" : "title",
+    "author" : "author",
+    "posted" : "posted",
+    "article" : "article",
+    "url" : "url"
+
+
 }
 
 
@@ -69,6 +86,7 @@ class Overview:
         )
         return req.json()["bitcoin"]["usd"]
 
+    @retry(tries=2,delay=3,max_delay=5)
     def _discover_coins(self, category="trending"):
         if category not in CATEGORIES:
             raise ValueError(
@@ -89,12 +107,13 @@ class Overview:
             if price.startswith("BTC"):
                 price = price.replace("BTC", "").replace(",", ".")
             results.append([name, price, url])
-        return pd.DataFrame(results, columns=["name", "price btc", "url"])
+        return pd.DataFrame(results, columns=[COLUMNS['name'], "price btc", COLUMNS["url"]])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def _get_news(self, page=1):
         url = f"https://www.coingecko.com/en/news?page={page}"
         soup = self.gecko_scraper(url)
-        row = soup.find_all("article")
+        row = soup.find_all(COLUMNS["article"])
         results = []
         for r in row:
             header = r.find("header")
@@ -106,9 +125,10 @@ class Overview:
             posted = posted.strip().replace(")", "")
             results.append([title, author.strip(), posted, article, link])
         return pd.DataFrame(
-            results, columns=["title", "author", "posted", "article", "url"]
+            results, columns=[COLUMNS["title"], COLUMNS["author"], COLUMNS["posted"], COLUMNS["article"], COLUMNS["url"]]
         )
 
+    @retry(tries=2, delay=3, max_delay=5)
     def _get_holdings_overview(self, endpoint='bitcoin'):
         url = "https://www.coingecko.com/en/public-companies-" + endpoint
         soup = self.gecko_scraper(url)
@@ -122,6 +142,7 @@ class Overview:
                 kpis[name] = value
         return kpis
 
+    @retry(tries=2, delay=3, max_delay=5)
     def _get_companies_assets(self, endpoint='bitcoin'):
         url = "https://www.coingecko.com/en/public-companies-" + endpoint
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
@@ -134,18 +155,19 @@ class Overview:
         return pd.DataFrame(
             results,
             columns=[
-                "rank",
-                "company",
-                "ticker",
-                "country",
+                COLUMNS['rank'],
+                COLUMNS["company"],
+                COLUMNS["ticker"],
+                COLUMNS["country"],
                 "total_btc",
                 "entry_value",
                 "today_value",
                 "pct_of_supply",
-                "url",
+                COLUMNS["url"],
             ],
-        ).set_index("rank")
+        ).set_index(COLUMNS['rank'])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def _get_gainers_and_losers(self, period="1h", typ="gainers"):
         category = {
             "gainers": 0,
@@ -168,20 +190,21 @@ class Overview:
             results.append([symbol, name, volume, price, change, url])
         return pd.DataFrame(
             results,
-            columns=["symbol", "name", "volume", "price", f"change_{period}", "url"],
+            columns=[COLUMNS['symbol'], COLUMNS['name'], "volume", COLUMNS['price'], f"change_{period}", COLUMNS["url"]],
         )
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_top_crypto_categories(self):
         columns = [
-            "rank",
-            "name",
-            "change_1h",
-            "change_24h",
-            "change_7d",
-            "market_cap",
-            "volume_24h",
+            COLUMNS['rank'],
+            COLUMNS['name'],
+            COLUMNS['change_1h'],
+            COLUMNS["change_24h"],
+            COLUMNS["change_7d"],
+            COLUMNS["market_cap"],
+            COLUMNS["volume_24h"],
             "n_of_coins",
-            "url",
+            COLUMNS["url"],
         ]
         url = "https://www.coingecko.com/en/categories"
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
@@ -213,19 +236,20 @@ class Overview:
                 ]
             )
 
-        return pd.DataFrame(results, columns=columns).set_index("rank")
+        return pd.DataFrame(results, columns=columns).set_index(COLUMNS['rank'])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_recently_added_coins(self):
         columns = [
-            "name",
-            "symbol",
-            "price",
-            "change_1h",
-            "change_24h",
-            "volume_24h",
-            "market_cap",
-            "last_added",
-            "url",
+            COLUMNS['name'],
+            COLUMNS['symbol'],
+            COLUMNS['price'],
+            COLUMNS['change_1h'],
+            COLUMNS["change_24h"],
+            COLUMNS["volume_24h"],
+            COLUMNS["market_cap"],
+            COLUMNS["last_added"],
+            COLUMNS["url"],
         ]
 
         url = "https://www.coingecko.com/en/coins/recently_added"
@@ -262,15 +286,16 @@ class Overview:
             )
         return replace_qm(pd.DataFrame(results, columns=columns))
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_stable_coins(self):
         columns = [
-            "rank",
-            "name",
-            "symbol",
-            "price",
-            "volume_24h",
+            COLUMNS['rank'],
+            COLUMNS['name'],
+            COLUMNS['symbol'],
+            COLUMNS['price'],
+            COLUMNS["change_24h"],
             "exchanges",
-            "market_cap",
+            COLUMNS["market_cap"],
             "change_30d",
             "link",
         ]
@@ -307,10 +332,11 @@ class Overview:
             )
         return replace_qm(pd.DataFrame(results, columns=columns).set_index("rank"))
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_yield_farms(self):
         columns = [
-            "rank",
-            "name",
+            COLUMNS['rank'],
+            COLUMNS['name'],
             "pool",
             "audits",
             "collateral",
@@ -336,17 +362,18 @@ class Overview:
             pd.DataFrame(results, columns=columns).set_index("rank").replace({"": None})
         )
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_top_volume_coins(self):
         columns = [
-            "rank",
-            "name",
-            "symbol",
-            "price",
-            "change_1h",
-            "change_24h",
-            "change_7d",
-            "volume_24h",
-            "market_cap",
+            COLUMNS['rank'],
+            COLUMNS['name'],
+            COLUMNS['symbol'],
+            COLUMNS['price'],
+            COLUMNS['change_1h'],
+            COLUMNS["change_24h"],
+            COLUMNS["change_7d"],
+            COLUMNS["volume_24h"],
+            COLUMNS["market_cap"],
         ]
         url = "https://www.coingecko.com/pl/waluty/high_volume"
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
@@ -356,7 +383,7 @@ class Overview:
             row_cleaned.insert(0, "?") if len(row_cleaned) == 9 else row_cleaned
             row_cleaned.pop(3)
             results.append(row_cleaned)
-        return pd.DataFrame(results, columns=columns).set_index("rank")
+        return pd.DataFrame(results, columns=columns).set_index(COLUMNS['rank'])
 
     def get_trending_coins(self):
         return self._discover_coins("trending")
@@ -376,6 +403,7 @@ class Overview:
     def get_top_gainers(self, period="1h"):
         return self._get_gainers_and_losers(period, typ="gainers")
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_top_defi_coins(self):
         url = "https://www.coingecko.com/en/defi"
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
@@ -392,26 +420,27 @@ class Overview:
         return pd.DataFrame(
             results,
             columns=[
-                "rank",
-                "name",
-                "symbol",
-                "price",
-                "change_1h",
-                "change_24h",
-                "change_7d",
-                "volume_24h",
-                "market_cap",
+                COLUMNS['rank'],
+                COLUMNS['name'],
+                COLUMNS['symbol'],
+                COLUMNS['price'],
+                COLUMNS['change_1h'],
+                COLUMNS["change_24h"],
+                COLUMNS["change_7d"],
+                COLUMNS["volume_24h"],
+                COLUMNS["market_cap"],
                 "fully_diluted_market_cap",
                 "market_cap_to_tvl_ratio",
-                "url",
+                COLUMNS["url"],
             ],
-        ).set_index("rank")
+        ).set_index(COLUMNS['rank'])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_top_dexes(self):
         columns = [
-            "name",
-            "rank",
-            "volume_24h",
+            COLUMNS['name'],
+            COLUMNS['rank'],
+            COLUMNS["volume_24h"],
             "number_of_coins",
             "number_of_pairs",
             "visits",
@@ -429,7 +458,7 @@ class Overview:
                 row_cleaned.insert(-3, "N/A")
             results.append(row_cleaned)
         df = pd.DataFrame(results)
-        df["name"] = df.iloc[:, 1] + " " + df.iloc[:, 2].replace("N/A", "")
+        df[COLUMNS['name']] = df.iloc[:, 1] + " " + df.iloc[:, 2].replace("N/A", "")
         df.drop(df.columns[1:3], axis=1, inplace=True)
         df = swap_columns(df)
         df.columns = columns
@@ -437,8 +466,9 @@ class Overview:
             lambda x: x.split("$")[0]
         ).str.replace(',','',regex=True).str.replace('.','',regex=True)
         df["most_traded_pairs"] = df["most_traded_pairs"].apply(lambda x: None if x.isdigit() else x)
-        return df.set_index("rank")
+        return df.set_index(COLUMNS['rank'])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_top_nfts(self):
         url = "https://www.coingecko.com/en/nft"
         soup = self.gecko_scraper(url)
@@ -455,37 +485,39 @@ class Overview:
         return pd.DataFrame(
             results,
             columns=[
-                "rank",
-                "name",
-                "symbol",
-                "price",
-                "change_1h",
-                "change_24h",
-                "change_7d",
-                "volume_24h",
-                "market_cap",
-                "url",
+                COLUMNS['rank'],
+                COLUMNS['name'],
+                COLUMNS['symbol'],
+                COLUMNS['price'],
+                COLUMNS['change_1h'],
+                COLUMNS["change_24h"],
+                COLUMNS["change_7d"],
+                COLUMNS["volume_24h"],
+                COLUMNS["market_cap"],
+                COLUMNS["url"],
             ],
-        ).set_index('rank')
+        ).set_index(COLUMNS['rank'])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_nft_of_the_day(self):
         url = "https://www.coingecko.com/en/nft"
         soup = self.gecko_scraper(url)
         row = soup.find("div", class_="tw-px-4 tw-py-5 sm:tw-p-6")
         try:
             *author, description, _ = clean_row(row)
-            if len(author) >= 3:
+            if len(author) > 3:
                 author, description = author[:3], author[3]
             print(author)
-        except ValueError:
+        except (ValueError, IndexError):
             return {}
         return {
-            "author": " ".join(author),
+            COLUMNS["author"]: " ".join(author),
             "desc": description,
-            "url": self.BASE + row.find("a")["href"],
+            COLUMNS["url"]: self.BASE + row.find("a")["href"],
             "img": row.find("img")["src"],
         }
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_nft_market_status(self):
         url = "https://www.coingecko.com/en/nft"
         soup = self.gecko_scraper(url)
@@ -497,6 +529,7 @@ class Overview:
             kpis[name] = value
         return kpis
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_news(self, n_of_pages=10):
         dfs = []
         for page in range(1, n_of_pages):
@@ -515,11 +548,13 @@ class Overview:
     def get_companies_with_eth(self):
         return self._get_companies_assets('ethereum')
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_coin_list(self):
         return pd.DataFrame(
-            self.client.get_coins_list(), columns=["id", "symbol", "name"]
-        ).set_index("id")
+            self.client.get_coins_list(), columns=[COLUMNS["id"], COLUMNS['symbol'], COLUMNS['name']]
+        ).set_index(COLUMNS["id"])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_exchanges(self):
         df = pd.DataFrame(self.client.get_exchanges_list(per_page=250))
         df.replace({float(np.NaN): None}, inplace=True)
@@ -527,18 +562,20 @@ class Overview:
             [
                 "trust_score_rank",
                 "trust_score",
-                "id",
-                "name",
-                "country",
+                COLUMNS["id"],
+                COLUMNS['name'],
+                COLUMNS["country"],
                 "year_established",
                 "trade_volume_24h_btc",
-                "url",
+                COLUMNS["url"],
             ]
         ].set_index("trust_score_rank")
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_financial_platforms(self):
-        return pd.DataFrame(self.client.get_finance_platforms()).set_index("name")
+        return pd.DataFrame(self.client.get_finance_platforms()).set_index(COLUMNS['name'])
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_finance_products(self):
         return pd.DataFrame(
             self.client.get_finance_products(per_page=250),
@@ -550,12 +587,15 @@ class Overview:
             ],
         )
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_indexes(self):
         return pd.DataFrame(self.client.get_indexes(per_page=250))
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_derivatives(self):
         return pd.DataFrame(self.client.get_derivatives(include_tickers="unexpired"))
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_exchange_rates(self):
         return (
             pd.DataFrame(self.client.get_exchange_rates()["rates"])
@@ -563,16 +603,18 @@ class Overview:
             .drop("index", axis=1)
         )
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_global_info(self, json=False):
         results = self.client.get_global()
-        for key in ["total_market_cap", "total_volume", "market_cap_percentage"]:
+        for key in [COLUMNS["total_market_cap"], COLUMNS["total_volume"], COLUMNS["market_cap_percentage"]]:
             del results[key]
         if json:
             return results
         return pd.Series(results)
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_global_markets_info(self):
-        columns = ["total_market_cap", "total_volume", "market_cap_percentage"]
+        columns = [COLUMNS["total_market_cap"], COLUMNS["total_volume"], COLUMNS["market_cap_percentage"]]
         data = []
         results = self.client.get_global()
         for key in columns:
@@ -581,6 +623,7 @@ class Overview:
         df.columns = columns
         return df
 
+    @retry(tries=2, delay=3, max_delay=5)
     def get_global_defi_info(self, json=False):
         results = self.client.get_global_decentralized_finance_defi()
         for k, v in results.items():
@@ -593,4 +636,12 @@ class Overview:
         df = pd.Series(results).reset_index()
         df.columns = ["statistic", "value"]
         return df
+
+
+o = Overview()
+# method_list = [func for func in dir(Overview) if callable(getattr(Overview, func)) and not func.startswith("__") and not func.startswith("_")]
+# method_list.remove('gecko_scraper')
+# print(method_list)
+# for elem in method_list:
+#     print(getattr(o, elem)())
 
