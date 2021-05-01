@@ -683,3 +683,15 @@ class Overview:
         return df
 
 
+class Coin:
+    def __init__(self, symbol):
+        self.symbol = symbol
+        self.client = CoinGeckoAPI()
+        self._coin_list = self.client.get_coins_list()
+
+    def _validate_coin(self, symbol):
+        if symbol in self._coin_list.keys() or self._coin_list.values():
+            pass
+
+
+
