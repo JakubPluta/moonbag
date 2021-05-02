@@ -758,6 +758,7 @@ class Coin:
         blockchain = self._get_links().get("blockchain_site")
         if blockchain:
             return filter_list(blockchain)
+        return None
 
     @property
     def social_media(self):
@@ -891,27 +892,23 @@ class Coin:
             "community_data",
             "public_interest_stats"
         ]
-        # for col in score_columns:
-        #     single_stats[col] = self.coin.get(col)
-        single_stats = {col : self.coin.get(col) for col in score_columns[:-2]}
 
+        single_stats = {col : self.coin.get(col) for col in score_columns[:-2]}
         nested_stats = {}
         for col in score_columns[-2:]:
             _dct = self.coin.get(col)
-            for k,v in _dct.items():
+            for k, _ in _dct.items():
                 nested_stats[k] = _dct.get(k)
 
         single_stats.update(nested_stats)
-        return pd.Series(single_stats)
+        df = pd.Series(single_stats)
+        df.replace({0: np.NaN}, inplace=True)
+        return df
 
-            # "community_data",
-            # "public_interest_stats",
+    def eth_scanner(self):
+        pass
 
-
-    # idea: if token has eth address use blockchain explorer to get some stats
-    def ether_scanner(self):
+    def reddit_screener(self):
         pass
 
 
-c = Coin("uniswap")
-print(c.scores)
