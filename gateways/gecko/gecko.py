@@ -788,26 +788,22 @@ class Coin:
     def categories(self):
         return self.coin.get("categories")
 
-    # TODO: Make it more elegant
     def _get_base_market_data_info(self):
         market_dct = {}
         market_data = self.coin.get("market_data")
-
-        market_dct["price_usd"] = market_data.get("current_price").get("usd")
-        market_dct["price_eth"] = market_data.get("current_price").get("eth")
-        market_dct["price_btc"] = market_data.get("current_price").get("btc")
-        market_dct["total_supply"] = market_data.get("total_supply")
-        market_dct["max_supply"] = market_data.get("max_supply")
-        market_dct["circulating_supply"] = market_data.get("circulating_supply")
-        market_dct["price_change_pct_24h"] = market_data.get(
-            "price_change_percentage_24h"
+        for stat in [
+            "total_supply",
+            "max_supply",
+            "circulating_supply",
+            "price_change_pct_24h",
+            "price_change_pct_7d",
+            "price_change_pct_30d",
+        ]:
+            market_dct[stat] = market_data.get(stat)
+        prices = create_dictionary_with_prefixes(
+            ["current_price"], market_data, DENOMINATION
         )
-        market_dct["price_change_pct_7d"] = market_data.get(
-            "price_change_percentage_7d"
-        )
-        market_dct["price_change_pct_30d"] = market_data.get(
-            "price_change_percentage_30d"
-        )
+        market_dct.update(prices)
         return market_dct
 
     @property
@@ -890,10 +886,10 @@ class Coin:
             "sentiment_votes_down_percentage",
             "public_interest_score",
             "community_data",
-            "public_interest_stats"
+            "public_interest_stats",
         ]
 
-        single_stats = {col : self.coin.get(col) for col in score_columns[:-2]}
+        single_stats = {col: self.coin.get(col) for col in score_columns[:-2]}
         nested_stats = {}
         for col in score_columns[-2:]:
             _dct = self.coin.get(col)
@@ -910,5 +906,4 @@ class Coin:
 
     def reddit_screener(self):
         pass
-
 
