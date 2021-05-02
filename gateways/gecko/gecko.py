@@ -15,12 +15,13 @@ from gateways.gecko.utils import (
     filter_list,
     find_discord,
     rename_columns_in_dct,
+    create_dictionary_with_prefixes,
 )
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
 pd.set_option("display.width", None)
-pd.set_option("display.float_format", lambda x: "%.1f" % x)
+pd.set_option("display.float_format", lambda x: "%.5f" % x)
 
 
 PERIODS = {
@@ -84,13 +85,10 @@ BASE_INFO = [
     "description",
     "contract_address",
     "market_cap_rank",
-    "coingecko_rank",
-    "coingecko_score",
-    "developer_score",
-    "community_score",
-    "liquidity_score",
     "public_interest_score",
 ]
+
+DENOMINATION = ("usd", "btc", "eth")
 
 
 def get_coin_list():
@@ -824,12 +822,96 @@ class Coin:
 
     @property
     def market_data(self):
-        pass
+        market_data = self.coin.get("market_data")
+        market_columns_denominated = [
+            "market_cap",
+            "fully_diluted_valuation",
+            "total_volume",
+            "high_24h",
+            "low_24h",
+        ]
+        denominated_data = create_dictionary_with_prefixes(
+            market_columns_denominated, market_data, DENOMINATION
+        )
+
+        market_single_columns = [
+            "market_cap_rank",
+            "total_supply",
+            "max_supply",
+            "circulating_supply",
+            "price_change_percentage_24h",
+            "price_change_percentage_7d",
+            "price_change_percentage_30d",
+            "price_change_percentage_60d",
+            "price_change_percentage_1y",
+            "market_cap_change_24h",
+        ]
+        single_stats = {}
+        for col in market_single_columns:
+            single_stats[col] = market_data.get(col)
+        single_stats.update(denominated_data)
+
+        try:
+            single_stats["circulating_supply_to_total_supply_ratio"] = (
+                single_stats["circulating_supply"] / single_stats["total_supply"]
+            )
+        except ZeroDivisionError:
+            ...
+        return pd.Series(single_stats)
+
+    @property
+    def all_time_high(self):
+        market_data = self.coin.get("market_data")
+        ath_columns = ["current_price", "ath", "ath_date", "ath_change_percentage"]
+        results = create_dictionary_with_prefixes(
+            ath_columns, market_data, DENOMINATION
+        )
+        return results
+
+    @property
+    def all_time_low(self):
+        market_data = self.coin.get("market_data")
+        ath_columns = ["current_price", "atl", "atl_date", "atl_change_percentage"]
+        results = create_dictionary_with_prefixes(
+            ath_columns, market_data, DENOMINATION
+        )
+        return pd.Series(results)
 
     @property
     def scores(self):
-        pass
+        score_columns = [
+            "coingecko_rank",
+            "coingecko_score",
+            "developer_score",
+            "community_score",
+            "liquidity_score",
+            "sentiment_votes_up_percentage",
+            "sentiment_votes_down_percentage",
+            "public_interest_score",
+            "community_data",
+            "public_interest_stats"
+        ]
+        # for col in score_columns:
+        #     single_stats[col] = self.coin.get(col)
+        single_stats = {col : self.coin.get(col) for col in score_columns[:-2]}
+
+        nested_stats = {}
+        for col in score_columns[-2:]:
+            _dct = self.coin.get(col)
+            for k,v in _dct.items():
+                nested_stats[k] = _dct.get(k)
+
+        single_stats.update(nested_stats)
+        return pd.Series(single_stats)
+
+            # "community_data",
+            # "public_interest_stats",
+
 
     # idea: if token has eth address use blockchain explorer to get some stats
     def ether_scanner(self):
         pass
+
+
+c = Coin("uniswap")
+print(c.scores)

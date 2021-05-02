@@ -103,6 +103,21 @@ def rename_columns_in_dct(dct, mapper):
     return {mapper.get(k, v): v for k, v in dct.items()}
 
 
+def create_dictionary_with_prefixes(
+    columns: [list, tuple], dct: dict, constrains: [list, tuple] = None
+):
+    results = {}
+    for column in columns:
+        ath_data = dct.get(column)
+        for element in ath_data:
+            if constrains:
+                if element in constrains:
+                    results[f"{column}_" + element] = ath_data.get(element)
+            else:
+                results[f"{column}_" + element] = ath_data.get(element)
+    return results
+
+
 import requests
 
 
