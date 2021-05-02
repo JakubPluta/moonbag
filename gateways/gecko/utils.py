@@ -91,3 +91,30 @@ def changes_parser(changes):
     else:
         changes = [None for i in range(3)]
     return changes
+
+
+def remove_keys(entries, the_dict):
+    for key in entries:
+        if key in the_dict:
+            del the_dict[key]
+
+
+def rename_columns_in_dct(dct, mapper):
+    return {mapper.get(k, v): v for k, v in dct.items()}
+
+
+import requests
+
+
+def _get_compare_coins():
+    api_key = "cee09c0bb9f3ecba3390beefe5c7b2bb4d0412be908b22b67a9a3e1664e91fda"
+    req = requests.get(
+        f"https://min-api.cryptocompare.com/data/blockchain/list?api_key={api_key}"
+    )
+    data = req.json()["Data"]
+    return set(d for d in data.keys())
+
+
+def _get_coins_from(gecko_coins: set, compare_coins: set):
+    coin = set(i["symbol"].upper() for i in gecko_coins)
+    return compare_coins.intersection(coin)

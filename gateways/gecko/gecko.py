@@ -11,6 +11,10 @@ from gateways.gecko.utils import (
     clean_row,
     collateral_auditors_parse,
     swap_columns,
+    remove_keys,
+    filter_list,
+    find_discord,
+    rename_columns_in_dct,
 )
 
 pd.set_option("display.max_columns", None)
@@ -62,6 +66,35 @@ COLUMNS = {
     "article": "article",
     "url": "url",
 }
+
+CHANNELS = {
+    "telegram_channel_identifier": "telegram",
+    "twitter_screen_name": "twitter",
+    "subreddit_url": "subreddit",
+    "bitcointalk_thread_identifier": "bitcointalk",
+    "facebook_username": "facebook",
+    "discord": "discord",
+}
+
+BASE_INFO = [
+    "id",
+    "name",
+    "symbol",
+    "asset_platform_id",
+    "description",
+    "contract_address",
+    "market_cap_rank",
+    "coingecko_rank",
+    "coingecko_score",
+    "developer_score",
+    "community_score",
+    "liquidity_score",
+    "public_interest_score",
+]
+
+
+def get_coin_list():
+    return CoinGeckoAPI().get_coins_list()
 
 
 class Overview:
@@ -276,16 +309,7 @@ class Overview:
             url = self.BASE + row.find("a")["href"]
 
             row_cleaned = clean_row(row)
-            (
-                name,
-                symbol,
-                _,
-                price,
-                *changes,
-                mcpa,
-                volume,
-                last_added,
-            ) = row_cleaned
+            (name, symbol, _, price, *changes, mcpa, volume, last_added,) = row_cleaned
             change_1h, change_24h, _ = changes_parser(changes)
             results.append(
                 [
@@ -501,8 +525,7 @@ class Overview:
     @retry(tries=2, delay=3, max_delay=5)
     def get_top_nfts(self):
         url = "https://www.coingecko.com/en/nft"
-        soup = self.gecko_scraper(url)
-        rows = soup.find("tbody").find_all("tr")
+        rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
         for row in rows:
             link = self.BASE + row.find("a")["href"]
@@ -696,19 +719,117 @@ class Coin:
         coin = None
         for dct in self._coin_list:
             if symbol.lower() in list(dct.values()):
-                coin = dct.get('id')
+                coin = dct.get("id")
         if not coin:
-            raise ValueError(f"Could not find coin with the given id: {symbol}\nTo check available coins use: coin_list method")
+            raise ValueError(
+                f"Could not find coin with the given id: {symbol}\nTo check available coins use: get_coin_list method"
+            )
         return coin
 
     @property
     @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
     def coin_list(self):
-        return [token.get('id') for token in self._coin_list]
+        return [token.get("id") for token in self._coin_list]
 
     @retry(tries=2, delay=3, max_delay=5)
     @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
     def _get_coin_info(self):
-        params = dict(localization="false",tickers="false", sparkline=True)
+        params = dict(localization="false", tickers="false", sparkline=True)
         return self.client.get_coin_by_id(self._coin_symbol, **params)
 
+    @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
+    def _get_links(self):
+        return self.coin.get("links")
+
+    @property
+    def repositories(self):
+        return self._get_links().get("repos_url")
+
+    @property
+    def developers_data(self):
+        dev = self.coin.get("developer_data")
+        useless_keys = (
+            "code_additions_deletions_4_weeks",
+            "last_4_weeks_commit_activity_series",
+        )
+        remove_keys(useless_keys, dev)
+        return pd.Series(dev)
+
+    @property
+    def blockchain_explorers(self):
+        blockchain = self._get_links().get("blockchain_site")
+        if blockchain:
+            return filter_list(blockchain)
+
+    @property
+    def social_media(self):
+        social_dct = {}
+        links = self._get_links()
+        for channel in CHANNELS.keys():
+            if channel in links:
+                value = links.get(channel)
+                if channel == "twitter_screen_name":
+                    value = "https://twitter.com/" + value
+                elif channel == "bitcointalk_thread_identifier" and value is not None:
+                    value = f"https://bitcointalk.org/index.php?topic={value}"
+                social_dct[channel] = value
+        social_dct["discord"] = find_discord(links.get("chat_url"))
+        return rename_columns_in_dct(social_dct, CHANNELS)
+
+    @property
+    def websites(self):
+        websites_dct = {}
+        links = self._get_links()
+        sites = ["homepage", "official_forum_url", "announcement_url"]
+        for site in sites:
+            websites_dct[site] = filter_list(links.get(site))
+        return websites_dct
+
+    @property
+    def categories(self):
+        return self.coin.get("categories")
+
+    # TODO: Make it more elegant
+    def _get_base_market_data_info(self):
+        market_dct = {}
+        market_data = self.coin.get("market_data")
+
+        market_dct["price_usd"] = market_data.get("current_price").get("usd")
+        market_dct["price_eth"] = market_data.get("current_price").get("eth")
+        market_dct["price_btc"] = market_data.get("current_price").get("btc")
+        market_dct["total_supply"] = market_data.get("total_supply")
+        market_dct["max_supply"] = market_data.get("max_supply")
+        market_dct["circulating_supply"] = market_data.get("circulating_supply")
+        market_dct["price_change_pct_24h"] = market_data.get(
+            "price_change_percentage_24h"
+        )
+        market_dct["price_change_pct_7d"] = market_data.get(
+            "price_change_percentage_7d"
+        )
+        market_dct["price_change_pct_30d"] = market_data.get(
+            "price_change_percentage_30d"
+        )
+        return market_dct
+
+    @property
+    def base_info(self):
+        results = {}
+        for attr in BASE_INFO:
+            info_obj = self.coin.get(attr)
+            if attr == "description":
+                info_obj = info_obj.get("en")
+            results[attr] = info_obj
+        results.update(self._get_base_market_data_info())
+        return pd.Series(results)
+
+    @property
+    def market_data(self):
+        pass
+
+    @property
+    def scores(self):
+        pass
+
+    # idea: if token has eth address use blockchain explorer to get some stats
+    def ether_scanner(self):
+        pass
