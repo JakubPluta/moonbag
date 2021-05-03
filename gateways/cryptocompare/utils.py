@@ -1,4 +1,3 @@
-
 def formatter(x):
     if isinstance(x, int):
         return "{0:.2f}".format(x)
@@ -11,8 +10,9 @@ def formatter(x):
 
 
 def table_formatter(func):
-    def wrapper(*args,**kwargs):
-        df = func(*args,**kwargs)
+    def wrapper(*args, **kwargs):
+        df = func(*args, **kwargs)
         df = df.applymap(lambda x: formatter(x))
         return df
+
     return wrapper

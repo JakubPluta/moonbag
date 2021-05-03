@@ -145,12 +145,7 @@ class Overview:
             results.append([name, price, price_usd, url])
         return pd.DataFrame(
             results,
-            columns=[
-                COLUMNS["name"],
-                "price btc",
-                "price_usd",
-                COLUMNS["url"],
-            ],
+            columns=[COLUMNS["name"], "price btc", "price_usd", COLUMNS["url"],],
         )
 
     def _get_news(self, page=1):
@@ -160,11 +155,7 @@ class Overview:
         for row in rows:
             header = row.find("header")
             link = header.find("a")["href"]
-            text = [
-                t
-                for t in header.text.strip().split("\n")
-                if t not in ["", " "]
-            ]
+            text = [t for t in header.text.strip().split("\n") if t not in ["", " "]]
             article = row.find("div", class_="post-body").text.strip()
             title, *by_who = text
             author, posted = " ".join(by_who).split("(")
@@ -184,9 +175,7 @@ class Overview:
     def _get_holdings_overview(self, endpoint="bitcoin"):
         url = "https://www.coingecko.com/en/public-companies-" + endpoint
         soup = self.gecko_scraper(url)
-        rows = soup.find_all(
-            "span", class_="overview-box d-inline-block p-3 mr-2"
-        )
+        rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
         kpis = {}
         for row in rows:
             row_cleaned = clean_row(row)
@@ -231,13 +220,9 @@ class Overview:
                 f"Wrong time period\nPlease chose one from list: {PERIODS.keys()}"
             )
 
-        url = (
-            f"https://www.coingecko.com/en/coins/trending{PERIODS.get(period)}"
-        )
+        url = f"https://www.coingecko.com/en/coins/trending{PERIODS.get(period)}"
         rows = (
-            self.gecko_scraper(url)
-            .find_all("tbody")[category.get(typ)]
-            .find_all("tr")
+            self.gecko_scraper(url).find_all("tbody")[category.get(typ)].find_all("tr")
         )
         results = []
         for row in rows:
@@ -299,9 +284,7 @@ class Overview:
                 ]
             )
 
-        return pd.DataFrame(results, columns=columns).set_index(
-            COLUMNS["rank"]
-        )
+        return pd.DataFrame(results, columns=columns).set_index(COLUMNS["rank"])
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_recently_added_coins(self):
@@ -325,16 +308,7 @@ class Overview:
             url = self.BASE + row.find("a")["href"]
 
             row_cleaned = clean_row(row)
-            (
-                name,
-                symbol,
-                _,
-                price,
-                *changes,
-                mcpa,
-                volume,
-                last_added,
-            ) = row_cleaned
+            (name, symbol, _, price, *changes, mcpa, volume, last_added,) = row_cleaned
             change_1h, change_24h, _ = changes_parser(changes)
             results.append(
                 [
@@ -397,9 +371,7 @@ class Overview:
                     link,
                 ]
             )
-        return replace_qm(
-            pd.DataFrame(results, columns=columns).set_index("rank")
-        )
+        return replace_qm(pd.DataFrame(results, columns=columns).set_index("rank"))
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_yield_farms(self):
@@ -420,35 +392,15 @@ class Overview:
             row_cleaned = clean_row(row)[:-2]
             if len(row_cleaned) == 7:
                 row_cleaned.insert(2, None)
-            (
-                rank,
-                name,
-                pool,
-                *others,
-                _,
-                value_locked,
-                apy1,
-                apy2,
-            ) = row_cleaned
+            (rank, name, pool, *others, _, value_locked, apy1, apy2,) = row_cleaned
             auditors, collateral = collateral_auditors_parse(others)
             auditors = ", ".join([aud.strip() for aud in auditors])
             collateral = ", ".join([coll.strip() for coll in collateral])
             results.append(
-                [
-                    rank,
-                    name,
-                    pool,
-                    auditors,
-                    collateral,
-                    value_locked,
-                    apy1,
-                    apy2,
-                ]
+                [rank, name, pool, auditors, collateral, value_locked, apy1, apy2,]
             )
         return (
-            pd.DataFrame(results, columns=columns)
-            .set_index("rank")
-            .replace({"": None})
+            pd.DataFrame(results, columns=columns).set_index("rank").replace({"": None})
         )
 
     @retry(tries=2, delay=3, max_delay=5)
@@ -473,9 +425,7 @@ class Overview:
                 row_cleaned.insert(0, "?")
             row_cleaned.pop(3)
             results.append(row_cleaned)
-        return pd.DataFrame(results, columns=columns).set_index(
-            COLUMNS["rank"]
-        )
+        return pd.DataFrame(results, columns=columns).set_index(COLUMNS["rank"])
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_trending_coins(self):
@@ -556,9 +506,7 @@ class Overview:
                 row_cleaned.insert(-3, "N/A")
             results.append(row_cleaned)
         df = pd.DataFrame(results)
-        df[COLUMNS["name"]] = (
-            df.iloc[:, 1] + " " + df.iloc[:, 2].replace("N/A", "")
-        )
+        df[COLUMNS["name"]] = df.iloc[:, 1] + " " + df.iloc[:, 2].replace("N/A", "")
         df.drop(df.columns[1:3], axis=1, inplace=True)
         df = swap_columns(df)
         df.columns = columns
@@ -625,9 +573,7 @@ class Overview:
     def get_nft_market_status(self):
         url = "https://www.coingecko.com/en/nft"
         soup = self.gecko_scraper(url)
-        rows = soup.find_all(
-            "span", class_="overview-box d-inline-block p-3 mr-2"
-        )
+        rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
         kpis = {}
         for row in rows:
             value, *kpi = clean_row(row)
@@ -706,9 +652,7 @@ class Overview:
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_derivatives(self):
-        return pd.DataFrame(
-            self.client.get_derivatives(include_tickers="unexpired")
-        )
+        return pd.DataFrame(self.client.get_derivatives(include_tickers="unexpired"))
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_exchange_rates(self):
@@ -826,10 +770,7 @@ class Coin:
                 value = links.get(channel)
                 if channel == "twitter_screen_name":
                     value = "https://twitter.com/" + value
-                elif (
-                    channel == "bitcointalk_thread_identifier"
-                    and value is not None
-                ):
+                elif channel == "bitcointalk_thread_identifier" and value is not None:
                     value = f"https://bitcointalk.org/index.php?topic={value}"
                 social_dct[channel] = value
         social_dct["discord"] = find_discord(links.get("chat_url"))
@@ -910,8 +851,7 @@ class Coin:
 
         try:
             single_stats["circulating_supply_to_total_supply_ratio"] = (
-                single_stats["circulating_supply"]
-                / single_stats["total_supply"]
+                single_stats["circulating_supply"] / single_stats["total_supply"]
             )
         except ZeroDivisionError:
             ...

@@ -47,7 +47,7 @@ ENDPOINTS = {
 
 class CryptoCompareClient:
     BASE_URL = "https://min-api.cryptocompare.com"
-    COMPARE_URL = 'https://www.cryptocompare.com'
+    COMPARE_URL = "https://www.cryptocompare.com"
 
     def __init__(self, api_key):
         self.api_key = api_key
@@ -79,7 +79,7 @@ class CryptoCompareClient:
         payload = {
             "fsyms": symbol,
             "tsyms": currency,
-            "relaxedValidation": 'false',
+            "relaxedValidation": "false",
         }
         return self._make_request(endpoint, payload, **kwargs)
 
@@ -97,7 +97,9 @@ class CryptoCompareClient:
         }
         return self._make_request(endpoint, payload, **kwargs)
 
-    def _get_exchanges_top_symbols_by_volume(self, exchange="Binance", limit=100, **kwargs):
+    def _get_exchanges_top_symbols_by_volume(
+        self, exchange="Binance", limit=100, **kwargs
+    ):
         "/data/exchange/top/volume?e=Binance&direction=TO"
         "e=Kraken"
         endpoint = ENDPOINTS["EXCHANGE_TOP_SYMBOLS"]
@@ -247,9 +249,7 @@ class CryptoCompareClient:
         }
         return self._make_request(endpoint, payload, **kwargs)
 
-    def _get_historical_blockchain_data(
-        self, symbol="BTC", limit=365, **kwargs
-    ):
+    def _get_historical_blockchain_data(self, symbol="BTC", limit=365, **kwargs):
         endpoint = ENDPOINTS["HISTO_BLOCKCHAIN_DATA"]
         payload = {
             "fsym": symbol,
