@@ -31,7 +31,9 @@ class LLama:
             raise ValueError(
                 f"Wrong protocol name\nPlease chose protocol name from list\n{self.symbols}"
             )
-        resp = requests.get(self.URL + self.ENDPOINTS.get("protocol") + protocol)
+        resp = requests.get(
+            self.URL + self.ENDPOINTS.get("protocol") + protocol
+        )
         resp.raise_for_status()
         return resp.json()
 

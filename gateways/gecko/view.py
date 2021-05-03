@@ -28,7 +28,9 @@ def main():
         user_input = input("> ")
 
         try:
-            (ns_known_args, l_args) = main_parser.parse_known_args(user_input.split())
+            (ns_known_args, l_args) = main_parser.parse_known_args(
+                user_input.split()
+            )
         except SystemExit as e:
             logger.log(3, e)
             continue
@@ -55,7 +57,9 @@ def main():
                 continue
 
             if l_unknown_args:
-                print(f"The following args couldn't be interpreted: {l_unknown_args}")
+                print(
+                    f"The following args couldn't be interpreted: {l_unknown_args}"
+                )
 
             try:
                 data = gecoin.get_coin_data(ns_parser.symbol)
