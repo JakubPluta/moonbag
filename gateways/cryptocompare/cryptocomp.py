@@ -3,13 +3,15 @@ import numpy as np
 import requests
 from dotenv import load_dotenv
 import os
+import cachetools.func
+from retry import retry
 from gateways.cryptocompare._client import CryptoCompareClient
 from gateways.cryptocompare.utils import table_formatter
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
 pd.set_option("display.width", None)
-pd.set_option('display.max_colwidth', 55)
+#pd.set_option('display.max_colwidth', 30)
 
 load_dotenv()
 
@@ -17,11 +19,10 @@ API_KEY = os.getenv("CC_API_KEY")
 
 
 class CryptoCompare(CryptoCompareClient):
-    COMPARE_URL = "https://www.cryptocompare.com"
-
     def __init__(self, api_key):
         super().__init__(api_key)
         self.api_key = api_key
+        self.coin_list = self.get_all_coins_list()
 
     @table_formatter
     def get_price(self, symbol="BTC", currency="USD", **kwargs):
@@ -126,4 +127,14 @@ class CryptoCompare(CryptoCompareClient):
         df.drop(['upvotes','downvotes','lang','source_info', 'imageurl', 'id', 'url'], axis=1, inplace=True)
         df['published_on'] = pd.to_datetime(df['published_on'], unit="s")
         return df.set_index('published_on')
+
+    def get_blockchain_available_coins_list(self):
+        data = self._get_blockchain_available_coins_list()['Data']
+        df = pd.DataFrame(data).T
+        df['data_available_from'] = pd.to_datetime(df['data_available_from'], unit="s")
+        return df.set_index('id')
+
+    def get_all_coins_list(self, summary="true", **kwargs):
+        data = self._get_all_coins_list( summary, **kwargs)['Data']
+        return pd.DataFrame(data).T[['Id','Symbol','FullName']].set_index('Id')
 
