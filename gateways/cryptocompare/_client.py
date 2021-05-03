@@ -47,6 +47,7 @@ ENDPOINTS = {
 
 class CryptoCompareClient:
     BASE_URL = "https://min-api.cryptocompare.com"
+    COMPARE_URL = 'https://www.cryptocompare.com'
 
     def __init__(self, api_key):
         self.api_key = api_key
@@ -78,7 +79,7 @@ class CryptoCompareClient:
         payload = {
             "fsyms": symbol,
             "tsyms": currency,
-            "relaxedValidation": False,
+            "relaxedValidation": 'false',
         }
         return self._make_request(endpoint, payload, **kwargs)
 
@@ -87,9 +88,7 @@ class CryptoCompareClient:
         payload = {"tsym": currency, "limit": limit}
         return self._make_request(endpoint, payload, **kwargs)
 
-    def _get_top_exchanges(
-        self, symbol="BTC", currency="USD", limit=100, **kwargs
-    ):
+    def _get_top_exchanges(self, symbol="BTC", currency="USD", limit=100, **kwargs):
         endpoint = ENDPOINTS["TOP_EXCHANGES_FULL_DATA"]
         payload = {
             "fsym": symbol,
@@ -98,9 +97,7 @@ class CryptoCompareClient:
         }
         return self._make_request(endpoint, payload, **kwargs)
 
-    def _get_exchanges_top_symbols_by_volume(
-        self, exchange="binance", limit=100, **kwargs
-    ):
+    def _get_exchanges_top_symbols_by_volume(self, exchange="binance", limit=100, **kwargs):
         "/data/exchange/top/volume?e=Binance&direction=TO"
         "e=Kraken"
         endpoint = ENDPOINTS["EXCHANGE_TOP_SYMBOLS"]
@@ -110,9 +107,7 @@ class CryptoCompareClient:
         }
         return self._make_request(endpoint, payload, **kwargs)
 
-    def _get_top_list_by_pair_volume(
-        self, currency="USD", limit=100, **kwargs
-    ):
+    def _get_top_list_by_pair_volume(self, currency="USD", limit=100, **kwargs):
         endpoint = ENDPOINTS["TOP_LIST_PAIR_VOLUME"]
         payload = {
             "tsym": currency,
@@ -245,7 +240,7 @@ class CryptoCompareClient:
         }
         return self._make_request(endpoint, payload, **kwargs)
 
-    def get_latest_blockchain_data(self, symbol="BTC", **kwargs):
+    def _get_latest_blockchain_data(self, symbol="BTC", **kwargs):
         endpoint = ENDPOINTS["LATEST_BLOCKCHAIN_DATA"]
         payload = {
             "fsym": symbol,
