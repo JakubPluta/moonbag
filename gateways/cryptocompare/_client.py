@@ -17,7 +17,7 @@ ENDPOINTS = {
     "TOP_BY_MARKET_CAP": "/data/top/mktcapfull",
     "TOP_EXCHANGES_FULL_DATA": "/data/top/exchanges/full",
     "TOP_LIST_PAIR_VOLUME": "/data/top/volumes",
-    "TOP_LIST_OF_PAIRS": "data/top/pairs",
+    "TOP_LIST_OF_PAIRS": "/data/top/pairs",
     "EXCHANGE_TOP_SYMBOLS": "/data/exchange/top/volume",
     "ALL_COINS_LIST": "/data/all/coinlist",
     "LATEST_COIN_SOCIAL_STATS": "/data/social/coin/latest",
@@ -97,7 +97,7 @@ class CryptoCompareClient:
         }
         return self._make_request(endpoint, payload, **kwargs)
 
-    def _get_exchanges_top_symbols_by_volume(self, exchange="binance", limit=100, **kwargs):
+    def _get_exchanges_top_symbols_by_volume(self, exchange="Binance", limit=100, **kwargs):
         "/data/exchange/top/volume?e=Binance&direction=TO"
         "e=Kraken"
         endpoint = ENDPOINTS["EXCHANGE_TOP_SYMBOLS"]
@@ -115,7 +115,7 @@ class CryptoCompareClient:
         }
         return self._make_request(endpoint, payload, **kwargs)
 
-    def _get_top_of_trading_pairs(self, symbol="BTC", limit=100, **kwargs):
+    def _get_top_of_trading_pairs(self, symbol="ETH", limit=50, **kwargs):
         endpoint = ENDPOINTS["TOP_LIST_OF_PAIRS"]
         payload = {
             "fsym": symbol,
