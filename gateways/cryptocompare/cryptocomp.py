@@ -9,6 +9,7 @@ from gateways.cryptocompare.utils import table_formatter
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
 pd.set_option("display.width", None)
+pd.set_option('display.max_colwidth', 55)
 
 load_dotenv()
 
@@ -97,22 +98,32 @@ class CryptoCompare(CryptoCompareClient):
             for k, v in repo["List"][0].items():
                 if not isinstance(v, (list, dict, set)):
                     repo_dct[k] = v
-            social_stats["CodeRepository"] = repo_dct
+            social_stats["repository"] = repo_dct
 
-        crypto_compare = data["CryptoCompare"]
-        crypto_compare_dct = {}
-        for k, v in crypto_compare.items():
-            if not isinstance(v, (list, dict, set)):
-                crypto_compare_dct[k] = v
-            social_stats["CryptoCompare"] = crypto_compare_dct
-        data = pd.json_normalize(social_stats)
-        data.columns = [col.replace(".", "_").lower() for col in list(data.columns)]
+        df = pd.json_normalize(social_stats)
+        df.columns = [col.replace(".", "_").lower() for col in list(df.columns)]
         for col in [
             "twitter_account_creation",
             "reddit_community_creation",
-            "coderepository_last_update",
-            "coderepository_created_at",
-            "coderepository_last_push",
+            "repository_last_update",
+            "repository_created_at",
+            "repository_last_push",
         ]:
-            data[col] = pd.to_datetime(data[col], unit="s")
-        return data.T
+            df[col] = pd.to_datetime(df[col], unit="s")
+        return df.T
+
+    def get_historical_social_stats(self, coin_id=7605, limit=104, aggregate=7, **kwargs):
+        data = self._get_historical_social_stats(coin_id, limit, aggregate, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df['time'] = pd.to_datetime(df['time'], unit="s")
+        df.drop(['comments', 'posts', 'followers', 'points', 'overview_page_views', 'analysis_page_views', 'markets_page_views', 'charts_page_views', 'trades_page_views', 'forum_page_views', 'influence_page_views', 'total_page_views'],
+            axis=1, inplace=True)
+        return df
+
+    def get_latest_news(self, lang="EN", sort_order="latest", **kwargs):
+        data = self._get_latest_news(lang, sort_order, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df.drop(['upvotes','downvotes','lang','source_info', 'imageurl', 'id', 'url'], axis=1, inplace=True)
+        df['published_on'] = pd.to_datetime(df['published_on'], unit="s")
+        return df.set_index('published_on')
+
