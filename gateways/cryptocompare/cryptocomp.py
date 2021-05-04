@@ -201,3 +201,60 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
+    @table_formatter
+    def get_hourly_exchange_volume(
+        self, currency="USD", exchange="CCCAGG", limit=60 * 24, **kwargs
+    ):
+        data = self._get_hourly_exchange_volume(currency, exchange, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df
+
+    @table_formatter
+    def get_daily_symbol_volume(
+        self, symbol="BTC", currency="USD", limit=365, **kwargs
+    ):
+        data = self._get_daily_symbol_volume(symbol, currency, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df[[
+             'time','top_tier_volume_total', 'total_volume_total'
+        ]].set_index('time')
+
+    @table_formatter
+    def get_hourly_symbol_volume(
+        self, symbol="BTC", currency="USD", limit=365, **kwargs
+    ):
+        data = self._get_hourly_symbol_volume(symbol, currency, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df[[
+             'time','top_tier_volume_total', 'total_volume_total'
+        ]].set_index('time')
+
+    def get_latest_blockchain_data(self, symbol="BTC", **kwargs):
+        data = self._get_latest_blockchain_data(symbol, **kwargs)['Data']
+        df = pd.Series(data)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df
+
+    @table_formatter
+    def get_historical_blockchain_data(self, symbol="ETH", limit=365, **kwargs):
+        data = self._get_historical_blockchain_data(symbol, limit, **kwargs)['Data']['Data']
+        df = pd.DataFrame(data)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        df.drop(['id','block_height', 'hashrate','difficulty' ,'block_time' , 'block_size'], axis=1, inplace=True)
+        return df.set_index('time')
+
+    def get_latest_trading_signals(self, symbol="ETH", **kwargs):
+        data = self._get_latest_trading_signals(symbol, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df.drop(['id','partner_symbol'],inplace=True,axis=1)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df
+
+    def get_order_books_exchanges(self, **kwargs):
+        data = self._get_order_books_exchanges(**kwargs)['Data']
+        df = pd.DataFrame(data).T
+        df['orderBookAvailability'] = df['orderBookAvailability'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+        return df
