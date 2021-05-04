@@ -87,8 +87,3 @@ class LLama:
         df = pd.json_normalize(data)
         df["date"] = pd.to_datetime(df["date"], unit="s")
         return df.set_index('date')
-
-
-l = LLama()
-# df = l.get_protocols()
-# print(df)
