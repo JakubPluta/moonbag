@@ -161,3 +161,43 @@ class CryptoCompare(CryptoCompareClient):
     def get_all_coins_list(self, summary="true", **kwargs):
         data = self._get_all_coins_list(summary, **kwargs)["Data"]
         return pd.DataFrame(data).T[["Id", "Symbol", "FullName"]].set_index("Id")
+
+    @table_formatter
+    def get_historical_day_prices(self, symbol="BTC", currency="USD", limit=365, **kwargs):
+        data = self._get_historical_day_prices(symbol, currency, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df.drop(['volumefrom','conversionType','conversionSymbol'],axis=1, inplace=True)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df.set_index('time')
+
+    @table_formatter
+    def get_historical_day_prices(self, symbol="BTC", currency="USD", limit=365, **kwargs):
+        data = self._get_historical_day_prices(symbol, currency, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df.drop(['volumefrom','conversionType','conversionSymbol'],axis=1, inplace=True)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df.set_index('time')
+
+    @table_formatter
+    def get_historical_hour_prices(self, symbol="BTC", currency="USD", limit=60*24, **kwargs):
+        data = self._get_historical_hour_prices(symbol, currency, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df.drop(['volumefrom','conversionType','conversionSymbol'],axis=1, inplace=True)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df.set_index('time')
+
+    @table_formatter
+    def get_historical_minutes_prices(self, symbol="BTC", currency="USD", limit=60*24, **kwargs):
+        data = self._get_historical_minutes_prices(symbol, currency, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df.drop(['volumefrom', 'conversionType', 'conversionSymbol'], axis=1, inplace=True)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df.set_index('time')
+
+    @table_formatter
+    def get_daily_exchange_volume(self, currency="USD", exchange="CCCAGG", limit=365, **kwargs):
+        data = self._get_daily_exchange_volume(currency, exchange, limit, **kwargs)['Data']
+        df = pd.DataFrame(data)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        return df
+
