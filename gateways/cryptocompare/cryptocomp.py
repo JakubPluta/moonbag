@@ -258,3 +258,91 @@ class CryptoCompare(CryptoCompareClient):
         df = pd.DataFrame(data).T
         df['orderBookAvailability'] = df['orderBookAvailability'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
         return df
+
+    def get_order_book_top(
+        self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
+    ):
+        data = self._get_order_book_top(symbol, to_symbol, exchange, **kwargs)['Data']['RAW']
+        df = pd.json_normalize(data)
+        df.columns = [c.replace('.','_') for c in df.columns]
+        df.drop(df.columns[0], axis=1, inplace=True)
+        return df
+
+    def get_order_book_snapshot(
+            self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
+    ):
+        data = self._get_order_book_snapshot(symbol, to_symbol, exchange, **kwargs)['Data']
+        bid = pd.DataFrame(data.pop('BID'))
+        ask = pd.DataFrame(data.pop('ASK'))
+        bid.columns = ['Bid_price','Bid_Quantity']
+        ask.columns = ['Ask_price','Ask_Quantity']
+        df = pd.concat([ask,bid],axis=1)
+        df['Exchange'] = data.get('M')
+        df['From_Symbol'] = data.get('FSYM')
+        df['To_Symbol'] = data.get('FSYM')
+        return df
+
+    def get_all_exchanges_info(self, symbol="BTC", **kwargs):
+        data = self._get_all_exchanges_info(symbol, **kwargs)['Data']
+        return pd.DataFrame(data).T
+
+    def get_all_wallet_info(self, **kwargs):
+        data = self._get_all_wallet_info( **kwargs)['Data']
+        df = pd.DataFrame(data).T
+        cols = ['Name','Security','Anonymity', 'EaseOfUse','WalletFeatures', 'Coins', 'Platforms',
+        'SourceCodeUrl','Avg','Votes']
+        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
+        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
+        joins = ['WalletFeatures','Platforms','Coins']
+        for col in joins:
+            df[col] = df[col].apply(lambda x: ', '.join(x))
+        return df[cols].sort_values(by='Votes', ascending=False).set_index('Name')
+
+    def get_all_gambling_info(self, **kwargs):
+        data = self._get_all_gambling_info(**kwargs)['Data']
+        df = pd.DataFrame(data).T
+        columns = ['Name', 'GameTypes', 'Coins',
+         'GamblingFeatures', 'Platforms', 'Twitter', 'Reddit',
+         'Avg','Votes']
+        joins = ['GameTypes', 'Coins',
+         'GamblingFeatures', 'Platforms',]
+        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
+        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
+
+        for col in joins:
+            df[col] = df[col].apply(lambda x: ', '.join(x))
+
+        return df[columns].sort_values(by='Votes', ascending=False).set_index('Name')
+
+    def get_recommended_wallets(self, symbol="BTC", **kwargs):
+        data = self._get_recommendations(symbol, **kwargs)['Data']['wallets']
+        df = pd.DataFrame(data).T
+        cols = ['Name', 'Security', 'Anonymity', 'EaseOfUse', 'WalletFeatures', 'Coins', 'Platforms',
+                'SourceCodeUrl', 'Avg', 'Votes']
+        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
+        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
+        joins = ['WalletFeatures', 'Platforms', 'Coins']
+        for col in joins:
+            df[col] = df[col].apply(lambda x: ', '.join(x))
+        return df[cols].sort_values(by='Votes', ascending=False).set_index('Name')
+
+    def get_recommended_exchanges(self, symbol="BTC", **kwargs):
+        data = self._get_recommendations(symbol, **kwargs)['Data']['exchanges']
+        df = pd.DataFrame(data).T
+        columns = ['Name',  'ItemType', 'CentralizationType', 'GradePoints', 'Grade',
+                    'Country',
+                   'FullAddress', 'DepositMethods',
+                   'WithdrawalMethods',
+                   'Avg', 'Votes']
+        for col in ['FullAddress', 'DepositMethods',
+                   'WithdrawalMethods']:
+            df[col] = df[col].apply(lambda x: x.replace('\n\n', ', '))
+            df[col] = df[col].apply(lambda x: x.replace(',\n', ', '))
+            df[col] = df[col].apply(lambda x: x.replace('\n', ', '))
+        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
+        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
+        df['ItemType'] = df['ItemType'].apply(lambda x: ', '.join(x))
+        return df[columns].set_index('Name').sort_values(by='Votes',ascending=False)
+
+c = CryptoCompare(API_KEY)
+print(c.get_recommended_exchanges())
