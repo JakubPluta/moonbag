@@ -1,4 +1,4 @@
-from gateways.gecko.utils import find_discord
+from moonbag.gecko.utils import find_discord
 
 
 def test_should_properly_return_discord_if_exists():

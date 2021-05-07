@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from pycoingecko import CoinGeckoAPI
 import cachetools.func
 from retry import retry
-from gateways.gecko.utils import (
+from moonbag.gecko.utils import (
     changes_parser,
     replace_qm,
     clean_row,
@@ -92,7 +92,10 @@ DENOMINATION = ("usd", "btc", "eth")
 
 
 def get_coin_list():
-    return CoinGeckoAPI().get_coins_list()
+    coins = CoinGeckoAPI().get_coins_list()
+    df = pd.DataFrame(coins)
+    return df
+
 
 
 class Overview:
@@ -714,6 +717,9 @@ class Coin:
         if self._coin_symbol:
             self.coin = self._get_coin_info()
 
+    def __str__(self):
+        return f"{self._coin_symbol}"
+
     def _validate_coin(self, symbol):
         coin = None
         for dct in self._coin_list:
@@ -721,7 +727,7 @@ class Coin:
                 coin = dct.get("id")
         if not coin:
             raise ValueError(
-                f"Could not find coin with the given id: {symbol}\nTo check available coins use: get_coin_list method"
+                f"Could not find coin with the given id: {symbol}\n"
             )
         return coin
 
@@ -796,9 +802,9 @@ class Coin:
             "total_supply",
             "max_supply",
             "circulating_supply",
-            "price_change_pct_24h",
-            "price_change_pct_7d",
-            "price_change_pct_30d",
+            "price_change_percentage_24h",
+            "price_change_percentage_7d",
+            "price_change_percentage_30d",
         ]:
             market_dct[stat] = market_data.get(stat)
         prices = create_dictionary_with_prefixes(
@@ -912,8 +918,3 @@ class Coin:
         df.replace({0: np.NaN}, inplace=True)
         return df
 
-    def eth_scanner(self):
-        pass
-
-    def reddit_screener(self):
-        pass

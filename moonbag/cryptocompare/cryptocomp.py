@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 import os
 import cachetools.func
 from retry import retry
-from gateways.cryptocompare._client import CryptoCompareClient
-from gateways.utils import table_formatter
+from moonbag.cryptocompare._client import CryptoCompareClient
+from moonbag.utils import table_formatter
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -163,40 +163,68 @@ class CryptoCompare(CryptoCompareClient):
         return pd.DataFrame(data).T[["Id", "Symbol", "FullName"]].set_index("Id")
 
     @table_formatter
-    def get_historical_day_prices(self, symbol="BTC", currency="USD", limit=365, **kwargs):
-        data = self._get_historical_day_prices(symbol, currency, limit, **kwargs)['Data']
+    def get_historical_day_prices(
+        self, symbol="BTC", currency="USD", limit=365, **kwargs
+    ):
+        data = self._get_historical_day_prices(symbol, currency, limit, **kwargs)[
+            "Data"
+        ]
         df = pd.DataFrame(data)
-        df.drop(['volumefrom','conversionType','conversionSymbol'],axis=1, inplace=True)
+        df.drop(
+            ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
+        )
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index('time')
+        return df.set_index("time")
 
     @table_formatter
-    def get_historical_day_prices(self, symbol="BTC", currency="USD", limit=365, **kwargs):
-        data = self._get_historical_day_prices(symbol, currency, limit, **kwargs)['Data']
+    def get_historical_day_prices(
+        self, symbol="BTC", currency="USD", limit=365, **kwargs
+    ):
+        data = self._get_historical_day_prices(symbol, currency, limit, **kwargs)[
+            "Data"
+        ]
         df = pd.DataFrame(data)
-        df.drop(['volumefrom','conversionType','conversionSymbol'],axis=1, inplace=True)
+        df.drop(
+            ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
+        )
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index('time')
+        return df.set_index("time")
 
     @table_formatter
-    def get_historical_hour_prices(self, symbol="BTC", currency="USD", limit=60*24, **kwargs):
-        data = self._get_historical_hour_prices(symbol, currency, limit, **kwargs)['Data']
+    def get_historical_hour_prices(
+        self, symbol="BTC", currency="USD", limit=60 * 24, **kwargs
+    ):
+        data = self._get_historical_hour_prices(symbol, currency, limit, **kwargs)[
+            "Data"
+        ]
         df = pd.DataFrame(data)
-        df.drop(['volumefrom','conversionType','conversionSymbol'],axis=1, inplace=True)
+        df.drop(
+            ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
+        )
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index('time')
+        return df.set_index("time")
 
     @table_formatter
-    def get_historical_minutes_prices(self, symbol="BTC", currency="USD", limit=60*24, **kwargs):
-        data = self._get_historical_minutes_prices(symbol, currency, limit, **kwargs)['Data']
+    def get_historical_minutes_prices(
+        self, symbol="BTC", currency="USD", limit=60 * 24, **kwargs
+    ):
+        data = self._get_historical_minutes_prices(symbol, currency, limit, **kwargs)[
+            "Data"
+        ]
         df = pd.DataFrame(data)
-        df.drop(['volumefrom', 'conversionType', 'conversionSymbol'], axis=1, inplace=True)
+        df.drop(
+            ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
+        )
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index('time')
+        return df.set_index("time")
 
     @table_formatter
-    def get_daily_exchange_volume(self, currency="USD", exchange="CCCAGG", limit=365, **kwargs):
-        data = self._get_daily_exchange_volume(currency, exchange, limit, **kwargs)['Data']
+    def get_daily_exchange_volume(
+        self, currency="USD", exchange="CCCAGG", limit=365, **kwargs
+    ):
+        data = self._get_daily_exchange_volume(currency, exchange, limit, **kwargs)[
+            "Data"
+        ]
         df = pd.DataFrame(data)
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
@@ -205,7 +233,9 @@ class CryptoCompare(CryptoCompareClient):
     def get_hourly_exchange_volume(
         self, currency="USD", exchange="CCCAGG", limit=60 * 24, **kwargs
     ):
-        data = self._get_hourly_exchange_volume(currency, exchange, limit, **kwargs)['Data']
+        data = self._get_hourly_exchange_volume(currency, exchange, limit, **kwargs)[
+            "Data"
+        ]
         df = pd.DataFrame(data)
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
@@ -214,135 +244,191 @@ class CryptoCompare(CryptoCompareClient):
     def get_daily_symbol_volume(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):
-        data = self._get_daily_symbol_volume(symbol, currency, limit, **kwargs)['Data']
+        data = self._get_daily_symbol_volume(symbol, currency, limit, **kwargs)["Data"]
         df = pd.DataFrame(data)
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df[[
-             'time','top_tier_volume_total', 'total_volume_total'
-        ]].set_index('time')
+        return df[["time", "top_tier_volume_total", "total_volume_total"]].set_index(
+            "time"
+        )
 
     @table_formatter
     def get_hourly_symbol_volume(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):
-        data = self._get_hourly_symbol_volume(symbol, currency, limit, **kwargs)['Data']
+        data = self._get_hourly_symbol_volume(symbol, currency, limit, **kwargs)["Data"]
         df = pd.DataFrame(data)
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df[[
-             'time','top_tier_volume_total', 'total_volume_total'
-        ]].set_index('time')
+        return df[["time", "top_tier_volume_total", "total_volume_total"]].set_index(
+            "time"
+        )
 
     def get_latest_blockchain_data(self, symbol="BTC", **kwargs):
-        data = self._get_latest_blockchain_data(symbol, **kwargs)['Data']
+        data = self._get_latest_blockchain_data(symbol, **kwargs)["Data"]
         df = pd.Series(data)
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
     @table_formatter
     def get_historical_blockchain_data(self, symbol="ETH", limit=365, **kwargs):
-        data = self._get_historical_blockchain_data(symbol, limit, **kwargs)['Data']['Data']
+        data = self._get_historical_blockchain_data(symbol, limit, **kwargs)["Data"][
+            "Data"
+        ]
         df = pd.DataFrame(data)
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        df.drop(['id','block_height', 'hashrate','difficulty' ,'block_time' , 'block_size'], axis=1, inplace=True)
-        return df.set_index('time')
+        df.drop(
+            [
+                "id",
+                "block_height",
+                "hashrate",
+                "difficulty",
+                "block_time",
+                "block_size",
+            ],
+            axis=1,
+            inplace=True,
+        )
+        return df.set_index("time")
 
     def get_latest_trading_signals(self, symbol="ETH", **kwargs):
-        data = self._get_latest_trading_signals(symbol, **kwargs)['Data']
+        data = self._get_latest_trading_signals(symbol, **kwargs)["Data"]
         df = pd.DataFrame(data)
-        df.drop(['id','partner_symbol'],inplace=True,axis=1)
+        df.drop(["id", "partner_symbol"], inplace=True, axis=1)
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
     def get_order_books_exchanges(self, **kwargs):
-        data = self._get_order_books_exchanges(**kwargs)['Data']
+        data = self._get_order_books_exchanges(**kwargs)["Data"]
         df = pd.DataFrame(data).T
-        df['orderBookAvailability'] = df['orderBookAvailability'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+        df["orderBookAvailability"] = df["orderBookAvailability"].apply(
+            lambda x: ", ".join(x) if isinstance(x, list) else x
+        )
         return df
 
     def get_order_book_top(
         self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
     ):
-        data = self._get_order_book_top(symbol, to_symbol, exchange, **kwargs)['Data']['RAW']
+        data = self._get_order_book_top(symbol, to_symbol, exchange, **kwargs)["Data"][
+            "RAW"
+        ]
         df = pd.json_normalize(data)
-        df.columns = [c.replace('.','_') for c in df.columns]
+        df.columns = [c.replace(".", "_") for c in df.columns]
         df.drop(df.columns[0], axis=1, inplace=True)
         return df
 
     def get_order_book_snapshot(
-            self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
+        self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
     ):
-        data = self._get_order_book_snapshot(symbol, to_symbol, exchange, **kwargs)['Data']
-        bid = pd.DataFrame(data.pop('BID'))
-        ask = pd.DataFrame(data.pop('ASK'))
-        bid.columns = ['Bid_price','Bid_Quantity']
-        ask.columns = ['Ask_price','Ask_Quantity']
-        df = pd.concat([ask,bid],axis=1)
-        df['Exchange'] = data.get('M')
-        df['From_Symbol'] = data.get('FSYM')
-        df['To_Symbol'] = data.get('FSYM')
+        data = self._get_order_book_snapshot(symbol, to_symbol, exchange, **kwargs)[
+            "Data"
+        ]
+        bid = pd.DataFrame(data.pop("BID"))
+        ask = pd.DataFrame(data.pop("ASK"))
+        bid.columns = ["Bid_price", "Bid_Quantity"]
+        ask.columns = ["Ask_price", "Ask_Quantity"]
+        df = pd.concat([ask, bid], axis=1)
+        df["Exchange"] = data.get("M")
+        df["From_Symbol"] = data.get("FSYM")
+        df["To_Symbol"] = data.get("FSYM")
         return df
 
     def get_all_exchanges_info(self, symbol="BTC", **kwargs):
-        data = self._get_all_exchanges_info(symbol, **kwargs)['Data']
+        data = self._get_all_exchanges_info(symbol, **kwargs)["Data"]
         return pd.DataFrame(data).T
 
     def get_all_wallet_info(self, **kwargs):
-        data = self._get_all_wallet_info( **kwargs)['Data']
+        data = self._get_all_wallet_info(**kwargs)["Data"]
         df = pd.DataFrame(data).T
-        cols = ['Name','Security','Anonymity', 'EaseOfUse','WalletFeatures', 'Coins', 'Platforms',
-        'SourceCodeUrl','Avg','Votes']
-        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
-        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
-        joins = ['WalletFeatures','Platforms','Coins']
+        cols = [
+            "Name",
+            "Security",
+            "Anonymity",
+            "EaseOfUse",
+            "WalletFeatures",
+            "Coins",
+            "Platforms",
+            "SourceCodeUrl",
+            "Avg",
+            "Votes",
+        ]
+        df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
+        df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
+        joins = ["WalletFeatures", "Platforms", "Coins"]
         for col in joins:
-            df[col] = df[col].apply(lambda x: ', '.join(x))
-        return df[cols].sort_values(by='Votes', ascending=False).set_index('Name')
+            df[col] = df[col].apply(lambda x: ", ".join(x))
+        return df[cols].sort_values(by="Votes", ascending=False).set_index("Name")
 
     def get_all_gambling_info(self, **kwargs):
-        data = self._get_all_gambling_info(**kwargs)['Data']
+        data = self._get_all_gambling_info(**kwargs)["Data"]
         df = pd.DataFrame(data).T
-        columns = ['Name', 'GameTypes', 'Coins',
-         'GamblingFeatures', 'Platforms', 'Twitter', 'Reddit',
-         'Avg','Votes']
-        joins = ['GameTypes', 'Coins',
-         'GamblingFeatures', 'Platforms',]
-        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
-        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
+        columns = [
+            "Name",
+            "GameTypes",
+            "Coins",
+            "GamblingFeatures",
+            "Platforms",
+            "Twitter",
+            "Reddit",
+            "Avg",
+            "Votes",
+        ]
+        joins = [
+            "GameTypes",
+            "Coins",
+            "GamblingFeatures",
+            "Platforms",
+        ]
+        df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
+        df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
 
         for col in joins:
-            df[col] = df[col].apply(lambda x: ', '.join(x))
+            df[col] = df[col].apply(lambda x: ", ".join(x))
 
-        return df[columns].sort_values(by='Votes', ascending=False).set_index('Name')
+        return df[columns].sort_values(by="Votes", ascending=False).set_index("Name")
 
     def get_recommended_wallets(self, symbol="BTC", **kwargs):
-        data = self._get_recommendations(symbol, **kwargs)['Data']['wallets']
+        data = self._get_recommendations(symbol, **kwargs)["Data"]["wallets"]
         df = pd.DataFrame(data).T
-        cols = ['Name', 'Security', 'Anonymity', 'EaseOfUse', 'WalletFeatures', 'Coins', 'Platforms',
-                'SourceCodeUrl', 'Avg', 'Votes']
-        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
-        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
-        joins = ['WalletFeatures', 'Platforms', 'Coins']
+        cols = [
+            "Name",
+            "Security",
+            "Anonymity",
+            "EaseOfUse",
+            "WalletFeatures",
+            "Coins",
+            "Platforms",
+            "SourceCodeUrl",
+            "Avg",
+            "Votes",
+        ]
+        df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
+        df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
+        joins = ["WalletFeatures", "Platforms", "Coins"]
         for col in joins:
-            df[col] = df[col].apply(lambda x: ', '.join(x))
-        return df[cols].sort_values(by='Votes', ascending=False).set_index('Name')
+            df[col] = df[col].apply(lambda x: ", ".join(x))
+        return df[cols].sort_values(by="Votes", ascending=False).set_index("Name")
 
     def get_recommended_exchanges(self, symbol="BTC", **kwargs):
-        data = self._get_recommendations(symbol, **kwargs)['Data']['exchanges']
+        data = self._get_recommendations(symbol, **kwargs)["Data"]["exchanges"]
         df = pd.DataFrame(data).T
-        columns = ['Name',  'ItemType', 'CentralizationType', 'GradePoints', 'Grade',
-                    'Country',
-                   'FullAddress', 'DepositMethods',
-                   'WithdrawalMethods',
-                   'Avg', 'Votes']
-        for col in ['FullAddress', 'DepositMethods',
-                   'WithdrawalMethods']:
-            df[col] = df[col].apply(lambda x: x.replace('\n\n', ', '))
-            df[col] = df[col].apply(lambda x: x.replace(',\n', ', '))
-            df[col] = df[col].apply(lambda x: x.replace('\n', ', '))
-        df['Avg'] = df['Rating'].apply(lambda x: x.get('Avg'))
-        df['Votes'] = df['Rating'].apply(lambda x: x.get('TotalUsers'))
-        df['ItemType'] = df['ItemType'].apply(lambda x: ', '.join(x))
-        return df[columns].set_index('Name').sort_values(by='Votes',ascending=False)
+        columns = [
+            "Name",
+            "ItemType",
+            "CentralizationType",
+            "GradePoints",
+            "Grade",
+            "Country",
+            "FullAddress",
+            "DepositMethods",
+            "WithdrawalMethods",
+            "Avg",
+            "Votes",
+        ]
+        for col in ["FullAddress", "DepositMethods", "WithdrawalMethods"]:
+            df[col] = df[col].apply(lambda x: x.replace("\n\n", ", "))
+            df[col] = df[col].apply(lambda x: x.replace(",\n", ", "))
+            df[col] = df[col].apply(lambda x: x.replace("\n", ", "))
+        df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
+        df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
+        df["ItemType"] = df["ItemType"].apply(lambda x: ", ".join(x))
+        return df[columns].set_index("Name").sort_values(by="Votes", ascending=False)
 
-c = CryptoCompare(API_KEY)
-print(c.get_recommended_exchanges())

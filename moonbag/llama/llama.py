@@ -2,8 +2,8 @@ import requests
 import pandas as pd
 import cachetools.func
 from retry import retry
-from gateways.utils import table_formatter
-from gateways.llama.utils import get_slug_mappings
+from moonbag.utils import table_formatter
+from moonbag.llama.utils import get_slug_mappings
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -38,10 +38,10 @@ class LLama:
                 "tvl",
                 "url",
                 "description",
-                #"module",
-                #"audits",
-                #"gecko_id",
-                #"cmcId",
+                # "module",
+                # "audits",
+                # "gecko_id",
+                # "cmcId",
             ]
         ].set_index("name")
         df["chains"] = df["chains"].apply(lambda x: ",".join(x))
@@ -73,7 +73,7 @@ class LLama:
     @table_formatter
     def get_protocol_info(self, protocol: str):
         data = self._get_protocol(protocol)
-        for stat in ['tvl','tokensInUsd']:
+        for stat in ["tvl", "tokensInUsd"]:
             data.pop(stat)
         df = pd.json_normalize(data)
         df["chains"] = df["chains"].apply(lambda x: ",".join(x))
@@ -81,9 +81,9 @@ class LLama:
 
     @table_formatter
     def get_protocol_total_value_locked(self, protocol: str):
-        data = self._get_protocol(protocol).get('tvl')
+        data = self._get_protocol(protocol).get("tvl")
         if not data:
             return pd.DataFrame()
         df = pd.json_normalize(data)
         df["date"] = pd.to_datetime(df["date"], unit="s")
-        return df.set_index('date')
+        return df.set_index("date")
