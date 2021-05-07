@@ -562,7 +562,6 @@ class Overview:
             *author, description, _ = clean_row(row)
             if len(author) > 3:
                 author, description = author[:3], author[3]
-            print(author)
         except (ValueError, IndexError):
             return {}
         return {
