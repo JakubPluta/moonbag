@@ -4,7 +4,7 @@ import logging
 from tabulate import tabulate
 import pandas as pd
 
-logger = logging.getLogger('parser')
+logger = logging.getLogger("parser")
 
 moon = "(🚀🚀)"
 
@@ -19,13 +19,6 @@ h = """
 
     Welcome in MoonBag Terminal!
 """
-
-MAPPER = {
-    'help': 'print_help'
-
-
-}
-
 
 
 def print_help():
@@ -56,314 +49,88 @@ def print_help():
     print("   ethhold           show eth holdings overview [Coingecko]")
     print("   btchold           show btc holdings overview [Coingecko]")
     print("   news              show latest crypto news [Coingecko]")
-
+    print("   topdefi           show top defi coins [Coingecko]")
     print("")
     return
 
 
+o = Overview()
+
+mapper = {
+    "topdexes": o.get_top_dexes,
+    "mostvisited": o.get_most_visited_coins,
+    "gainers": o.get_top_gainers,
+    "mostvoted": o.get_most_voted_coins,
+    "sentiment": o.get_positive_sentiment_coins,
+    "topvolume": o.get_top_volume_coins,
+    "trending": o.get_trending_coins,
+    "yieldfarms": o.get_yield_farms,
+    "stables": o.get_stable_coins,
+    "nft": o.get_top_nfts,
+    "nftmarketstatus": o.get_nft_market_status,
+    "categories": o.get_top_crypto_categories,
+    "nftofday": o.get_nft_of_the_day,
+    "recently": o.get_recently_added_coins,
+    "btccompanies": o.get_companies_with_btc,
+    "ethcompanies": o.get_companies_with_eth,
+    "losers": o.get_top_losers,
+    "exrates": o.get_exchange_rates,
+    "exchanges": o.get_exchanges,
+    "derivatives": o.get_derivatives,
+    "indexes": o.get_indexes,
+    "ethhold": o.get_eth_holdings_public_companies_overview,
+    "btchold": o.get_btc_holdings_public_companies_overview,
+    "news": o._get_news,
+    "topdefi": o.get_top_defi_coins,
+}
+
+
+standard = {
+    "help": print_help,
+    "r": False,
+    "quit": True,
+}
+
+
 def overview_menu():
+    choices = list(mapper.keys()) + list(standard.keys())
 
-    choices = ['help', 'r', 'quit',
-               'topdexes', 'mostvisited',
-               'gainers', 'mostvoted',
-               'sentiment', 'topvolume',
-               'trending', 'yieldfarms',
-               'stables','nft','categories',
-               'nftofday', 'recently','btccompanies','ethcompanies',
-               'losers','exrates','derivatives','indexes', 'exrates',
-               'ethhold', 'btchold', 'news'
-
-               ]
-
-    parser = argparse.ArgumentParser(prog='overview', add_help=False)
-    parser.add_argument('cmd', choices=choices)
+    parser = argparse.ArgumentParser(prog="overview", add_help=False)
+    parser.add_argument("cmd", choices=choices)
     print(h)
     print_help()
-    ov = Overview()
+
     while True:
-        as_input = input(f'{moon} ')
+        as_input = input(f"{moon} ")
         try:
             (known_args, others) = parser.parse_known_args(as_input.split())
         except SystemExit:
             print("The command selected doesn't exist")
-            print('\n')
+            print("\n")
             continue
 
-        if known_args.cmd == 'help':
-            print_help()
-        elif known_args.cmd == 'r':
-            return False
-        elif known_args.cmd == 'quit':
-            return True
+        cmd = mapper.get(known_args.cmd)
 
-        elif known_args.cmd == 'topdexes':
-            df = ov.get_top_dexes().head(10)
-            print(tabulate(
+        if not cmd:
+            base = standard.get(cmd)
+            if callable(base):
+                base()
+            else:
+                return base
+
+        elif cmd and callable(cmd):
+            df = cmd()
+            if isinstance(df, dict):
+                df = pd.Series(df).to_frame().reset_index()
+                df.columns = ["Metric", "Value"]
+            print(
+                tabulate(
                     df,
                     headers=df.columns,
                     floatfmt=".5f",
                     showindex=False,
                     tablefmt="presto",
                 )
-            )
-            print("")
-
-        elif known_args.cmd == 'mostvisited':
-            df = ov.get_most_visited_coins()
-            print(tabulate(
-                    df,
-                    headers=df.columns,
-                    floatfmt=".5f",
-                    showindex=False,
-                    tablefmt="presto",
-                )
-            )
-            print("")
-
-        elif known_args.cmd == 'mostvoted':
-            df = ov.get_most_voted_coins()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".5f",
-                showindex=False,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'sentiment':
-            df = ov.get_positive_sentiment_coins()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=False,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'topvolume':
-            df = ov.get_top_volume_coins()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-
-        elif known_args.cmd == 'gainers':
-            df = ov.get_top_gainers()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=False,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-
-        elif known_args.cmd == 'trending':
-            df = ov.get_trending_coins()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=False,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'yieldfarms':
-            df = ov.get_yield_farms()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=False,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'stables':
-            df = ov.get_stable_coins()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=False,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'nft':
-            df = ov.get_top_nfts()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'categories':
-            df = ov.get_top_crypto_categories()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'nftofday':
-            df = pd.Series(ov.get_nft_of_the_day()).to_frame().reset_index()
-            df.columns = ['Metric', 'Value']
-
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'ethcompanies':
-            df = ov.get_companies_with_eth()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'btccompanies':
-            df = ov.get_companies_with_btc()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'recently':
-            df = ov.get_recently_added_coins()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'derivatives':
-            df = ov.get_derivatives()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'indexes':
-            df = ov.get_indexes()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'exrates':
-            df = ov.get_exchange_rates()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'losers':
-            df = ov.get_top_losers()
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'btchold':
-            df = pd.Series(ov.get_btc_holdings_public_companies_overview()).to_frame().reset_index()
-            df.columns = ['Metric', 'Value']
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'ethhold':
-            df = pd.Series(ov.get_eth_holdings_public_companies_overview()).to_frame().reset_index()
-            df.columns = ['Metric', 'Value']
-
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
-            )
-            print("")
-
-        elif known_args.cmd == 'news':
-            df = ov._get_news().head(50)
-            print(tabulate(
-                df,
-                headers=df.columns,
-                floatfmt=".6f",
-                showindex=True,
-                tablefmt="presto",
-            )
             )
             print("")
 
