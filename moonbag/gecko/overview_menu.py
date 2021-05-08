@@ -1,32 +1,12 @@
 import argparse
-import logging
 import pandas as pd
 from tabulate import tabulate
 from moonbag.gecko.gecko import Overview
 import logging
+from moonbag import LOGO, MOON
+from typing import List
 
 logger = logging.getLogger("parser")
-
-MOON = "(🚀🚀)"
-
-
-LOGO = """
-    ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗██████╗  █████╗  ██████╗ 
-    ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔══██╗██╔══██╗██╔════╝ 
-    ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║██████╔╝███████║██║  ███╗
-    ██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║██╔══██╗██╔══██║██║   ██║
-    ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝██║  ██║╚██████╔╝
-    ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝
-
-    Welcome in MoonBag Terminal!
-"""
-
-
-import argparse
-from typing import List
-from tabulate import tabulate
-from moonbag.gecko.gecko import Coin, Overview, get_coin_list
-import pandas as pd
 
 
 def print_table(df: pd.DataFrame):
@@ -34,36 +14,28 @@ def print_table(df: pd.DataFrame):
         raise TypeError("Please use data frame as an input!")
     print(
         tabulate(
-            df,
-            headers=df.columns,
-            floatfmt=".5f",
-            showindex=False,
-            tablefmt="psql",
+            df, headers=df.columns, floatfmt=".5f", showindex=False, tablefmt="psql",
         )
     )
     print("")
 
 
-def create_view(name, func, desc, args: List):
-    parser = argparse.ArgumentParser(
-        add_help=True,
-        prog=name,
-        description=desc
-    )
+def create_view(name, func, desc, n: List):
+    parser = argparse.ArgumentParser(add_help=True, prog=name, description=desc)
     parser.add_argument(
         "-n",
         "--num",
         action="store",
         dest="n",
         type=int,
-        default=None,
+        default=50,
         help="Number of the records",
     )
-    parsy, _ = parser.parse_known_args(args)
+    parsy, _ = parser.parse_known_args(n)
     if not parsy:
         return
 
-    df = func(parsy.n)
+    df = func(n=parsy.n)
     return df
 
 
@@ -96,8 +68,8 @@ class Controller:
         "news": o.get_news,
         "topdefi": o.get_top_defi_coins,
         "infodefi": o.get_global_defi_info,
-        'finprod' : o.get_finance_products,
-        'finplat' : o.get_financial_platforms,
+        "finprod": o.get_finance_products,
+        "finplat": o.get_financial_platforms,
     }
 
     def __init__(self):
@@ -107,7 +79,7 @@ class Controller:
             "help": self.help,
             "r": self.returner,
             "quit": self.quit,
-            'exit' : self.quit,
+            "exit": self.quit,
         }
 
     @staticmethod
@@ -117,34 +89,48 @@ class Controller:
         print("   r                 return to previous menu")
         print("   quit              quit program")
         print("")
-        print("Crypto Overview Menu")
-        print("   topdexes          show top decentralized exchanges [Coingecko]")
-        print("   mostvisited       show most visited coins [Coingecko]")
-        print("   gainers           show top gainers [Coingecko]")
-        print("   mostvoted         show most visited coins [Coingecko]")
-        print("   topsentiment      show coins with most positive sentiment [Coingecko]")
-        print("   topvolume         show coins with highest volume [Coingecko]")
-        print("   trending          show trending coins [Coingecko]")
-        print("   yieldfarms        show yield farms [Coingecko]")
-        print("   stables           show stable coins [Coingecko]")
-        print("   topnft            show top nfts [Coingecko]")
-        print("   nftmarket         show nft market status [Coingecko]")
-        print("   categories        show top crypto categories [Coingecko]")
-        print("   nftofday          show nft of a day [Coingecko]")
-        print("   recently          show recently added coins [Coingecko]")
-        print("   btccompanies      show companies that holds bitcoin [Coingecko]")
-        print("   ethcompanies      show companies that holds ethereum [Coingecko]")
-        print("   derivatives       show derivatives [Coingecko]")
-        print("   indexes           show indexes [Coingecko]")
-        print("   losers            show top losers [Coingecko]")
-        print("   exrates           show exchanges rates [Coingecko]")
-        print("   ethhold           show eth holdings overview [Coingecko]")
-        print("   btchold           show btc holdings overview [Coingecko]")
+        print("Crypto Overview      (use --n 25 for top N records)")
         print("   news              show latest crypto news [Coingecko]")
+        print("   trending          show trending coins [Coingecko]")
+        print("   recently          show recently added coins [Coingecko]")
+        print("   mostvisited       show most visited coins [Coingecko]")
+        print("   mostvoted         show most visited coins [Coingecko]")
+
+        print("   gainers           show top gainers in last 1h [Coingecko]")
+        print("   losers            show top losers in last 1h [Coingecko]")
+
+        print(
+            "   topsentiment      show coins with most positive sentiment [Coingecko]"
+        )
+        print("   topvolume         show coins with highest volume [Coingecko]")
+
+        print("   topdexes          show top decentralized exchanges [Coingecko]")
         print("   topdefi           show top defi coins [Coingecko]")
         print("   infodefi          show overview of defi [Coingecko]")
+        print("   yieldfarms        show yield farms [Coingecko]")
+
+        print("   stables           show stable coins [Coingecko]")
+
+        print("   topnft            show top nfts [Coingecko]")
+        print("   nftmarket         show nft market status [Coingecko]")
+        print("   nftofday          show nft of a day [Coingecko]")
+
+        print("   categories        show top crypto categories [Coingecko]")
+        print(
+            "   derivatives       show derivatives [Coingecko] !Waiting time ~ 10-15 sec!"
+        )
+        print("   indexes           show indexes [Coingecko]")
         print("   finprod           show financial products [Coingecko]")
-        print("   finplat          show financial platforms [Coingecko]")
+        print("   finplat           show financial platforms [Coingecko]")
+
+        print("   btccompanies      show companies that holds bitcoin [Coingecko]")
+        print("   ethcompanies      show companies that holds ethereum [Coingecko]")
+        print("   ethhold           show eth holdings overview [Coingecko]")
+        print("   btchold           show btc holdings overview [Coingecko]")
+
+        print("   exchanges         show info about exchanges [Coingecko]")
+        print("   exrates           show exchanges rates [Coingecko]")
+
         print(" ")
         return
 
@@ -164,7 +150,7 @@ class Controller:
         elif command in self.mapper:
             func = self.mapper.get(command)
             if func:
-                view = create_view(known_args.cmd, func ,'', others)
+                view = create_view(name=known_args.cmd, func=func, desc="", n=others)
                 return view
         else:
             print("Command not recognized")

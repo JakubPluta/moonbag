@@ -17,6 +17,7 @@ cachetools = "^4.2.2"
 python-dotenv = "^0.17.1"
 tabulate = "^0.8.9"
 lxml = "^4.6.3"
+tqdm = "^4.60.0"
 
 [tool.poetry.dev-dependencies]
 

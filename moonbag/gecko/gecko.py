@@ -98,7 +98,6 @@ def get_coin_list():
     return df
 
 
-
 class Overview:
     BASE = "https://www.coingecko.com"
 
@@ -330,7 +329,7 @@ class Overview:
         return replace_qm(pd.DataFrame(results, columns=columns)).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_stable_coins(self,n=None):
+    def get_stable_coins(self, n=None):
         columns = [
             COLUMNS["rank"],
             COLUMNS["name"],
@@ -375,7 +374,9 @@ class Overview:
                     link,
                 ]
             )
-        return replace_qm(pd.DataFrame(results, columns=columns).set_index("rank")).head(n)
+        return replace_qm(
+            pd.DataFrame(results, columns=columns).set_index("rank")
+        ).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_yield_farms(self, n=None):
@@ -444,19 +445,15 @@ class Overview:
         return self._discover_coins("positive_sentiment").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_most_visited_coins(self,n=None):
+    def get_most_visited_coins(self, n=None):
         return self._discover_coins("most_visited").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_losers(self, n=None):
-        # FIXME: Argparser takes only one argument n, make it possible to recognize if parameter is n
-        # FIXME: Name parameter in argparser, in the way that perdio param won't be change
-        period = '1h'
+    def get_top_losers(self, period="1h", n=None):
         return self._get_gainers_and_losers(period, typ="losers").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_gainers(self, n=None):
-        period = '1h'
+    def get_top_gainers(self, period="1h", n=None):
         return self._get_gainers_and_losers(period, typ="gainers").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
@@ -473,23 +470,27 @@ class Overview:
                 row_cleaned.insert(4, "?")
             results.append(row_cleaned)
 
-        return pd.DataFrame(
-            results,
-            columns=[
-                COLUMNS["rank"],
-                COLUMNS["name"],
-                COLUMNS["symbol"],
-                COLUMNS["price"],
-                COLUMNS["change_1h"],
-                COLUMNS["change_24h"],
-                COLUMNS["change_7d"],
-                COLUMNS["volume_24h"],
-                COLUMNS["market_cap"],
-                "fully_diluted_market_cap",
-                "market_cap_to_tvl_ratio",
-                COLUMNS["url"],
-            ],
-        ).set_index(COLUMNS["rank"]).head(n)
+        return (
+            pd.DataFrame(
+                results,
+                columns=[
+                    COLUMNS["rank"],
+                    COLUMNS["name"],
+                    COLUMNS["symbol"],
+                    COLUMNS["price"],
+                    COLUMNS["change_1h"],
+                    COLUMNS["change_24h"],
+                    COLUMNS["change_7d"],
+                    COLUMNS["volume_24h"],
+                    COLUMNS["market_cap"],
+                    "fully_diluted_market_cap",
+                    "market_cap_to_tvl_ratio",
+                    COLUMNS["url"],
+                ],
+            )
+            .set_index(COLUMNS["rank"])
+            .head(n)
+        )
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_top_dexes(self, n=None):
@@ -542,21 +543,25 @@ class Overview:
             row_cleaned.append(link)
             row_cleaned.pop(3)
             results.append(row_cleaned)
-        return pd.DataFrame(
-            results,
-            columns=[
-                COLUMNS["rank"],
-                COLUMNS["name"],
-                COLUMNS["symbol"],
-                COLUMNS["price"],
-                COLUMNS["change_1h"],
-                COLUMNS["change_24h"],
-                COLUMNS["change_7d"],
-                COLUMNS["volume_24h"],
-                COLUMNS["market_cap"],
-                COLUMNS["url"],
-            ],
-        ).set_index(COLUMNS["rank"]).head(n)
+        return (
+            pd.DataFrame(
+                results,
+                columns=[
+                    COLUMNS["rank"],
+                    COLUMNS["name"],
+                    COLUMNS["symbol"],
+                    COLUMNS["price"],
+                    COLUMNS["change_1h"],
+                    COLUMNS["change_24h"],
+                    COLUMNS["change_7d"],
+                    COLUMNS["volume_24h"],
+                    COLUMNS["market_cap"],
+                    COLUMNS["url"],
+                ],
+            )
+            .set_index(COLUMNS["rank"])
+            .head(n)
+        )
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_nft_of_the_day(self, n=None):
@@ -569,13 +574,19 @@ class Overview:
                 author, description = author[:3], author[3]
         except (ValueError, IndexError):
             return {}
-        df = pd.Series({
-            COLUMNS["author"]: " ".join(author),
-            "desc": description,
-            COLUMNS["url"]: self.BASE + row.find("a")["href"],
-            "img": row.find("img")["src"],
-        }).to_frame().reset_index()
-        df.columns = ['Metric','Value']
+        df = (
+            pd.Series(
+                {
+                    COLUMNS["author"]: " ".join(author),
+                    "desc": description,
+                    COLUMNS["url"]: self.BASE + row.find("a")["href"],
+                    "img": row.find("img")["src"],
+                }
+            )
+            .to_frame()
+            .reset_index()
+        )
+        df.columns = ["Metric", "Value"]
         return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
@@ -589,12 +600,12 @@ class Overview:
             name = " ".join(kpi)
             kpis[name] = value
         df = pd.Series(kpis).to_frame().reset_index()
-        df.columns = ['Metric','Value']
+        df.columns = ["Metric", "Value"]
         return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_news(self, n=None):
-        n_of_pages = (math.ceil(n/25) + 1) if n else 2
+        n_of_pages = (math.ceil(n / 25) + 1) if n else 2
         dfs = []
         for page in range(1, n_of_pages):
             dfs.append(self._get_news(page))
@@ -603,13 +614,13 @@ class Overview:
     @retry(tries=2, delay=3, max_delay=5)
     def get_btc_holdings_public_companies_overview(self, n=None):
         df = pd.Series(self._get_holdings_overview("bitcoin")).to_frame().reset_index()
-        df.columns = ['Metric','Value']
+        df.columns = ["Metric", "Value"]
         return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_eth_holdings_public_companies_overview(self, n=None):
         df = pd.Series(self._get_holdings_overview("ethereum")).to_frame().reset_index()
-        df.columns = ['Metric', 'Value']
+        df.columns = ["Metric", "Value"]
         return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
@@ -622,33 +633,43 @@ class Overview:
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_coin_list(self, n=None):
-        return pd.DataFrame(
-            self.client.get_coins_list(),
-            columns=[COLUMNS["id"], COLUMNS["symbol"], COLUMNS["name"]],
-        ).set_index(COLUMNS["id"]).head(n)
+        return (
+            pd.DataFrame(
+                self.client.get_coins_list(),
+                columns=[COLUMNS["id"], COLUMNS["symbol"], COLUMNS["name"]],
+            )
+            .set_index(COLUMNS["id"])
+            .head(n)
+        )
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_exchanges(self, n=None):
         df = pd.DataFrame(self.client.get_exchanges_list(per_page=250))
         df.replace({float(np.NaN): None}, inplace=True)
-        return df[
-            [
-                "trust_score_rank",
-                "trust_score",
-                COLUMNS["id"],
-                COLUMNS["name"],
-                COLUMNS["country"],
-                "year_established",
-                "trade_volume_24h_btc",
-                COLUMNS["url"],
+        return (
+            df[
+                [
+                    "trust_score_rank",
+                    "trust_score",
+                    COLUMNS["id"],
+                    COLUMNS["name"],
+                    COLUMNS["country"],
+                    "year_established",
+                    "trade_volume_24h_btc",
+                    COLUMNS["url"],
+                ]
             ]
-        ].set_index("trust_score_rank").head(n)
+            .set_index("trust_score_rank")
+            .head(n)
+        )
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_financial_platforms(self, n=None):
-        return pd.DataFrame(self.client.get_finance_platforms()).set_index(
-            COLUMNS["name"]
-        ).head(n)
+        return (
+            pd.DataFrame(self.client.get_finance_platforms())
+            .set_index(COLUMNS["name"])
+            .head(n)
+        )
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_finance_products(self, n=None):
@@ -668,7 +689,9 @@ class Overview:
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_derivatives(self, n=None):
-        return pd.DataFrame(self.client.get_derivatives(include_tickers="unexpired")).head(n)
+        return pd.DataFrame(
+            self.client.get_derivatives(include_tickers="unexpired")
+        ).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_exchange_rates(self, n=None):
@@ -739,9 +762,7 @@ class Coin:
             if symbol.lower() in list(dct.values()):
                 coin = dct.get("id")
         if not coin:
-            raise ValueError(
-                f"Could not find coin with the given id: {symbol}\n"
-            )
+            raise ValueError(f"Could not find coin with the given id: {symbol}\n")
         return coin
 
     @property
@@ -930,4 +951,3 @@ class Coin:
         df = pd.Series(single_stats)
         df.replace({0: np.NaN}, inplace=True)
         return df
-
