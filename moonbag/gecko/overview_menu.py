@@ -1,6 +1,5 @@
 import argparse
 import logging
-from tabulate import tabulate
 import pandas as pd
 from tabulate import tabulate
 from moonbag.gecko.gecko import Overview
@@ -34,12 +33,13 @@ def print_help():
     print("   mostvisited       show most visited coins [Coingecko]")
     print("   gainers           show top gainers [Coingecko]")
     print("   mostvoted         show most visited coins [Coingecko]")
-    print("   sentiment         show coins with most positive sentiment [Coingecko]")
+    print("   topsentiment      show coins with most positive sentiment [Coingecko]")
     print("   topvolume         show coins with highest volume [Coingecko]")
     print("   trending          show trending coins [Coingecko]")
     print("   yieldfarms        show yield farms [Coingecko]")
     print("   stables           show stable coins [Coingecko]")
-    print("   nft               show top nfts [Coingecko]")
+    print("   topnft            show top nfts [Coingecko]")
+    print("   nftmarket         show nft market status [Coingecko]")
     print("   categories        show top crypto categories [Coingecko]")
     print("   nftofday          show nft of a day [Coingecko]")
     print("   recently          show recently added coins [Coingecko]")
@@ -53,7 +53,8 @@ def print_help():
     print("   btchold           show btc holdings overview [Coingecko]")
     print("   news              show latest crypto news [Coingecko]")
     print("   topdefi           show top defi coins [Coingecko]")
-    print("")
+    print("   infodefi          show overview of defi [Coingecko]")
+    print(" ")
     return
 
 
@@ -64,13 +65,13 @@ mapper = {
     "mostvisited": o.get_most_visited_coins,
     "gainers": o.get_top_gainers,
     "mostvoted": o.get_most_voted_coins,
-    "sentiment": o.get_positive_sentiment_coins,
+    "topsentiment": o.get_positive_sentiment_coins,
     "topvolume": o.get_top_volume_coins,
     "trending": o.get_trending_coins,
     "yieldfarms": o.get_yield_farms,
     "stables": o.get_stable_coins,
-    "nft": o.get_top_nfts,
-    "nftmarketstatus": o.get_nft_market_status,
+    "topnft": o.get_top_nfts,
+    "nftmarket": o.get_nft_market_status,
     "categories": o.get_top_crypto_categories,
     "nftofday": o.get_nft_of_the_day,
     "recently": o.get_recently_added_coins,
@@ -85,6 +86,7 @@ mapper = {
     "btchold": o.get_btc_holdings_public_companies_overview,
     "news": o._get_news,
     "topdefi": o.get_top_defi_coins,
+    "infodefi" : o.get_global_defi_info,
 }
 
 
@@ -133,7 +135,7 @@ def overview_menu():
                     headers=df.columns,
                     floatfmt=".5f",
                     showindex=False,
-                    tablefmt="presto",
+                    tablefmt="psql",
                 )
             )
             print("")

@@ -245,7 +245,7 @@ class Overview:
         )
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_crypto_categories(self):
+    def get_top_crypto_categories(self, n=None):
         columns = [
             COLUMNS["rank"],
             COLUMNS["name"],
@@ -287,10 +287,10 @@ class Overview:
                 ]
             )
 
-        return pd.DataFrame(results, columns=columns).set_index(COLUMNS["rank"])
+        return pd.DataFrame(results, columns=columns).set_index(COLUMNS["rank"]).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_recently_added_coins(self):
+    def get_recently_added_coins(self, n=None):
         columns = [
             COLUMNS["name"],
             COLUMNS["symbol"],
@@ -326,10 +326,10 @@ class Overview:
                     url,
                 ]
             )
-        return replace_qm(pd.DataFrame(results, columns=columns))
+        return replace_qm(pd.DataFrame(results, columns=columns)).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_stable_coins(self):
+    def get_stable_coins(self,n=None):
         columns = [
             COLUMNS["rank"],
             COLUMNS["name"],
@@ -374,10 +374,10 @@ class Overview:
                     link,
                 ]
             )
-        return replace_qm(pd.DataFrame(results, columns=columns).set_index("rank"))
+        return replace_qm(pd.DataFrame(results, columns=columns).set_index("rank")).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_yield_farms(self):
+    def get_yield_farms(self, n=None):
         columns = [
             COLUMNS["rank"],
             COLUMNS["name"],
@@ -404,10 +404,10 @@ class Overview:
             )
         return (
             pd.DataFrame(results, columns=columns).set_index("rank").replace({"": None})
-        )
+        ).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_volume_coins(self):
+    def get_top_volume_coins(self, n=None):
         columns = [
             COLUMNS["rank"],
             COLUMNS["name"],
@@ -428,34 +428,34 @@ class Overview:
                 row_cleaned.insert(0, "?")
             row_cleaned.pop(3)
             results.append(row_cleaned)
-        return pd.DataFrame(results, columns=columns).set_index(COLUMNS["rank"])
+        return pd.DataFrame(results, columns=columns).set_index(COLUMNS["rank"]).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_trending_coins(self):
-        return self._discover_coins("trending")
+    def get_trending_coins(self, n=None):
+        return self._discover_coins("trending").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_most_voted_coins(self):
-        return self._discover_coins("most_voted")
+    def get_most_voted_coins(self, n=None):
+        return self._discover_coins("most_voted").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_positive_sentiment_coins(self):
-        return self._discover_coins("positive_sentiment")
+    def get_positive_sentiment_coins(self, n=None):
+        return self._discover_coins("positive_sentiment").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_most_visited_coins(self):
-        return self._discover_coins("most_visited")
+    def get_most_visited_coins(self, n=None):
+        return self._discover_coins("most_visited").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_losers(self, period="1h"):
-        return self._get_gainers_and_losers(period, typ="losers")
+    def get_top_losers(self, period="1h", n=None):
+        return self._get_gainers_and_losers(period, typ="losers").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_gainers(self, period="1h"):
-        return self._get_gainers_and_losers(period, typ="gainers")
+    def get_top_gainers(self, period="1h", n=None):
+        return self._get_gainers_and_losers(period, typ="gainers").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_defi_coins(self):
+    def get_top_defi_coins(self, n=None):
         url = "https://www.coingecko.com/en/defi"
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
@@ -484,10 +484,10 @@ class Overview:
                 "market_cap_to_tvl_ratio",
                 COLUMNS["url"],
             ],
-        ).set_index(COLUMNS["rank"])
+        ).set_index(COLUMNS["rank"]).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_dexes(self):
+    def get_top_dexes(self, n=None):
         columns = [
             COLUMNS["name"],
             COLUMNS["rank"],
@@ -522,10 +522,10 @@ class Overview:
         df["most_traded_pairs"] = df["most_traded_pairs"].apply(
             lambda x: None if x.isdigit() else x
         )
-        return df.set_index(COLUMNS["rank"])
+        return df.set_index(COLUMNS["rank"]).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_nfts(self):
+    def get_top_nfts(self, n=None):
         url = "https://www.coingecko.com/en/nft"
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
@@ -551,10 +551,10 @@ class Overview:
                 COLUMNS["market_cap"],
                 COLUMNS["url"],
             ],
-        ).set_index(COLUMNS["rank"])
+        ).set_index(COLUMNS["rank"]).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_nft_of_the_day(self):
+    def get_nft_of_the_day(self, n=None):
         url = "https://www.coingecko.com/en/nft"
         soup = self.gecko_scraper(url)
         row = soup.find("div", class_="tw-px-4 tw-py-5 sm:tw-p-6")
@@ -564,15 +564,17 @@ class Overview:
                 author, description = author[:3], author[3]
         except (ValueError, IndexError):
             return {}
-        return {
+        df = pd.Series({
             COLUMNS["author"]: " ".join(author),
             "desc": description,
             COLUMNS["url"]: self.BASE + row.find("a")["href"],
             "img": row.find("img")["src"],
-        }
+        }).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_nft_market_status(self):
+    def get_nft_market_status(self, n=None):
         url = "https://www.coingecko.com/en/nft"
         soup = self.gecko_scraper(url)
         rows = soup.find_all("span", class_="overview-box d-inline-block p-3 mr-2")
@@ -581,40 +583,46 @@ class Overview:
             value, *kpi = clean_row(row)
             name = " ".join(kpi)
             kpis[name] = value
-        return kpis
+        df = pd.Series(kpis).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_news(self, n_of_pages=10):
+    def get_news(self, n_of_pages=10, n=None):
         dfs = []
         for page in range(1, n_of_pages):
             dfs.append(self._get_news(page))
-        return pd.concat(dfs, ignore_index=True)
+        return pd.concat(dfs, ignore_index=True).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_btc_holdings_public_companies_overview(self):
-        return self._get_holdings_overview("bitcoin")
+    def get_btc_holdings_public_companies_overview(self, n=None):
+        df = pd.Series(self._get_holdings_overview("bitcoin")).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_eth_holdings_public_companies_overview(self):
-        return self._get_holdings_overview("ethereum")
+    def get_eth_holdings_public_companies_overview(self, n=None):
+        df = pd.Series(self._get_holdings_overview("ethereum")).to_frame().reset_index()
+        df.columns = ['Metric', 'Value']
+        return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_companies_with_btc(self):
-        return self._get_companies_assets("bitcoin")
+    def get_companies_with_btc(self, n=None):
+        return self._get_companies_assets("bitcoin").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_companies_with_eth(self):
-        return self._get_companies_assets("ethereum")
+    def get_companies_with_eth(self, n=None):
+        return self._get_companies_assets("ethereum").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_coin_list(self):
+    def get_coin_list(self, n=None):
         return pd.DataFrame(
             self.client.get_coins_list(),
             columns=[COLUMNS["id"], COLUMNS["symbol"], COLUMNS["name"]],
-        ).set_index(COLUMNS["id"])
+        ).set_index(COLUMNS["id"]).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_exchanges(self):
+    def get_exchanges(self, n=None):
         df = pd.DataFrame(self.client.get_exchanges_list(per_page=250))
         df.replace({float(np.NaN): None}, inplace=True)
         return df[
@@ -628,16 +636,16 @@ class Overview:
                 "trade_volume_24h_btc",
                 COLUMNS["url"],
             ]
-        ].set_index("trust_score_rank")
+        ].set_index("trust_score_rank").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_financial_platforms(self):
+    def get_financial_platforms(self, n=None):
         return pd.DataFrame(self.client.get_finance_platforms()).set_index(
             COLUMNS["name"]
-        )
+        ).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_finance_products(self):
+    def get_finance_products(self, n=None):
         return pd.DataFrame(
             self.client.get_finance_products(per_page=250),
             columns=[
@@ -646,26 +654,26 @@ class Overview:
                 "supply_rate_percentage",
                 "borrow_rate_percentage",
             ],
-        )
+        ).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_indexes(self):
-        return pd.DataFrame(self.client.get_indexes(per_page=250))
+    def get_indexes(self, n=None):
+        return pd.DataFrame(self.client.get_indexes(per_page=250)).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_derivatives(self):
+    def get_derivatives(self, n=None):
         return pd.DataFrame(self.client.get_derivatives(include_tickers="unexpired"))
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_exchange_rates(self):
+    def get_exchange_rates(self, n=None):
         return (
             pd.DataFrame(self.client.get_exchange_rates()["rates"])
             .T.reset_index()
             .drop("index", axis=1)
-        )
+        ).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_global_info(self, json=False):
+    def get_global_info(self, json=False, n=None):
         results = self.client.get_global()
         for key in [
             COLUMNS["total_market_cap"],
@@ -675,10 +683,12 @@ class Overview:
             del results[key]
         if json:
             return results
-        return pd.Series(results)
+        df = pd.Series(results).reset_index()
+        df.columns = ["Metric", "Value"]
+        return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_global_markets_info(self):
+    def get_global_markets_info(self, n=None):
         columns = [
             COLUMNS["total_market_cap"],
             COLUMNS["total_volume"],
@@ -690,10 +700,10 @@ class Overview:
             data.append(results.get(key))
         df = pd.DataFrame(data).T
         df.columns = columns
-        return df
+        return df.reset_index().head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_global_defi_info(self, json=False):
+    def get_global_defi_info(self, json=False, n=None):
         results = self.client.get_global_decentralized_finance_defi()
         for key, value in results.items():
             try:
@@ -703,8 +713,8 @@ class Overview:
         if json:
             return results
         df = pd.Series(results).reset_index()
-        df.columns = ["statistic", "value"]
-        return df
+        df.columns = ["Metric", "Value"]
+        return df.head(n)
 
 
 class Coin:
