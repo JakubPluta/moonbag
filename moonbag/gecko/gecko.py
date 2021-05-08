@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from pycoingecko import CoinGeckoAPI
 import cachetools.func
 from retry import retry
+import math
 from moonbag.gecko.utils import (
     changes_parser,
     replace_qm,
@@ -443,15 +444,19 @@ class Overview:
         return self._discover_coins("positive_sentiment").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_most_visited_coins(self, n=None):
+    def get_most_visited_coins(self,n=None):
         return self._discover_coins("most_visited").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_losers(self, period="1h", n=None):
+    def get_top_losers(self, n=None):
+        # FIXME: Argparser takes only one argument n, make it possible to recognize if parameter is n
+        # FIXME: Name parameter in argparser, in the way that perdio param won't be change
+        period = '1h'
         return self._get_gainers_and_losers(period, typ="losers").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_top_gainers(self, period="1h", n=None):
+    def get_top_gainers(self, n=None):
+        period = '1h'
         return self._get_gainers_and_losers(period, typ="gainers").head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
@@ -588,7 +593,8 @@ class Overview:
         return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_news(self, n_of_pages=10, n=None):
+    def get_news(self, n=None):
+        n_of_pages = (math.ceil(n/25) + 1) if n else 2
         dfs = []
         for page in range(1, n_of_pages):
             dfs.append(self._get_news(page))
@@ -662,7 +668,7 @@ class Overview:
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_derivatives(self, n=None):
-        return pd.DataFrame(self.client.get_derivatives(include_tickers="unexpired"))
+        return pd.DataFrame(self.client.get_derivatives(include_tickers="unexpired")).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_exchange_rates(self, n=None):
@@ -673,7 +679,7 @@ class Overview:
         ).head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_global_info(self, json=False, n=None):
+    def get_global_info(self, n=None):
         results = self.client.get_global()
         for key in [
             COLUMNS["total_market_cap"],
@@ -681,8 +687,7 @@ class Overview:
             COLUMNS["market_cap_percentage"],
         ]:
             del results[key]
-        if json:
-            return results
+
         df = pd.Series(results).reset_index()
         df.columns = ["Metric", "Value"]
         return df.head(n)
@@ -703,15 +708,14 @@ class Overview:
         return df.reset_index().head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
-    def get_global_defi_info(self, json=False, n=None):
+    def get_global_defi_info(self, n=None):
         results = self.client.get_global_decentralized_finance_defi()
         for key, value in results.items():
             try:
                 results[key] = round(float(value), 4)
             except (ValueError, TypeError):
                 pass
-        if json:
-            return results
+
         df = pd.Series(results).reset_index()
         df.columns = ["Metric", "Value"]
         return df.head(n)
