@@ -1,15 +1,17 @@
 import argparse
-from moonbag.gecko.gecko import Overview
 import logging
 from tabulate import tabulate
 import pandas as pd
+from tabulate import tabulate
+from moonbag.gecko.gecko import Overview
+import logging
 
 logger = logging.getLogger("parser")
 
-moon = "(🚀🚀)"
+MOON = "(🚀🚀)"
 
 
-h = """
+LOGO = """
     ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗██████╗  █████╗  ██████╗ 
     ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔══██╗██╔══██╗██╔════╝ 
     ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║██████╔╝███████║██║  ███╗
@@ -22,11 +24,12 @@ h = """
 
 
 def print_help():
-    print("Overview Mode:")
-    print("   help          show help")
-    print("   r             return to previous menu")
-    print("   quit          quit program")
+    print("Main commands:")
+    print("   help              show help")
+    print("   r                 return to previous menu")
+    print("   quit              quit program")
     print("")
+    print("Crypto Overview Menu")
     print("   topdexes          show top decentralized exchanges [Coingecko]")
     print("   mostvisited       show most visited coins [Coingecko]")
     print("   gainers           show top gainers [Coingecko]")
@@ -91,17 +94,18 @@ standard = {
     "quit": True,
 }
 
+# TODO ADD DECORATOR FOR EACH FUNCTION TO MAKE IT POSSIBLE TO ADD --limit Argument
+
 
 def overview_menu():
     choices = list(mapper.keys()) + list(standard.keys())
-
     parser = argparse.ArgumentParser(prog="overview", add_help=False)
     parser.add_argument("cmd", choices=choices)
-    print(h)
+    print(LOGO)
     print_help()
 
     while True:
-        as_input = input(f"{moon} ")
+        as_input = input(f"{MOON} ")
         try:
             (known_args, others) = parser.parse_known_args(as_input.split())
         except SystemExit:
@@ -112,7 +116,7 @@ def overview_menu():
         cmd = mapper.get(known_args.cmd)
 
         if not cmd:
-            base = standard.get(cmd)
+            base = standard.get(known_args.cmd)
             if callable(base):
                 base()
             else:
