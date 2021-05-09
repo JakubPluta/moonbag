@@ -9,12 +9,12 @@ from typing import List
 logger = logging.getLogger("parser")
 
 
-def print_table(df: pd.DataFrame):
+def print_table(df: pd.DataFrame, tablefmt='psql'):
     if not isinstance(df, pd.DataFrame):
         raise TypeError("Please use data frame as an input!")
     print(
         tabulate(
-            df, headers=df.columns, floatfmt=".5f", showindex=False, tablefmt="psql",
+            df, headers=df.columns, floatfmt=".5f", showindex=False, tablefmt=tablefmt,
         )
     )
     print("")

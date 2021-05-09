@@ -792,13 +792,18 @@ class Coin:
             "last_4_weeks_commit_activity_series",
         )
         remove_keys(useless_keys, dev)
-        return pd.Series(dev)
+        df = pd.Series(dev).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        return df
 
     @property
     def blockchain_explorers(self):
         blockchain = self._get_links().get("blockchain_site")
         if blockchain:
-            return filter_list(blockchain)
+            dct = filter_list(blockchain)
+            df = pd.Series(dct).to_frame().reset_index()
+            df.columns = ['Metric','Value']
+            return df
         return None
 
     @property
@@ -814,7 +819,10 @@ class Coin:
                     value = f"https://bitcointalk.org/index.php?topic={value}"
                 social_dct[channel] = value
         social_dct["discord"] = find_discord(links.get("chat_url"))
-        return rename_columns_in_dct(social_dct, CHANNELS)
+        dct = rename_columns_in_dct(social_dct, CHANNELS)
+        df = pd.Series(dct).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        return df
 
     @property
     def websites(self):
@@ -823,7 +831,10 @@ class Coin:
         sites = ["homepage", "official_forum_url", "announcement_url"]
         for site in sites:
             websites_dct[site] = filter_list(links.get(site))
-        return websites_dct
+        df = pd.Series(websites_dct).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        df['Value'] = df['Value'].apply(lambda x: ','.join(x))
+        return df
 
     @property
     def categories(self):
@@ -895,7 +906,9 @@ class Coin:
             )
         except ZeroDivisionError:
             ...
-        return pd.Series(single_stats)
+        df = pd.Series(single_stats).to_frame().reset_index()
+        df.columns = ['Metric', 'Value']
+        return df
 
     @property
     def all_time_high(self):
@@ -909,7 +922,9 @@ class Coin:
         results = create_dictionary_with_prefixes(
             ath_columns, market_data, DENOMINATION
         )
-        return results
+        df = pd.Series(results).to_frame().reset_index()
+        df.columns = ['Metric', 'Value']
+        return df
 
     @property
     def all_time_low(self):
@@ -923,7 +938,9 @@ class Coin:
         results = create_dictionary_with_prefixes(
             ath_columns, market_data, DENOMINATION
         )
-        return pd.Series(results)
+        df = pd.Series(results).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        return df
 
     @property
     def scores(self):
@@ -948,6 +965,8 @@ class Coin:
                 nested_stats[k] = _dct.get(k)
 
         single_stats.update(nested_stats)
-        df = pd.Series(single_stats)
-        df.replace({0: np.NaN}, inplace=True)
+        df = pd.Series(single_stats).reset_index()
+        df.replace({0: ""}, inplace=True)
+        df = df.fillna('')
+        df.columns = ['Metric', "Value"]
         return df
