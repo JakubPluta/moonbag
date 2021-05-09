@@ -1,161 +1,188 @@
 import argparse
-import pandas as pd
-from tabulate import tabulate
-from moonbag.gecko.gecko import Overview, get_coin_list, Coin
+from moonbag.gecko.gecko import  get_coin_list, Coin
 import logging
 from moonbag import LOGO, MOON
 from typing import List
 from moonbag.gecko.overview_menu import print_table
+import textwrap
+from inspect import signature
 
 logger = logging.getLogger("parser")
 
 
-def load_coin_from_coin_gecko(args: List[str]):
-    """U can use id or symbol of coins"""
-    parser = argparse.ArgumentParser(
-        prog="load",
-        add_help=False,
-        description="Load coin from coingecko\n If you not sure what is the symbol or id of coin use method coinlist",
-    )
-    parser.add_argument(
-        "-c", "--coin", help="Coin to get", dest="coin", required=True,type=str,
-    )
+class Controller:
 
-    if "-" not in args[0]:
-        args.insert(0, "-c")
+    def __init__(self):
+        self.parser = argparse.ArgumentParser(prog="coin", add_help=False)
+        self.parser.add_argument("cmd")
+        self.base = {
+                    'help' : self.help,
+                    "r": self.returner,
+                    "quit": self.quit,
+                    "exit": self.quit,
+                }
 
-    parsy, _ = parser.parse_known_args(args)
-    if not parsy:
+        self.mapper = {
+            'load': self.load_coin,
+            'web' : self.show_web,
+            'info' : self.show_coin_base_info,
+            'devs' : self.show_developers,
+            'market' : self.show_market,
+            'social' : self.show_socials,
+            'ath' : self.show_ath,
+            'atl' : self.show_atl,
+            'coinlist' : self.show_list_of_coins,
+            'explorers' : self.show_bcexplores,
+
+                  }
+
+
+        self.coin = None
+
+    @staticmethod
+    def help():
+        print("Main commands:")
+        print("   help              show help")
+        print("   r                 return to previous menu")
+        print("   quit              quit program")
+        print("")
+        print("Coin View            [Coingecko]")
+        print("    load             load coin, example: 'load -c uniswap' [Coingecko]")
+        print("    coinlist         show list of all coins available in [Coingecko]")
+        print("    info             show info about loaded coin [Coingecko]")
+        print("    market           show market info about loaded coin [Coingecko]")
+        print("    devs             show development information about loaded coins [Coingecko]")
+        print("    ath              show info all time high of loaded coin [Coingecko]")
+        print("    atl              show info all time low of loaded coin [Coingecko]")
+        print("    web              show web pages founded for loaded coin [Coingecko]")
+        print("    explorers        show blockchain explorers links for loaded coin [Coingecko]")
         return
 
-    try:
-        coin = Coin(parsy.coin)
-    except ValueError as e:
-        print(f"{parsy.coin} -> {e} ")
+    @staticmethod
+    def quit():
+        return False
 
-    if coin._coin_symbol is None:
-        print(f"Could not find coin with the given id: {parsy.coin}")
-    else:
-        print(f"Coin loaded {coin._coin_symbol}")
-        return coin
+    @staticmethod
+    def returner():
+        return True
 
+    def load_coin(self, args: List[str]):
+        """U can use id or symbol of coins"""
+        parser = argparse.ArgumentParser(
+            prog="load",
+            add_help=False,
+            description="Load coin from coingecko\n If you not sure what is the symbol or id of coin use method coinlist",
+        )
+        parser.add_argument(
+            "-c", "--coin", help="Coin to get", dest="coin", required=True,type=str,
+        )
 
-def show_coin_base_info(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    info = coin.base_info
-    df = info.reset_index()
-    import textwrap
-    df = df.applymap(lambda x: '\n'.join(textwrap.wrap(x, width=150)) if isinstance(x, str) else x)
-    df.columns = ['Metric', 'Value']
-    print_table(df)
+        if "-" not in args[0]:
+            args.insert(0, "-c")
 
+        parsy, _ = parser.parse_known_args(args)
+        if not parsy:
+            return
 
-def show_list_of_coins():
-    print_table(get_coin_list(),'plain')
+        try:
+            self.coin = Coin(parsy.coin)
+        except ValueError as e:
+            print(f"{e}, To check list of coins use command: coinlist ")
+            return
 
+        else:
+            print(f"Coin loaded {self.coin.coin_symbol}")
 
-def show_scores(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    df = coin.scores
-    import textwrap
-    df = df.applymap(lambda x: '\n'.join(textwrap.wrap(x, width=200)) if isinstance(x, str) else x)
-    df.columns = ['Metric', 'Value']
-    print_table(df)
+    @property
+    def _is_loaded(self):
+        if self.coin is None:
+            print("You didn't load a coin, plase first use load -c symbol to load coin")
+            return False
+        return True
 
+    def show_coin_base_info(self, args):
+        if self._is_loaded:
+            df = self.coin.base_info.reset_index()
+            df = df.applymap(lambda x: '\n'.join(textwrap.wrap(x, width=150)) if isinstance(x, str) else x)
+            df.columns = ['Metric', 'Value']
+            print_table(df)
 
-def show_market(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    df = coin.market_data
-    print_table(df)
+    @staticmethod
+    def show_list_of_coins(args):
+        print_table(get_coin_list(),'plain')
 
+    def show_scores(self,args):
+        if self._is_loaded:
+            df = self.coin.scores
+            df = df.applymap(lambda x: '\n'.join(textwrap.wrap(x, width=200)) if isinstance(x, str) else x)
+            df.columns = ['Metric', 'Value']
+            print_table(df)
 
-def show_atl(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    df = coin.all_time_low
-    print_table(df)
+    def show_market(self, args):
+        if self._is_loaded:
+            df = self.coin.market_data
+            print_table(df)
 
+    def show_atl(self, args):
+        if self._is_loaded:
+            print_table(self.coin.all_time_low)
 
-def show_ath(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    df = coin.all_time_high
-    print_table(df)
+    def show_ath(self, args):
+        if self._is_loaded:
+            df = self.coin.all_time_high
+            print_table(df)
 
+    def show_developers(self, args):
+        if self._is_loaded:
+            print_table(self.coin.developers_data)
 
-def show_developers(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    df = coin.developers_data
-    print_table(df)
+    def show_bcexplores(self, args):
+        if self._is_loaded:
+            print_table(self.coin.blockchain_explorers)
 
+    def show_socials(self,args):
+        if self._is_loaded:
+            print_table(self.coin.social_media)
 
-def show_blockchainexplores(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    be = coin.blockchain_explorers
-    print_table(be)
+    def show_web(self, args):
+        if self._is_loaded:
+            print_table(self.coin.websites)
 
-
-def show_socials(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    social = coin.social_media
-    print_table(social)
-
-
-def show_web(coin: Coin):
-    if coin is None:
-        print("You didn't load a coin, plase first use load -c symbol to load coin")
-        return
-    social = coin.websites
-    print(social)
 
 
 def main():
-    choices = ['coinlist','load','info','market','ath','atl','scores','websites', 'bcexplorers',
-               'social','devs','web']
+    c = Controller()
+    choices = list(c.mapper.keys()) + list(c.base.keys())
+
     parser = argparse.ArgumentParser(prog="coin", add_help=False)
     parser.add_argument("cmd", choices=choices)
     print(LOGO)
-    coin = None
+    c.help()
     while True:
         an_input = input(f"> {MOON} ")
+
+        # TODO: Clean this code, make it more elegant
         try:
             parsy, others = parser.parse_known_args(an_input.split())
-            if parsy.cmd == 'load':
-                coin = load_coin_from_coin_gecko(others)
-            elif parsy.cmd == 'info':
-                show_coin_base_info(coin)
-            elif parsy.cmd == 'scores':
-                show_scores(coin)
-            elif parsy.cmd == 'market':
-                show_market(coin)
-            elif parsy.cmd == 'atl':
-                show_atl(coin)
-            elif parsy.cmd == 'ath':
-                show_ath(coin)
-            elif parsy.cmd == 'bcexplorers':
-                show_blockchainexplores(coin)
-            elif parsy.cmd == 'devs':
-                show_developers(coin)
-            elif parsy.cmd == "social":
-                show_socials(coin)
-            elif parsy.cmd == "web":
-                show_web(coin)
-            elif parsy.cmd == 'coinlist':
-                show_list_of_coins()
+            cmd = parsy.cmd
+
+            view = c.base.get(cmd)
+
+            if view and cmd == 'help':
+                view()
+                continue
+            elif view:
+                return view()
+
+            view = c.mapper.get(cmd)
+            if view is None:
+                continue
+            elif callable(view):
+                if len(signature(view).parameters) > 0:
+                    view(others)
+                else:
+                    view()
+
 
         except SystemExit:
             print("The command selected doesn't exist")

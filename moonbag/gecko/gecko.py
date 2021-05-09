@@ -18,6 +18,8 @@ from moonbag.gecko.utils import (
     rename_columns_in_dct,
     create_dictionary_with_prefixes,
 )
+import logging
+logger = logging.getLogger("gecko")
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -748,13 +750,13 @@ class Coin:
     def __init__(self, symbol):
         self.client = CoinGeckoAPI()
         self._coin_list = self.client.get_coins_list()
-        self._coin_symbol = self._validate_coin(symbol)
+        self.coin_symbol = self._validate_coin(symbol)
 
-        if self._coin_symbol:
+        if self.coin_symbol:
             self.coin = self._get_coin_info()
 
     def __str__(self):
-        return f"{self._coin_symbol}"
+        return f"{self.coin_symbol}"
 
     def _validate_coin(self, symbol):
         coin = None
@@ -774,7 +776,7 @@ class Coin:
     @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
     def _get_coin_info(self):
         params = dict(localization="false", tickers="false", sparkline=True)
-        return self.client.get_coin_by_id(self._coin_symbol, **params)
+        return self.client.get_coin_by_id(self.coin_symbol, **params)
 
     @cachetools.func.ttl_cache(maxsize=128, ttl=30 * 60)
     def _get_links(self):
@@ -904,8 +906,8 @@ class Coin:
             single_stats["circulating_supply_to_total_supply_ratio"] = (
                 single_stats["circulating_supply"] / single_stats["total_supply"]
             )
-        except ZeroDivisionError:
-            ...
+        except (ZeroDivisionError, TypeError) as e:
+            logger.log(2, e)
         df = pd.Series(single_stats).to_frame().reset_index()
         df.columns = ['Metric', 'Value']
         return df
