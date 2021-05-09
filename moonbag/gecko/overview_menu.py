@@ -3,22 +3,10 @@ import pandas as pd
 from tabulate import tabulate
 from moonbag.gecko.gecko import Overview
 import logging
-from moonbag import LOGO, MOON
+from moonbag.common import LOGO, MOON, print_table
 from typing import List
 
 logger = logging.getLogger("parser")
-
-
-def print_table(df: pd.DataFrame, floatfmt=".5f",tablefmt='psql'):
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError("Please use data frame as an input!")
-    print(
-        tabulate(
-            df, headers=df.columns, floatfmt=floatfmt,
-            showindex=False, tablefmt=tablefmt,
-        )
-    )
-    print("")
 
 
 def create_view(name, func, desc, n: List):
@@ -41,46 +29,45 @@ def create_view(name, func, desc, n: List):
 
 
 class Controller:
-    o = Overview()
-    mapper = {
-        "topdexes": o.get_top_dexes,
-        "mostvisited": o.get_most_visited_coins,
-        "gainers": o.get_top_gainers,
-        "mostvoted": o.get_most_voted_coins,
-        "topsentiment": o.get_positive_sentiment_coins,
-        "topvolume": o.get_top_volume_coins,
-        "trending": o.get_trending_coins,
-        "yieldfarms": o.get_yield_farms,
-        "stables": o.get_stable_coins,
-        "topnft": o.get_top_nfts,
-        "nftmarket": o.get_nft_market_status,
-        "categories": o.get_top_crypto_categories,
-        "nftofday": o.get_nft_of_the_day,
-        "recently": o.get_recently_added_coins,
-        "btccompanies": o.get_companies_with_btc,
-        "ethcompanies": o.get_companies_with_eth,
-        "losers": o.get_top_losers,
-        "exrates": o.get_exchange_rates,
-        "exchanges": o.get_exchanges,
-        "derivatives": o.get_derivatives,
-        "indexes": o.get_indexes,
-        "ethhold": o.get_eth_holdings_public_companies_overview,
-        "btchold": o.get_btc_holdings_public_companies_overview,
-        "news": o.get_news,
-        "topdefi": o.get_top_defi_coins,
-        "infodefi": o.get_global_defi_info,
-        "finprod": o.get_finance_products,
-        "finplat": o.get_financial_platforms,
-    }
-
     def __init__(self):
         self.parser = argparse.ArgumentParser(prog="overview", add_help=False)
         self.parser.add_argument("cmd")
+        self.o = Overview()
         self.base = {
             "help": self.help,
             "r": self.returner,
             "quit": self.quit,
             "exit": self.quit,
+        }
+        self.mapper = {
+            "topdexes": self.o.get_top_dexes,
+            "mostvisited": self.o.get_most_visited_coins,
+            "gainers": self.o.get_top_gainers,
+            "mostvoted": self.o.get_most_voted_coins,
+            "topsentiment": self.o.get_positive_sentiment_coins,
+            "topvolume": self.o.get_top_volume_coins,
+            "trending": self.o.get_trending_coins,
+            "yieldfarms": self.o.get_yield_farms,
+            "stables": self.o.get_stable_coins,
+            "topnft": self.o.get_top_nfts,
+            "nftmarket": self.o.get_nft_market_status,
+            "categories": self.o.get_top_crypto_categories,
+            "nftofday": self.o.get_nft_of_the_day,
+            "recently": self.o.get_recently_added_coins,
+            "btccompanies": self.o.get_companies_with_btc,
+            "ethcompanies": self.o.get_companies_with_eth,
+            "losers": self.o.get_top_losers,
+            "exrates": self.o.get_exchange_rates,
+            "exchanges": self.o.get_exchanges,
+            "derivatives": self.o.get_derivatives,
+            "indexes": self.o.get_indexes,
+            "ethhold": self.o.get_eth_holdings_public_companies_overview,
+            "btchold": self.o.get_btc_holdings_public_companies_overview,
+            "news": self.o.get_news,
+            "topdefi": self.o.get_top_defi_coins,
+            "infodefi": self.o.get_global_defi_info,
+            "finprod": self.o.get_finance_products,
+            "finplat": self.o.get_financial_platforms,
         }
 
     @staticmethod

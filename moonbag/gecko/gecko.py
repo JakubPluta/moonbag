@@ -19,6 +19,7 @@ from moonbag.gecko.utils import (
     create_dictionary_with_prefixes,
 )
 import logging
+
 logger = logging.getLogger("gecko")
 
 pd.set_option("display.max_columns", None)
@@ -795,7 +796,7 @@ class Coin:
         )
         remove_keys(useless_keys, dev)
         df = pd.Series(dev).to_frame().reset_index()
-        df.columns = ['Metric','Value']
+        df.columns = ["Metric", "Value"]
         return df
 
     @property
@@ -804,7 +805,7 @@ class Coin:
         if blockchain:
             dct = filter_list(blockchain)
             df = pd.Series(dct).to_frame().reset_index()
-            df.columns = ['Metric','Value']
+            df.columns = ["Metric", "Value"]
             return df
         return None
 
@@ -823,7 +824,7 @@ class Coin:
         social_dct["discord"] = find_discord(links.get("chat_url"))
         dct = rename_columns_in_dct(social_dct, CHANNELS)
         df = pd.Series(dct).to_frame().reset_index()
-        df.columns = ['Metric','Value']
+        df.columns = ["Metric", "Value"]
         return df
 
     @property
@@ -834,8 +835,8 @@ class Coin:
         for site in sites:
             websites_dct[site] = filter_list(links.get(site))
         df = pd.Series(websites_dct).to_frame().reset_index()
-        df.columns = ['Metric','Value']
-        df['Value'] = df['Value'].apply(lambda x: ','.join(x))
+        df.columns = ["Metric", "Value"]
+        df["Value"] = df["Value"].apply(lambda x: ",".join(x))
         return df
 
     @property
@@ -909,7 +910,7 @@ class Coin:
         except (ZeroDivisionError, TypeError) as e:
             logger.log(2, e)
         df = pd.Series(single_stats).to_frame().reset_index()
-        df.columns = ['Metric', 'Value']
+        df.columns = ["Metric", "Value"]
         return df
 
     @property
@@ -925,7 +926,7 @@ class Coin:
             ath_columns, market_data, DENOMINATION
         )
         df = pd.Series(results).to_frame().reset_index()
-        df.columns = ['Metric', 'Value']
+        df.columns = ["Metric", "Value"]
         return df
 
     @property
@@ -941,7 +942,7 @@ class Coin:
             ath_columns, market_data, DENOMINATION
         )
         df = pd.Series(results).to_frame().reset_index()
-        df.columns = ['Metric','Value']
+        df.columns = ["Metric", "Value"]
         return df
 
     @property
@@ -969,6 +970,6 @@ class Coin:
         single_stats.update(nested_stats)
         df = pd.Series(single_stats).reset_index()
         df.replace({0: ""}, inplace=True)
-        df = df.fillna('')
-        df.columns = ['Metric', "Value"]
+        df = df.fillna("")
+        df.columns = ["Metric", "Value"]
         return df

@@ -1,41 +1,34 @@
 import argparse
-from moonbag.gecko.gecko import  get_coin_list, Coin
+from moonbag.gecko.gecko import get_coin_list, Coin
 import logging
-from moonbag import LOGO, MOON
+from moonbag.common import LOGO, MOON, print_table
 from typing import List
-from moonbag.gecko.overview_menu import print_table
 import textwrap
 from inspect import signature
+import difflib
+import pandas as pd
 
-logger = logging.getLogger("parser")
+logger = logging.getLogger("gecko-menu")
 
 
 class Controller:
-
     def __init__(self):
         self.parser = argparse.ArgumentParser(prog="coin", add_help=False)
         self.parser.add_argument("cmd")
-        self.base = {
-                    'help' : self.help,
-                    "r": self.returner,
-                    "quit": self.quit,
-                    "exit": self.quit,
-                }
-
+        self.base_commands = ["help", "exit", "quit", "r", "q"]
         self.mapper = {
-            'load': self.load_coin,
-            'web' : self.show_web,
-            'info' : self.show_coin_base_info,
-            'devs' : self.show_developers,
-            'market' : self.show_market,
-            'social' : self.show_socials,
-            'ath' : self.show_ath,
-            'atl' : self.show_atl,
-            'coinlist' : self.show_list_of_coins,
-            'explorers' : self.show_bcexplores,
-
-                  }
-
+            "similar" : self.find_similar_coins,
+            "load": self.load_coin,
+            "web": self.show_web,
+            "info": self.show_coin_base_info,
+            "devs": self.show_developers,
+            "market": self.show_market,
+            "social": self.show_socials,
+            "ath": self.show_ath,
+            "atl": self.show_atl,
+            "coinlist": self.show_list_of_coins,
+            "explorers": self.show_bcexplores,
+        }
 
         self.coin = None
 
@@ -47,24 +40,19 @@ class Controller:
         print("   quit              quit program")
         print("")
         print("Coin View            [Coingecko]")
+        print("    similar          don't remember symbol of coin ? Look for closest matches [Coingecko]")
         print("    load             load coin, example: 'load -c uniswap' [Coingecko]")
         print("    coinlist         show list of all coins available in [Coingecko]")
         print("    info             show info about loaded coin [Coingecko]")
         print("    market           show market info about loaded coin [Coingecko]")
-        print("    devs             show development information about loaded coins [Coingecko]")
+        print("    devs             show development information about loaded coins [Coingecko]"
+        )
         print("    ath              show info all time high of loaded coin [Coingecko]")
         print("    atl              show info all time low of loaded coin [Coingecko]")
         print("    web              show web pages founded for loaded coin [Coingecko]")
-        print("    explorers        show blockchain explorers links for loaded coin [Coingecko]")
+        print("    explorers        show blockchain explorers links for loaded coin [Coingecko]"
+        )
         return
-
-    @staticmethod
-    def quit():
-        return False
-
-    @staticmethod
-    def returner():
-        return True
 
     def load_coin(self, args: List[str]):
         """U can use id or symbol of coins"""
@@ -74,8 +62,11 @@ class Controller:
             description="Load coin from coingecko\n If you not sure what is the symbol or id of coin use method coinlist",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="coin", required=True,type=str,
+            "-c", "--coin", help="Coin to get", dest="coin", required=True, type=str,
         )
+
+        if not args:
+            return
 
         if "-" not in args[0]:
             args.insert(0, "-c")
@@ -100,59 +91,91 @@ class Controller:
             return False
         return True
 
-    def show_coin_base_info(self, args):
+    def show_coin_base_info(self):
         if self._is_loaded:
             df = self.coin.base_info.reset_index()
-            df = df.applymap(lambda x: '\n'.join(textwrap.wrap(x, width=150)) if isinstance(x, str) else x)
-            df.columns = ['Metric', 'Value']
+            df = df.applymap(
+                lambda x: "\n".join(textwrap.wrap(x, width=150))
+                if isinstance(x, str)
+                else x
+            )
+            df.columns = ["Metric", "Value"]
             print_table(df)
 
     @staticmethod
-    def show_list_of_coins(args):
-        print_table(get_coin_list(),'plain')
+    def show_list_of_coins():
+        print_table(get_coin_list(), "plain")
 
-    def show_scores(self,args):
+    def show_scores(self,):
         if self._is_loaded:
             df = self.coin.scores
-            df = df.applymap(lambda x: '\n'.join(textwrap.wrap(x, width=200)) if isinstance(x, str) else x)
-            df.columns = ['Metric', 'Value']
+            df = df.applymap(
+                lambda x: "\n".join(textwrap.wrap(x, width=200))
+                if isinstance(x, str)
+                else x
+            )
+            df.columns = ["Metric", "Value"]
             print_table(df)
 
-    def show_market(self, args):
+    def show_market(self):
         if self._is_loaded:
             df = self.coin.market_data
             print_table(df)
 
-    def show_atl(self, args):
+    def show_atl(self,):
         if self._is_loaded:
             print_table(self.coin.all_time_low)
 
-    def show_ath(self, args):
+    def show_ath(self,):
         if self._is_loaded:
             df = self.coin.all_time_high
             print_table(df)
 
-    def show_developers(self, args):
+    def show_developers(self,):
         if self._is_loaded:
             print_table(self.coin.developers_data)
 
-    def show_bcexplores(self, args):
+    def show_bcexplores(self,):
         if self._is_loaded:
             print_table(self.coin.blockchain_explorers)
 
-    def show_socials(self,args):
+    def show_socials(self,):
         if self._is_loaded:
             print_table(self.coin.social_media)
 
-    def show_web(self, args):
+    def show_web(self,):
         if self._is_loaded:
             print_table(self.coin.websites)
 
+    @staticmethod
+    def find_similar_coins(args):
+        parser = argparse.ArgumentParser(
+            prog="similar",
+            add_help=False,
+            description="Find similar coins",
+        )
+        parser.add_argument('-c','--coin',
+             help="Symbol/Name of Coin", dest="symbol", required=True, type=str,
+        )
+
+        if not args:
+            print("You didn't pass coin symbol. Please use similar -c symbol")
+            return
+
+        parsy, others = parser.parse_known_args(args)
+        if not parsy or parsy.symbol is None:
+            return
+
+        coins = get_coin_list().id.to_list()
+        sim = difflib.get_close_matches(parsy.symbol, coins, 10)
+        df = pd.Series(sim).to_frame().reset_index()
+        df.columns = ['Index', 'Name']
+        print_table(df)
 
 
 def main():
     c = Controller()
-    choices = list(c.mapper.keys()) + list(c.base.keys())
+    choices = list(c.mapper.keys()) + c.base_commands
 
     parser = argparse.ArgumentParser(prog="coin", add_help=False)
     parser.add_argument("cmd", choices=choices)
@@ -166,23 +189,21 @@ def main():
             parsy, others = parser.parse_known_args(an_input.split())
             cmd = parsy.cmd
 
-            view = c.base.get(cmd)
-
-            if view and cmd == 'help':
-                view()
-                continue
-            elif view:
-                return view()
+            if cmd == "help":
+                c.help()
+            elif cmd in ["exit", "quit", "q"]:
+                return False
+            elif cmd == "r":
+                return True
 
             view = c.mapper.get(cmd)
             if view is None:
                 continue
-            elif callable(view):
+            elif callable(view):  # If function takes params return func(args), else func()
                 if len(signature(view).parameters) > 0:
                     view(others)
                 else:
                     view()
-
 
         except SystemExit:
             print("The command selected doesn't exist")
