@@ -30,3 +30,4 @@ def print_table(df: pd.DataFrame, floatfmt=".5f", tablefmt="psql"):
         )
     )
     print("")
+

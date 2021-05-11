@@ -13,6 +13,10 @@ pd.set_option("display.max_rows", None)
 pd.set_option("display.width", None)
 # pd.set_option('display.max_colwidth', 30)
 
+import logging
+
+logger = logging.getLogger('cmc')
+
 load_dotenv()
 
 API_KEY = os.getenv("CC_API_KEY")
@@ -47,15 +51,21 @@ class CryptoCompare(CryptoCompareClient):
             "CHANGEPCT24HOUR",
         ]
         data = {k: v for k, v in data.items() if k in columns}
-        return pd.Series(data)
+        df = pd.Series(data).to_frame().reset_index()
+        df.columns = ['Metric','Value']
+        return df
 
     @table_formatter
     def get_top_list_by_market_cap(self, currency="USD", limit=100, **kwargs):
+        limit = 10 if limit < 10 else limit
         data = self._get_top_list_by_market_cap(currency, limit, **kwargs)["Data"]
         data = [{"CoinInfo": d.get("CoinInfo"), "RAW": d.get("RAW")} for d in data]
         df = pd.json_normalize(data)
         df.columns = [col.split(".")[-1] for col in list(df.columns)]
-        df["Url"] = df["Url"].apply(lambda x: self.COMPARE_URL + x)
+        try:
+            df["Url"] = df["Url"].apply(lambda x: self.COMPARE_URL + x)
+        except Exception as e:
+            print(e)
         return df
 
     @table_formatter
@@ -174,21 +184,7 @@ class CryptoCompare(CryptoCompareClient):
             ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
         )
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index("time")
-
-    @table_formatter
-    def get_historical_day_prices(
-        self, symbol="BTC", currency="USD", limit=365, **kwargs
-    ):
-        data = self._get_historical_day_prices(symbol, currency, limit, **kwargs)[
-            "Data"
-        ]
-        df = pd.DataFrame(data)
-        df.drop(
-            ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
-        )
-        df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index("time")
+        return df
 
     @table_formatter
     def get_historical_hour_prices(
@@ -202,7 +198,7 @@ class CryptoCompare(CryptoCompareClient):
             ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
         )
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index("time")
+        return df
 
     @table_formatter
     def get_historical_minutes_prices(
@@ -216,7 +212,7 @@ class CryptoCompare(CryptoCompareClient):
             ["volumefrom", "conversionType", "conversionSymbol"], axis=1, inplace=True
         )
         df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df.set_index("time")
+        return df
 
     @table_formatter
     def get_daily_exchange_volume(
@@ -292,8 +288,11 @@ class CryptoCompare(CryptoCompareClient):
     def get_latest_trading_signals(self, symbol="ETH", **kwargs):
         data = self._get_latest_trading_signals(symbol, **kwargs)["Data"]
         df = pd.DataFrame(data)
-        df.drop(["id", "partner_symbol"], inplace=True, axis=1)
-        df["time"] = pd.to_datetime(df["time"], unit="s")
+        try:
+            df.drop(["id", "partner_symbol"], inplace=True, axis=1)
+            df["time"] = pd.to_datetime(df["time"], unit="s")
+        except KeyError as e:
+            logger.log(2, e)
         return df
 
     def get_order_books_exchanges(self, **kwargs):
@@ -335,6 +334,11 @@ class CryptoCompare(CryptoCompareClient):
         data = self._get_all_exchanges_info(symbol, **kwargs)["Data"]
         return pd.DataFrame(data).T
 
+    def get_all_exchanges_names(self):
+        exchanges = list(self._get_all_exchanges_and_trading_pairs()['Data']['exchanges'].keys())
+        df = pd.Series(exchanges).to_frame().reset_index()
+        df.columns = ['Index','Name']
+        return df
     def get_all_wallet_info(self, **kwargs):
         data = self._get_all_wallet_info(**kwargs)["Data"]
         df = pd.DataFrame(data).T

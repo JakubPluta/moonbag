@@ -1,6 +1,9 @@
 import os
 import requests
 from dotenv import load_dotenv
+import cachetools.func
+from retry import retry
+
 
 load_dotenv()
 
@@ -52,6 +55,7 @@ class CryptoCompareClient:
     def __init__(self, api_key):
         self.api_key = api_key
 
+    @retry(tries=2, delay=3, max_delay=5)
     def _make_request(self, endpoint, payload=None, **kwargs):
         """You can use either endpoint key or endpoint value from dictionary ENDPOINTS
         All of request will be handled"""

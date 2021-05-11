@@ -7,6 +7,7 @@ import textwrap
 from inspect import signature
 import difflib
 import pandas as pd
+from argparse import ArgumentError
 
 logger = logging.getLogger("gecko-menu")
 
@@ -58,7 +59,7 @@ class Controller:
         """U can use id or symbol of coins"""
         parser = argparse.ArgumentParser(
             prog="load",
-            add_help=False,
+            add_help=True,
             description="Load coin from coingecko\n If you not sure what is the symbol or id of coin use method coinlist",
         )
         parser.add_argument(
@@ -151,7 +152,7 @@ class Controller:
     def find_similar_coins(args):
         parser = argparse.ArgumentParser(
             prog="similar",
-            add_help=False,
+            add_help=True,
             description="Find similar coins",
         )
         parser.add_argument('-c','--coin',
@@ -205,8 +206,11 @@ def main():
                 else:
                     view()
 
-        except SystemExit:
+        except ArgumentError:
             print("The command selected doesn't exist")
+            print("\n")
+            continue
+        except SystemExit:
             print("\n")
             continue
 
