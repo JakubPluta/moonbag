@@ -160,13 +160,18 @@ class CryptoCompare(CryptoCompareClient):
             inplace=True,
         )
         df["published_on"] = pd.to_datetime(df["published_on"], unit="s")
-        return df.set_index("published_on")
+
+        return df[['published_on','title','source','tags','categories','guid','body']]
 
     def get_blockchain_available_coins_list(self):
         data = self._get_blockchain_available_coins_list()["Data"]
         df = pd.DataFrame(data).T
         df["data_available_from"] = pd.to_datetime(df["data_available_from"], unit="s")
-        return df.set_index("id")
+        return df
+
+    @property
+    def blockchain_coins_list(self):
+        return self.get_blockchain_available_coins_list()['symbol'].to_list()
 
     def get_all_coins_list(self, summary="true", **kwargs):
         data = self._get_all_coins_list(summary, **kwargs)["Data"]
@@ -259,31 +264,39 @@ class CryptoCompare(CryptoCompareClient):
         )
 
     def get_latest_blockchain_data(self, symbol="BTC", **kwargs):
-        data = self._get_latest_blockchain_data(symbol, **kwargs)["Data"]
-        df = pd.Series(data)
-        df["time"] = pd.to_datetime(df["time"], unit="s")
-        return df
+        try:
+            data = self._get_latest_blockchain_data(symbol, **kwargs)["Data"]
+            df = pd.Series(data)
+            df["time"] = pd.to_datetime(df["time"], unit="s")
+            return df.to_frame().reset_index()
+        except KeyError as e:
+            logger.log(2, e)
+            return pd.DataFrame()
 
     @table_formatter
     def get_historical_blockchain_data(self, symbol="ETH", limit=365, **kwargs):
-        data = self._get_historical_blockchain_data(symbol, limit, **kwargs)["Data"][
-            "Data"
-        ]
-        df = pd.DataFrame(data)
-        df["time"] = pd.to_datetime(df["time"], unit="s")
-        df.drop(
-            [
-                "id",
-                "block_height",
-                "hashrate",
-                "difficulty",
-                "block_time",
-                "block_size",
-            ],
-            axis=1,
-            inplace=True,
-        )
-        return df.set_index("time")
+        try:
+            data = self._get_historical_blockchain_data(symbol, limit, **kwargs)["Data"][
+                "Data"
+            ]
+            df = pd.DataFrame(data)
+            df["time"] = pd.to_datetime(df["time"], unit="s")
+            df.drop(
+                [
+                    "id",
+                    "block_height",
+                    "hashrate",
+                    "difficulty",
+                    "block_time",
+                    "block_size",
+                ],
+                axis=1,
+                inplace=True,
+            )
+            return df
+        except KeyError as e:
+            logger.log(2, e)
+            return pd.DataFrame()
 
     def get_latest_trading_signals(self, symbol="ETH", **kwargs):
         data = self._get_latest_trading_signals(symbol, **kwargs)["Data"]
@@ -306,7 +319,8 @@ class CryptoCompare(CryptoCompareClient):
     def get_order_book_top(
         self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
     ):
-        data = self._get_order_book_top(symbol, to_symbol, exchange, **kwargs)["Data"][
+        data = self._get_order_book_top(symbol.upper(), to_symbol.upper(),
+                                        exchange.capitalize(), **kwargs)["Data"][
             "RAW"
         ]
         df = pd.json_normalize(data)
@@ -339,6 +353,7 @@ class CryptoCompare(CryptoCompareClient):
         df = pd.Series(exchanges).to_frame().reset_index()
         df.columns = ['Index','Name']
         return df
+
     def get_all_wallet_info(self, **kwargs):
         data = self._get_all_wallet_info(**kwargs)["Data"]
         df = pd.DataFrame(data).T
