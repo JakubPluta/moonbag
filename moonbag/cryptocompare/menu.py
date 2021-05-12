@@ -7,6 +7,9 @@ import pandas as pd
 import textwrap
 from argparse import ArgumentError
 from moonbag.cryptocompare.utils import get_closes_matches_by_name, get_closes_matches_by_symbol
+from inspect import signature
+
+
 logger = logging.getLogger("compare-menu")
 
 compare = CryptoCompare(API_KEY)
@@ -19,6 +22,27 @@ class Controller:
         self.parser.add_argument("cmd")
         self.base_commands = ["help", "exit", "quit", "r", "q"]
         self.mapper = {
+            "price" : self.show_prices,
+            'coins' : self.show_coins,
+            'similar' : self.find_similar_coins,
+            'top_exchanges' : self.show_top_exchanges,
+            'news' : self.show_news,
+            'list_exchanges' : self.show_all_exchanges,
+            'price_day' : self.show_day_prices,
+            'price_hour' : self.show_hour_prices,
+            'price_minute' : self.show_minute_prices,
+            'orders' : self.show_top_orders,
+            'top_symbols_ex' : self.show_exchanges_by_top_symbol,
+            'pair_volume' : self.show_top_list_pair_volume,
+            'volume_hour' : self.show_hourly_coin_volume,
+            'volume_day' : self.show_daily_coin_volume,
+            'list_bc_coins' : self.show_available_blockchain_lists,
+            'coin_bc' : self.show_latest_blockchain_data,
+            'coin_bc_hist' : self.show_histo_blockchain_data,
+            'trade_signals' : self.show_trading_signals,
+            'top_trading' : self.show_top_trading_pairs,
+            'top_mcap' : self.show_top_list_by_market_cap,
+
         }
 
     @staticmethod
@@ -29,30 +53,31 @@ class Controller:
         print("   quit              quit program")
         print("")
         print("CryptoCompare        You need API_KEY to use this menu.")
+        print("   add_api           add api key, only works for one shell session. use add_api -k <your api key>  ")
         print("   news              show latest crypto news [CryptoCompare]")
         print("   coins             show available coins: Symbol and Names [CryptoCompare]")
         print("   similar           try to find coin symbol [CryptoCompare]")
-        print("   topmc             try to find coin symbol [CryptoCompare]")
+        print("   top_mcap          top market cap coins [CryptoCompare]")
 
-        print("   topex             show top  exchanges for given pair: Default BTC/USD [CryptoCompare]")
-        print("   lex               show names of all exchanges  [CryptoCompare]")
-        print("   topexsym          show top coins on given exchange [CryptoCompare]")
-        print("   orders            show  order book for given pair and exchange. Default LUNA/BTC, Binance [CryptoCompare]")
+        print("   top_exchanges     show top  exchanges for given pair: Default BTC/USD [CryptoCompare]")
+        print("   list_exchanges    show names of all exchanges  [CryptoCompare]")
+        print("   top_symbols_ex    show top coins on given exchange [CryptoCompare]")
+        print("   orders            show  order book for given pair and exchange. LUNA/BTC,Binance [CryptoCompare]")
 
         print("   price             show latest price info for given pair like BTC/USD [CryptoCompare]")
-        print("   priced            show historical prices with 1 day interval [CryptoCompare]")
-        print("   priceh            show historical prices with 1 hour interval [CryptoCompare]")
-        print("   pricem            show historical prices with 1 min interval [CryptoCompare]")
+        print("   price_day         show historical prices with 1 day interval [CryptoCompare]")
+        print("   price_hour        show historical prices with 1 hour interval [CryptoCompare]")
+        print("   price_minute      show historical prices with 1 min interval [CryptoCompare]")
 
-        print("   volumed           show daily volume for given pair. Default: BTC/USD [CryptoCompare]")
-        print("   volumeh           show hourly volume for given pair. Default: BTC/USD [CryptoCompare]")
+        print("   volume_day        show daily volume for given pair. Default: BTC/USD [CryptoCompare]")
+        print("   volume_hour       show hourly volume for given pair. Default: BTC/USD [CryptoCompare]")
 
-        print("   tsignals          show latest trading signals for given coin. Default ETH [CryptoCompare]")
-        print("   pairvolume        show latest volume for given pair of coins [CryptoCompare]")
-        print("   toptrading        show top trading pairs for given coin [CryptoCompare]")
-        print("   onchain           show list of coins with on-chain data available [CryptoCompare]")
-        print("   chaincoin         show on chain data for given coin [CryptoCompare]")
-        print("   hchaincoin        show historical on chain data for given coin [CryptoCompare]")
+        print("   trade_signals     show latest trading signals for given coin. Default ETH [CryptoCompare]")
+        print("   pair_volume       show latest volume for given pair of coins [CryptoCompare]")
+        print("   top_trading       show top trading pairs for given coin [CryptoCompare]")
+        print("   list_bc_coins     show list of coins with on-chain data available [CryptoCompare]")
+        print("   coin_bc           show on chain data for given coin [CryptoCompare]")
+        print("   coin_bc_hist      show historical on chain data for given coin [CryptoCompare]")
 
         print(" ")
         return
@@ -138,7 +163,7 @@ class Controller:
             description="get top market cap coins",
         )
         parser.add_argument(
-            "-t", "--tsym", help="Denomination coin in which you want to see market cap",
+            "-t", "--tsym", help="To symbol - coin in which you want to see market cap data",
             dest="tosymbol", required=False, type=str,
             default='USD'
         )
@@ -166,10 +191,11 @@ class Controller:
             description="get top exchanges",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="symbol", required=False, type=str, default='BTC'
+            "-c", "--coin", help="symbol or name of coin", dest="symbol", required=False, type=str, default='BTC'
         )
         parser.add_argument(
-            "-t", "--tsym", help="tosymbol", dest="tosymbol", required=False, type=str,
+            "-t", "--tsym", help="To symbol - coin in which you want to see data",
+            dest="tosymbol", required=False, type=str,
             default='USD'
         )
 
@@ -234,13 +260,13 @@ class Controller:
         )
 
         if not args:
-            print("You didn't pass coin symbol. Please use price -c symbol")
+            print("You didn't pass coin symbol. Please use -c symbol")
             return
 
         parsy, _ = parser.parse_known_args(args)
         return parsy
 
-    def get_day_prices(self, args):
+    def show_day_prices(self, args):
         parsy = self._get_prices(args)
         if not parsy:
             return
@@ -252,7 +278,7 @@ class Controller:
             return
         print_table(prices)
 
-    def get_hour_prices(self, args):
+    def show_hour_prices(self, args):
         parsy = self._get_prices(args)
         if not parsy:
             return
@@ -263,7 +289,7 @@ class Controller:
             return
         print_table(prices)
 
-    def get_minute_prices(self, args):
+    def show_minute_prices(self, args):
         parsy = self._get_prices(args)
         if not parsy:
             return
@@ -275,14 +301,14 @@ class Controller:
         print_table(prices)
 
     @staticmethod
-    def get_trading_signals(args):
+    def show_trading_signals(args):
         parser = argparse.ArgumentParser(
             prog="topmcap",
             add_help=True,
             description="get top market cap",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="symbol", required=True, type=str,
+            "-c", "--coin", help="Coin symbol", dest="symbol", required=True, type=str,
             default='ETH'
         )
 
@@ -306,14 +332,14 @@ class Controller:
         print_table(df)
 
     @staticmethod
-    def get_top_orders(args):
+    def show_top_orders(args):
         parser = argparse.ArgumentParser(
             prog="orders",
             add_help=True,
             description="get order book for pair of coins",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="symbol", required=True, type=str,
+            "-c", "--coin", help="Coin smybol", dest="symbol", required=True, type=str,
             default='ETH'
         )
         parser.add_argument(
@@ -332,7 +358,7 @@ class Controller:
             df = compare.get_order_book_top(
                 symbol=parsy.symbol, to_symbol=parsy.tsym, exchange=parsy.exchange)
         except ValueError as e:
-            print(f"{e}, To check list of coins use command: coinlist ")
+            print(f"{e}, To check list of coins use command: coins ")
             return
         print_table(df)
 
@@ -371,14 +397,14 @@ class Controller:
         print_table(df)
 
     @staticmethod
-    def get_top_list_pair_volume(args):
+    def show_top_list_pair_volume(args):
         parser = argparse.ArgumentParser(
             prog="pairvolume",
             add_help=True,
             description="get top list by pair volume",
         )
         parser.add_argument(
-            "-t", "--tsym", help="tosymbol", dest="tosymbol", required=False, type=str,
+            "-t", "--tsym", help="To symbol - coin in which you want to see data", dest="tosymbol", required=False, type=str,
             default='USD'
         )
         parsy, _ = parser.parse_known_args(args)
@@ -423,10 +449,10 @@ class Controller:
         parser = argparse.ArgumentParser(
             prog="blockchain data",
             add_help=True,
-            description="get top list by pari folvume",
+            description="get latest block chain data for given coin [To see supported coins use onchain command ",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="symbol", required=True, type=str,
+            "-c", "--coin", help="Coin symbol", dest="symbol", required=True, type=str,
             default='ETH'
         )
 
@@ -435,7 +461,7 @@ class Controller:
             return
 
         if parsy.symbol.upper() not in compare.blockchain_coins_list:
-            print(f"{parsy.symbol} not found in blockchain data list. User onchaincoins "
+            print(f"{parsy.symbol} not found in blockchain data list. Use onchain "
                   f"to see available coins for onchain data")
             return
         try:
@@ -445,20 +471,19 @@ class Controller:
             return
         print_table(df)
 
-
     @staticmethod
     def show_histo_blockchain_data(args):
         parser = argparse.ArgumentParser(
             prog="blockchain data",
             add_help=True,
-            description="get top list by pari folvume",
+            description="get historical block chain data for given coin [To see supported coins use onchain command",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="symbol", required=True, type=str,
+            "-c", "--coin", help="Coin symbol", dest="symbol", required=True, type=str,
             default='ETH'
         )
         parser.add_argument(
-            "-n", "--num", '--limit', help="last n quotes", dest="limit", required=False, type=int,
+            "-n", "--num", '--limit', help="number of results", dest="limit", required=False, type=int,
             default=100
         )
 
@@ -477,10 +502,10 @@ class Controller:
         parser = argparse.ArgumentParser(
             prog="trading pairs",
             add_help=True,
-            description="get top list by",
+            description="get top trading pairs",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="symbol", required=True, type=str,
+            "-c", "--coin", help="Coin symbol", dest="symbol", required=True, type=str,
             default='ETH'
         )
 
@@ -496,12 +521,7 @@ class Controller:
 
 def main():
     c = Controller()
-    choices = c.base_commands + [
-        'price','coins','similar','topex','news', 'lex',
-        'priced','priceh','pricem','tsignals','orders','extopsym','pairvolume','volumeh','volumed',
-        'onchain', 'chaincoin', 'hchaincoin', 'toptrading', 'topmc', 'topexsym'
-
-    ]
+    choices = c.base_commands + list(c.mapper.keys())
 
     parser = argparse.ArgumentParser(prog="cmc", add_help=False)
     parser.add_argument("cmd", choices=choices)
@@ -519,46 +539,16 @@ def main():
                 return False
             elif cmd == "r":
                 return True
-            if cmd == 'price':
-                c.show_prices(others)
-            elif cmd == 'coins':
-                c.show_coins()
-            elif cmd == 'similar':
-                c.find_similar_coins(others)
-            elif cmd == 'topmc':
-                c.show_top_list_by_market_cap(others)
-            elif cmd == 'exchanges':
-                c.show_top_exchanges(others)
-            elif cmd == 'news':
-                c.show_news(others)
-            elif cmd == 'priceh':
-                c._get_prices(others)
-            elif cmd == 'priced':
-                c.get_day_prices(others)
-            elif cmd == 'pricem':
-                c.get_minute_prices(others)
-            elif cmd == 'tsignals':
-                c.get_trading_signals(others)
-            elif cmd == 'orders':
-                c.get_top_orders(others)
-            elif cmd == 'lex':
-                c.show_all_exchanges()
-            elif cmd == 'topexsym':
-                c.show_exchanges_by_top_symbol(others)
-            elif cmd == 'pairvolume':
-                c.get_top_list_pair_volume(others)
-            elif cmd == 'volumed':
-                c.show_daily_coin_volume(others)
-            elif cmd == 'volumeh':
-                c.show_hourly_coin_volume(others)
-            elif cmd == 'onchain':
-                c.show_available_blockchain_lists()
-            elif cmd == 'chaincoin':
-                c.show_latest_blockchain_data(others)
-            elif cmd == 'hchaincoin':
-                c.show_histo_blockchain_data(others)
-            elif cmd == 'toptrading':
-                c.show_top_trading_pairs(others)
+
+            view = c.mapper.get(cmd)
+            if view is None:
+                continue
+            elif callable(view):  # If function takes params return func(args), else func()
+                if len(signature(view).parameters) > 0:
+                    view(others)
+                else:
+                    view()
+
 
         except ArgumentError:
             print("The command selected doesn't exist")
