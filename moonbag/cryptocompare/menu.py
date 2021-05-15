@@ -6,18 +6,21 @@ import difflib
 import pandas as pd
 import textwrap
 from argparse import ArgumentError
-from moonbag.cryptocompare.utils import get_closes_matches_by_name, get_closes_matches_by_symbol
+from moonbag.cryptocompare.utils import get_closes_matches_by_name, get_closes_matches_by_symbol, print_no_api_key_msg
 from inspect import signature
+from pyreadline import Readline
+from moonbag.common.utils import reconfigure_sys
+
+#readline = Readline()
 
 
 logger = logging.getLogger("compare-menu")
-
-compare = CryptoCompare(API_KEY)
 
 
 class Controller:
 
     def __init__(self):
+        self.client = CryptoCompare(API_KEY)
         self.parser = argparse.ArgumentParser(prog="coin", add_help=False)
         self.parser.add_argument("cmd")
         self.base_commands = ["help", "exit", "quit", "r", "q"]
@@ -42,7 +45,11 @@ class Controller:
             'trade_signals' : self.show_trading_signals,
             'top_trading' : self.show_top_trading_pairs,
             'top_mcap' : self.show_top_list_by_market_cap,
-
+            'orders_snap' : self.show_order_book_snapshot,
+            'wallets' : self.show_all_wallets,
+            'gambling' : self.show_all_gambling,
+            'recommended' : self.show_recommended,
+            'social_latest' : self.show_latest_socials,
         }
 
     @staticmethod
@@ -53,7 +60,6 @@ class Controller:
         print("   quit              quit program")
         print("")
         print("CryptoCompare        You need API_KEY to use this menu.")
-        print("   add_api           add api key, only works for one shell session. use add_api -k <your api key>  ")
         print("   news              show latest crypto news [CryptoCompare]")
         print("   coins             show available coins: Symbol and Names [CryptoCompare]")
         print("   similar           try to find coin symbol [CryptoCompare]")
@@ -63,7 +69,7 @@ class Controller:
         print("   list_exchanges    show names of all exchanges  [CryptoCompare]")
         print("   top_symbols_ex    show top coins on given exchange [CryptoCompare]")
         print("   orders            show  order book for given pair and exchange. LUNA/BTC,Binance [CryptoCompare]")
-
+        print("   orders_snap       show  order book for given pair and exchange. LUNA/BTC,Binance [CryptoCompare]")
         print("   price             show latest price info for given pair like BTC/USD [CryptoCompare]")
         print("   price_day         show historical prices with 1 day interval [CryptoCompare]")
         print("   price_hour        show historical prices with 1 hour interval [CryptoCompare]")
@@ -79,11 +85,14 @@ class Controller:
         print("   coin_bc           show on chain data for given coin [CryptoCompare]")
         print("   coin_bc_hist      show historical on chain data for given coin [CryptoCompare]")
 
+        print("   wallets           show all available wallets [CryptoCompare]")
+        print("   gambling          show all available gambling [CryptoCompare]")
+        print("   recommended       show all recommendation fro wallets and exchanges [CryptoCompare]")
+
         print(" ")
         return
 
-    @staticmethod
-    def show_prices(args):
+    def show_prices(self,args):
         parser = argparse.ArgumentParser(
             prog="prices",
             add_help=True,
@@ -94,7 +103,8 @@ class Controller:
             dest="symbol", required=True, type=str,
         )
         parser.add_argument(
-            '-t',"-tsym", help="symbol of second coin in pair. Default: USD", dest="tosymbol", required=False, type=str,
+            '-t',"-tsym", help="Second coin in pair. Default USD",
+            dest="tosymbol", required=False, type=str,
             default='USD'
         )
 
@@ -107,18 +117,16 @@ class Controller:
             return
 
         try:
-            prices = compare.get_price(parsy.symbol, parsy.tosymbol)
+            prices = self.client.get_price(parsy.symbol, parsy.tosymbol)
         except ValueError as e:
             print(f"{e}, To check list of coins use command: coins ")
             return
         print_table(prices)
 
-    @staticmethod
-    def show_coins():
-        print_table(compare.coin_list)
+    def show_coins(self,):
+        print_table(self.client.coin_list.reset_index())
 
-    @staticmethod
-    def find_similar_coins(args):
+    def find_similar_coins(self,args):
         parser = argparse.ArgumentParser(
             prog="similar",
             add_help=True,
@@ -141,7 +149,7 @@ class Controller:
         if not parsy or parsy.symbol is None:
             return
 
-        coin_df = compare.coin_list
+        coin_df = self.client.coin_list
         coins = dict(zip(coin_df['Symbol'],coin_df['FullName']))
 
         if parsy.key == 'name':
@@ -155,8 +163,7 @@ class Controller:
         else:
             print(pd.DataFrame())
 
-    @staticmethod
-    def show_top_list_by_market_cap(args):
+    def show_top_list_by_market_cap(self,args):
         parser = argparse.ArgumentParser(
             prog="topmc",
             add_help=True,
@@ -172,19 +179,38 @@ class Controller:
             default=50
         )
 
+        parser.add_argument(
+            "--full", help="show all columns", dest="full", required=False, action='store_true',
+            default=False
+        )
+
         parsy, _ = parser.parse_known_args(args)
         if not parsy:
             return
         try:
-            df = compare.get_top_list_by_market_cap(
+            df = self.client.get_top_list_by_market_cap(
                 currency=parsy.tosymbol, limit=parsy.limit)
-        except ValueError as e:
+        except (ValueError, Exception) as e:
             print(f"{e}, To check list of coins use command: coins ")
             return
-        print_table(df)
 
-    @staticmethod
-    def show_top_exchanges(args):
+        if df.empty:
+            print(f"Empty dataframe returned for {parsy.tosymbol} ")
+            return
+
+        columns = [
+            'Id', 'Name','FullName', 'ProofType','Rating',
+            'TechnologyAdoptionRating', 'MarketPerformanceRating',
+            'AssetLaunchDate' ,'FROMSYMBOL', 'TOSYMBOL', 'PRICE',
+            'MEDIAN', 'MKTCAP', 'SUPPLY', 'MaxSupply',
+             'CHANGEPCT24HOUR', 'CHANGEPCTHOUR','TOTALVOLUME24H',
+        ]
+        if parsy.full is True:
+            print_table(df)
+        else:
+            print_table(df[columns])
+
+    def show_top_exchanges(self, args):
         parser = argparse.ArgumentParser(
             prog="exchanges",
             add_help=True,
@@ -203,21 +229,14 @@ class Controller:
         if not parsy:
             return
 
-        if not parsy.symbol:
-            parsy.currency = 'BTC'
-
-        if not parsy.currency:
-            parsy.currency = 'USD'
-
         try:
-            prices = compare.get_top_exchanges(parsy.symbol, parsy.tosymbol)
+            prices = self.client.get_top_exchanges(parsy.symbol, parsy.tosymbol)
         except ValueError as e:
             print(f"{e}, To check list of coins use command: coinlist ")
             return
         print_table(prices)
 
-    @staticmethod
-    def show_news(args):
+    def show_news(self, args):
         parser = argparse.ArgumentParser(
             prog="news",
             add_help=True,
@@ -233,14 +252,13 @@ class Controller:
             return
 
         try:
-            df = compare.get_latest_news(sort_order=parsy.sort)
+            df = self.client.get_latest_news(sort_order=parsy.sort)
         except ValueError as e:
             print(f"{e} ")
             return
         print_table(df)
 
-    @staticmethod
-    def _get_prices(args):
+    def _get_prices(self, args):
         parser = argparse.ArgumentParser(
             prog="histoprices",
             add_help=True,
@@ -272,10 +290,11 @@ class Controller:
             return
         try:
             parsy = self._get_prices(args)
-            prices = compare.get_historical_day_prices(parsy.symbol, parsy.tosymbol, parsy.limit)
+            prices = self.client.get_historical_day_prices(parsy.symbol, parsy.tosymbol, parsy.limit)
         except ValueError as e:
             print(f"{e}, ")
             return
+        print(f"Day prices for {parsy.symbol}/{parsy.tosymbol}")
         print_table(prices)
 
     def show_hour_prices(self, args):
@@ -283,10 +302,11 @@ class Controller:
         if not parsy:
             return
         try:
-            prices = compare.get_historical_hour_prices(parsy.symbol, parsy.tosymbol)
+            prices = self.client.get_historical_hour_prices(parsy.symbol, parsy.tosymbol)
         except ValueError as e:
             print(f"{e}, ")
             return
+        print(f"Hour prices for {parsy.symbol}/{parsy.tosymbol}")
         print_table(prices)
 
     def show_minute_prices(self, args):
@@ -294,14 +314,14 @@ class Controller:
         if not parsy:
             return
         try:
-            prices = compare.get_historical_minutes_prices(parsy.symbol, parsy.tosymbol)
+            prices = self.client.get_historical_minutes_prices(parsy.symbol, parsy.tosymbol)
         except ValueError as e:
             print(f"{e}, ")
             return
+        print(f"Minute prices for {parsy.symbol}/{parsy.tosymbol}")
         print_table(prices)
 
-    @staticmethod
-    def show_trading_signals(args):
+    def show_trading_signals(self, args):
         parser = argparse.ArgumentParser(
             prog="topmcap",
             add_help=True,
@@ -317,7 +337,7 @@ class Controller:
             return
 
         try:
-            df = compare.get_latest_trading_signals(parsy.symbol)
+            df = self.client.get_latest_trading_signals(parsy.symbol)
         except ValueError as e:
             print(f"{e} ")
             return
@@ -326,13 +346,11 @@ class Controller:
         else:
             print_table(df)
 
-    @staticmethod
-    def show_orderbooks():
-        df = compare.get_order_books_exchanges()
+    def show_orderbooks(self,):
+        df = self.client.get_order_books_exchanges()
         print_table(df)
 
-    @staticmethod
-    def show_top_orders(args):
+    def show_top_orders(self,args):
         parser = argparse.ArgumentParser(
             prog="orders",
             add_help=True,
@@ -355,20 +373,18 @@ class Controller:
         if not parsy:
             return
         try:
-            df = compare.get_order_book_top(
+            df = self.client.get_order_book_top(
                 symbol=parsy.symbol, to_symbol=parsy.tsym, exchange=parsy.exchange)
         except ValueError as e:
             print(f"{e}, To check list of coins use command: coins ")
             return
         print_table(df)
 
-    @staticmethod
-    def show_all_exchanges():
-        df = compare.get_all_exchanges_names()
+    def show_all_exchanges(self,):
+        df = self.client.get_all_exchanges_names()
         print_table(df)
 
-    @staticmethod
-    def show_exchanges_by_top_symbol(args):
+    def show_exchanges_by_top_symbol(self, args):
         parser = argparse.ArgumentParser(
             prog="exchange symbols",
             add_help=True,
@@ -389,15 +405,16 @@ class Controller:
         if not parsy:
             return
         try:
-            df = compare.get_exchanges_top_symbols_by_volume(
+            df = self.client.get_exchanges_top_symbols_by_volume(
                 exchange=parsy.exchange, limit=parsy.limit)
         except ValueError as e:
             print(f"{e}")
             return
+        if df.empty:
+            print(f"Could'nt find data for Exchange: {parsy.exchange}")
         print_table(df)
 
-    @staticmethod
-    def show_top_list_pair_volume(args):
+    def show_top_list_pair_volume(self,args):
         parser = argparse.ArgumentParser(
             prog="pairvolume",
             add_help=True,
@@ -411,7 +428,7 @@ class Controller:
         if not parsy:
             return
         try:
-            df = compare.get_top_list_by_pair_volume(parsy.tosymbol)
+            df = self.client.get_top_list_by_pair_volume(parsy.tosymbol)
         except ValueError as e:
             print(f"{e}")
             return
@@ -422,10 +439,11 @@ class Controller:
         if not parsy:
             return
         try:
-            prices = compare.get_daily_symbol_volume(parsy.symbol, parsy.tosymbol, parsy.limit)
+            prices = self.client.get_daily_symbol_volume(parsy.symbol, parsy.tosymbol, parsy.limit)
         except ValueError as e:
             print(f"{e}, ")
             return
+        print(f"Daily volume for {parsy.symbol}/{parsy.tosymbol}")
         print_table(prices)
 
     def show_hourly_coin_volume(self, args):
@@ -433,19 +451,17 @@ class Controller:
         if not parsy:
             return
         try:
-            prices = compare.get_hourly_symbol_volume(parsy.symbol, parsy.tosymbol, parsy.limit)
+            prices = self.client.get_hourly_symbol_volume(parsy.symbol, parsy.tosymbol, parsy.limit)
         except ValueError as e:
             print(f"{e}, ")
             return
+        print(f"Hourly volume for {parsy.symbol}/{parsy.tosymbol}")
         print_table(prices)
 
-    @staticmethod
-    def show_available_blockchain_lists():
-        print_table(compare.get_blockchain_available_coins_list())
+    def show_available_blockchain_lists(self,):
+        print_table(self.client.get_blockchain_available_coins_list())
 
-
-    @staticmethod
-    def show_latest_blockchain_data(args):
+    def show_latest_blockchain_data(self,args):
         parser = argparse.ArgumentParser(
             prog="blockchain data",
             add_help=True,
@@ -460,19 +476,18 @@ class Controller:
         if not parsy:
             return
 
-        if parsy.symbol.upper() not in compare.blockchain_coins_list:
+        if parsy.symbol.upper() not in self.client.blockchain_coins_list:
             print(f"{parsy.symbol} not found in blockchain data list. Use onchain "
                   f"to see available coins for onchain data")
             return
         try:
-            df = compare.get_latest_blockchain_data(parsy.symbol)
+            df = self.client.get_latest_blockchain_data(parsy.symbol)
         except ValueError as e:
             print(f"{e}")
             return
         print_table(df)
 
-    @staticmethod
-    def show_histo_blockchain_data(args):
+    def show_histo_blockchain_data(self, args):
         parser = argparse.ArgumentParser(
             prog="blockchain data",
             add_help=True,
@@ -491,14 +506,13 @@ class Controller:
         if not parsy:
             return
         try:
-            df = compare.get_historical_blockchain_data(symbol=parsy.symbol, limit=parsy.limit)
+            df = self.client.get_historical_blockchain_data(symbol=parsy.symbol, limit=parsy.limit)
         except ValueError as e:
             print(f"{e}")
             return
         print_table(df)
 
-    @staticmethod
-    def show_top_trading_pairs(args):
+    def show_top_trading_pairs(self, args):
         parser = argparse.ArgumentParser(
             prog="trading pairs",
             add_help=True,
@@ -513,11 +527,111 @@ class Controller:
         if not parsy:
             return
         try:
-            df = compare.get_top_of_trading_pairs(symbol=parsy.symbol)
+            df = self.client.get_top_of_trading_pairs(symbol=parsy.symbol)
         except ValueError as e:
             print(f"{e}")
             return
         print_table(df)
+
+    def show_order_book_snapshot(self, args):
+        parser = argparse.ArgumentParser(
+            prog="orders snapshot",
+            add_help=True,
+            description="get order book snapshot for pair of coins",
+        )
+        parser.add_argument(
+            "-c", "--coin", help="Coin symbol", dest="symbol", required=True, type=str,
+            default='ETH'
+        )
+        parser.add_argument(
+            "-t", '--tsym', help="to symbol, second pair", dest="tsym", required=False, type=str,
+            default='BTC'
+        )
+        parser.add_argument(
+            "-e", "--exchange", help="exchange", dest="exchange", required=False, type=str,
+            default='Binance'
+        )
+
+        parsy, _ = parser.parse_known_args(args)
+        if not parsy:
+            return
+        try:
+            df = self.client.get_order_book_snapshot(
+                symbol=parsy.symbol, to_symbol=parsy.tsym, exchange=parsy.exchange)
+        except ValueError as e:
+            print(f"{e}, To check list of coins use command: coins ")
+            return
+        print_table(df)
+
+    def show_all_wallets(self,):
+        print_table(self.client.get_all_wallet_info())
+
+    def show_all_gambling(self,):
+        print_table(self.client.get_all_gambling_info())
+
+    def show_recommended(self, args):
+        parser = argparse.ArgumentParser(
+            prog="recommendations",
+            add_help=True,
+            description="get recommended exchanges and wallets",
+        )
+        parser.add_argument(
+            "-c", "--coin", help="Coin symbol", dest="symbol", required=True, type=str,
+            default='ETH'
+        )
+        parser.add_argument(
+            "-k", "--key", help="What you need recommendations for ? choose from [wallet, exchange]",
+            dest="key", required=True, type=str, choices=['wallet', 'exchange'],
+            default='wallet'
+        )
+        parsy, _ = parser.parse_known_args(args)
+        if not parsy:
+            return
+
+        if parsy.key == 'exchange':
+            func = self.client.get_recommended_exchanges
+        else:
+            func = self.client.get_recommended_wallets
+
+        try:
+            df = func(symbol=parsy.symbol)
+        except ValueError as e:
+            print(f"{e}, To check list of coins use command: coins ")
+            return
+
+        if df.empty:
+            print(f"Not found recommended {parsy.key} for {parsy.symbol}")
+        print_table(df)
+
+    def show_latest_socials(self, args):
+        parser = argparse.ArgumentParser(
+            prog="socials",
+            add_help=True,
+            description="get latest social stats",
+        )
+        parser.add_argument(
+            "-c", "--coin", help="symbol or id of coin. Default 7605 - > ETH",
+            dest="symbol", required=False,
+            default=7605
+        )
+
+        parsy, _ = parser.parse_known_args(args)
+        if not parsy:
+            return
+
+        if isinstance(parsy.symbol, str) and parsy.symbol.isalpha():
+            coin_id = self.client.coin_mapping.get(parsy.symbol.upper())
+            if coin_id:
+                df = self.client.get_latest_social_coin_stats(coin_id=coin_id)
+            else:
+                print(f"Could'nt find coin {parsy.symbol}. To see list of coins use coins command")
+                return
+        elif isinstance(parsy.symbol, int) or parsy.symbol.isdigit():
+            df = self.client.get_latest_social_coin_stats(coin_id=int(parsy.symbol))
+        else:
+            df = pd.DataFrame()
+        print_table(df)
+
 
 def main():
     c = Controller()
@@ -527,7 +641,12 @@ def main():
     parser.add_argument("cmd", choices=choices)
     print(LOGO)
     c.help()
+    reconfigure_sys()
     while True:
+        if c.client.api_key is None:
+            print_no_api_key_msg()
+            break
+
         an_input = input(f"> {MOON} ")
         try:
             parsy, others = parser.parse_known_args(an_input.split())
@@ -548,7 +667,6 @@ def main():
                     view(others)
                 else:
                     view()
-
 
         except ArgumentError:
             print("The command selected doesn't exist")

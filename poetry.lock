@@ -122,6 +122,14 @@ python-versions = "*"
 requests = "*"
 
 [[package]]
+name = "pyreadline"
+version = "2.1"
+description = "A python implmementation of GNU readline."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.1"
 description = "Extensions to the standard Python datetime module"
@@ -237,7 +245,7 @@ brotli = ["brotlipy (>=0.6.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.1"
-content-hash = "284a39794adcab6d433226732fa0f950c29c33b245e90c05ae3d3a2d7fa8df5a"
+content-hash = "bdaf41b76a61b2531d1f7e1982d3a58de4ba33a2d42712911914aebc3c8bc0d8"
 
 [metadata.files]
 beautifulsoup4 = [
@@ -367,6 +375,11 @@ py = [
 pycoingecko = [
     {file = "pycoingecko-2.0.0-py3-none-any.whl", hash = "sha256:ebc17d5947006d02691cc9e4be3533a7a3a5f43da0f9e407e97d592bac26d98c"},
     {file = "pycoingecko-2.0.0.tar.gz", hash = "sha256:5927d50b0eee0c6eb49c176d4f11d31851bcee282b9a6d08cad2bff149f66f33"},
+]
+pyreadline = [
+    {file = "pyreadline-2.1.win-amd64.exe", hash = "sha256:9ce5fa65b8992dfa373bddc5b6e0864ead8f291c94fbfec05fbd5c836162e67b"},
+    {file = "pyreadline-2.1.win32.exe", hash = "sha256:65540c21bfe14405a3a77e4c085ecfce88724743a4ead47c66b84defcf82c32e"},
+    {file = "pyreadline-2.1.zip", hash = "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},

@@ -7,6 +7,7 @@ import cachetools.func
 from retry import retry
 from moonbag.cryptocompare._client import CryptoCompareClient
 from moonbag.utils import table_formatter
+from moonbag.cryptocompare.utils import create_dct_mapping_from_df
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -27,6 +28,7 @@ class CryptoCompare(CryptoCompareClient):
         super().__init__(api_key)
         self.api_key = api_key
         self.coin_list = self.get_all_coins_list()
+        self.coin_mapping = create_dct_mapping_from_df(self.coin_list, 'Symbol','Id')
 
     @table_formatter
     def get_price(self, symbol="BTC", currency="USD", **kwargs):
@@ -65,7 +67,7 @@ class CryptoCompare(CryptoCompareClient):
         try:
             df["Url"] = df["Url"].apply(lambda x: self.COMPARE_URL + x)
         except Exception as e:
-            print(e)
+            logger.log(2, e)
         return df
 
     @table_formatter
@@ -83,8 +85,11 @@ class CryptoCompare(CryptoCompareClient):
             "Data"
         ]
         df = pd.DataFrame(data)
-        df["volume"] = df["volume"].apply(lambda x: float(x))
-        df = df[df["volume"] > 0]
+        try:
+            df["volume"] = df["volume"].apply(lambda x: float(x))
+            df = df[df["volume"] > 0]
+        except KeyError as e:
+            logger.log(2, e)
         return df
 
     @table_formatter
@@ -100,6 +105,8 @@ class CryptoCompare(CryptoCompareClient):
     def get_latest_social_coin_stats(self, coin_id=7605, **kwargs):
         data = self._get_latest_social_coin_stats(coin_id, **kwargs)["Data"]
         social_stats = {}
+
+        general = pd.Series(data.get('General')).to_frame().reset_index()
         for social in ["Twitter", "Reddit", "Facebook"]:
             social_stats[social] = data.get(social)
 
@@ -120,8 +127,14 @@ class CryptoCompare(CryptoCompareClient):
             "repository_created_at",
             "repository_last_push",
         ]:
-            df[col] = pd.to_datetime(df[col], unit="s")
-        return df.T
+            try:
+                df[col] = pd.to_datetime(df[col], unit="s")
+            except KeyError as e:
+                logger.log(2, e)
+        df = df.T.reset_index()
+        df = pd.concat([general, df])
+        df.columns = ['Metric','Value']
+        return df
 
     def get_historical_social_stats(
         self, coin_id=7605, limit=104, aggregate=7, **kwargs
@@ -175,7 +188,7 @@ class CryptoCompare(CryptoCompareClient):
 
     def get_all_coins_list(self, summary="true", **kwargs):
         data = self._get_all_coins_list(summary, **kwargs)["Data"]
-        return pd.DataFrame(data).T[["Id", "Symbol", "FullName"]].set_index("Id")
+        return pd.DataFrame(data).T[["Id", "Symbol", "FullName"]]
 
     @table_formatter
     def get_historical_day_prices(
@@ -405,49 +418,57 @@ class CryptoCompare(CryptoCompareClient):
         return df[columns].sort_values(by="Votes", ascending=False).set_index("Name")
 
     def get_recommended_wallets(self, symbol="BTC", **kwargs):
-        data = self._get_recommendations(symbol, **kwargs)["Data"]["wallets"]
-        df = pd.DataFrame(data).T
-        cols = [
-            "Name",
-            "Security",
-            "Anonymity",
-            "EaseOfUse",
-            "WalletFeatures",
-            "Coins",
-            "Platforms",
-            "SourceCodeUrl",
-            "Avg",
-            "Votes",
-        ]
-        df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
-        df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
-        joins = ["WalletFeatures", "Platforms", "Coins"]
-        for col in joins:
-            df[col] = df[col].apply(lambda x: ", ".join(x))
-        return df[cols].sort_values(by="Votes", ascending=False).set_index("Name")
+        try:
+            data = self._get_recommendations(symbol, **kwargs)["Data"]["wallets"]
+            df = pd.DataFrame(data).T
+            cols = [
+                "Name",
+                "Security",
+                "Anonymity",
+                "EaseOfUse",
+                "WalletFeatures",
+                "Coins",
+                "Platforms",
+                "SourceCodeUrl",
+                "Avg",
+                "Votes",
+            ]
+            df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
+            df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
+            joins = ["WalletFeatures", "Platforms", "Coins"]
+            for col in joins:
+                df[col] = df[col].apply(lambda x: ", ".join(x))
+            return df[cols].sort_values(by="Votes", ascending=False)
+        except KeyError as e:
+            logger.log(2, e)
+            return pd.DataFrame()
 
     def get_recommended_exchanges(self, symbol="BTC", **kwargs):
-        data = self._get_recommendations(symbol, **kwargs)["Data"]["exchanges"]
-        df = pd.DataFrame(data).T
-        columns = [
-            "Name",
-            "ItemType",
-            "CentralizationType",
-            "GradePoints",
-            "Grade",
-            "Country",
-            "FullAddress",
-            "DepositMethods",
-            "WithdrawalMethods",
-            "Avg",
-            "Votes",
-        ]
-        for col in ["FullAddress", "DepositMethods", "WithdrawalMethods"]:
-            df[col] = df[col].apply(lambda x: x.replace("\n\n", ", "))
-            df[col] = df[col].apply(lambda x: x.replace(",\n", ", "))
-            df[col] = df[col].apply(lambda x: x.replace("\n", ", "))
-        df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
-        df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
-        df["ItemType"] = df["ItemType"].apply(lambda x: ", ".join(x))
-        return df[columns].set_index("Name").sort_values(by="Votes", ascending=False)
+        try:
+            data = self._get_recommendations(symbol, **kwargs)["Data"]["exchanges"]
+            df = pd.DataFrame(data).T
+            columns = [
+                "Name",
+                "ItemType",
+                "CentralizationType",
+                "GradePoints",
+                "Grade",
+                "Country",
+                "FullAddress",
+                "DepositMethods",
+                "WithdrawalMethods",
+                "Avg",
+                "Votes",
+            ]
+            for col in ["FullAddress", "DepositMethods", "WithdrawalMethods"]:
+                df[col] = df[col].apply(lambda x: x.replace("\n\n", ", "))
+                df[col] = df[col].apply(lambda x: x.replace(",\n", ", "))
+                df[col] = df[col].apply(lambda x: x.replace("\n", ", "))
+            df["Avg"] = df["Rating"].apply(lambda x: x.get("Avg"))
+            df["Votes"] = df["Rating"].apply(lambda x: x.get("TotalUsers"))
+            df["ItemType"] = df["ItemType"].apply(lambda x: ", ".join(x))
+            return df[columns].sort_values(by="Votes", ascending=False)
+        except KeyError as e:
+            logger.log(2, e)
+            return pd.DataFrame()
 

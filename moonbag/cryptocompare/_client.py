@@ -110,7 +110,7 @@ class CryptoCompareClient:
         payload = {
             "e": exchange.capitalize(),
             "limit": limit,
-            'direction' : 'TO'
+            'direction' : 'FROM'
         }
         return self._make_request(endpoint, payload, **kwargs)
 
