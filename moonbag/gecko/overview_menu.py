@@ -5,6 +5,9 @@ from moonbag.gecko.gecko import Overview
 import logging
 from moonbag.common import LOGO, MOON, print_table
 from typing import List
+import sys
+#coding: utf8
+sys.stdout.reconfigure(encoding='utf-8')
 
 logger = logging.getLogger("parser")
 
@@ -40,34 +43,34 @@ class Controller:
             "exit": self.quit,
         }
         self.mapper = {
-            "topdexes": self.o.get_top_dexes,
-            "mostvisited": self.o.get_most_visited_coins,
+            "top_dexes": self.o.get_top_dexes,
+            "most_visited": self.o.get_most_visited_coins,
             "gainers": self.o.get_top_gainers,
-            "mostvoted": self.o.get_most_voted_coins,
-            "topsentiment": self.o.get_positive_sentiment_coins,
-            "topvolume": self.o.get_top_volume_coins,
+            "most_voted": self.o.get_most_voted_coins,
+            "top_sentiment": self.o.get_positive_sentiment_coins,
+            "top_volume": self.o.get_top_volume_coins,
             "trending": self.o.get_trending_coins,
-            "yieldfarms": self.o.get_yield_farms,
+            "yield_farms": self.o.get_yield_farms,
             "stables": self.o.get_stable_coins,
-            "topnft": self.o.get_top_nfts,
-            "nftmarket": self.o.get_nft_market_status,
+            "top_nft": self.o.get_top_nfts,
+            "nft_market": self.o.get_nft_market_status,
             "categories": self.o.get_top_crypto_categories,
-            "nftofday": self.o.get_nft_of_the_day,
+            "nft_of_day": self.o.get_nft_of_the_day,
             "recently": self.o.get_recently_added_coins,
-            "btccompanies": self.o.get_companies_with_btc,
-            "ethcompanies": self.o.get_companies_with_eth,
+            "btc_comp": self.o.get_companies_with_btc,
+            "eth_comp": self.o.get_companies_with_eth,
             "losers": self.o.get_top_losers,
-            "exrates": self.o.get_exchange_rates,
+            "ex_rates": self.o.get_exchange_rates,
             "exchanges": self.o.get_exchanges,
             "derivatives": self.o.get_derivatives,
             "indexes": self.o.get_indexes,
-            "ethhold": self.o.get_eth_holdings_public_companies_overview,
-            "btchold": self.o.get_btc_holdings_public_companies_overview,
+            "eth_holders": self.o.get_eth_holdings_public_companies_overview,
+            "btc_holders": self.o.get_btc_holdings_public_companies_overview,
             "news": self.o.get_news,
-            "topdefi": self.o.get_top_defi_coins,
-            "infodefi": self.o.get_global_defi_info,
-            "finprod": self.o.get_finance_products,
-            "finplat": self.o.get_financial_platforms,
+            "top_defi": self.o.get_top_defi_coins,
+            "info_defi": self.o.get_global_defi_info,
+            "fin_products": self.o.get_finance_products,
+            "fin_platforms": self.o.get_financial_platforms,
         }
 
     @staticmethod
@@ -81,43 +84,43 @@ class Controller:
         print("   news              show latest crypto news [Coingecko]")
         print("   trending          show trending coins [Coingecko]")
         print("   recently          show recently added coins [Coingecko]")
-        print("   mostvisited       show most visited coins [Coingecko]")
-        print("   mostvoted         show most visited coins [Coingecko]")
+        print("   most_visited      show most visited coins [Coingecko]")
+        print("   most_voted        show most visited coins [Coingecko]")
 
         print("   gainers           show top gainers in last 1h [Coingecko]")
         print("   losers            show top losers in last 1h [Coingecko]")
 
         print(
-            "   topsentiment      show coins with most positive sentiment [Coingecko]"
+            "   top_sentiment      show coins with most positive sentiment [Coingecko]"
         )
-        print("   topvolume         show coins with highest volume [Coingecko]")
+        print("   top_volume        show coins with highest volume [Coingecko]")
 
-        print("   topdexes          show top decentralized exchanges [Coingecko]")
-        print("   topdefi           show top defi coins [Coingecko]")
-        print("   infodefi          show overview of defi [Coingecko]")
-        print("   yieldfarms        show yield farms [Coingecko]")
+        print("   top_dexes         show top decentralized exchanges [Coingecko]")
+        print("   top_defi          show top defi coins [Coingecko]")
+        print("   info_defi         show overview of defi [Coingecko]")
+        print("   yield_farms       show yield farms [Coingecko]")
 
         print("   stables           show stable coins [Coingecko]")
 
-        print("   topnft            show top nfts [Coingecko]")
-        print("   nftmarket         show nft market status [Coingecko]")
-        print("   nftofday          show nft of a day [Coingecko]")
+        print("   top_nft           show top nfts [Coingecko]")
+        print("   nft_market        show nft market status [Coingecko]")
+        print("   nft_of_day        show nft of a day [Coingecko]")
 
         print("   categories        show top crypto categories [Coingecko]")
         print(
             "   derivatives       show derivatives [Coingecko] !Waiting time ~ 10-15 sec!"
         )
         print("   indexes           show indexes [Coingecko]")
-        print("   finprod           show financial products [Coingecko]")
-        print("   finplat           show financial platforms [Coingecko]")
+        print("   fin_products      show financial products [Coingecko]")
+        print("   fin_platforms     show financial platforms [Coingecko]")
 
-        print("   btccompanies      show companies that holds bitcoin [Coingecko]")
-        print("   ethcompanies      show companies that holds ethereum [Coingecko]")
-        print("   ethhold           show eth holdings overview [Coingecko]")
-        print("   btchold           show btc holdings overview [Coingecko]")
+        print("   btc_comp          show companies that holds bitcoin [Coingecko]")
+        print("   eth_comp          show companies that holds ethereum [Coingecko]")
+        print("   eth_holdings      show eth holdings overview [Coingecko]")
+        print("   btc_holdings      show btc holdings overview [Coingecko]")
 
         print("   exchanges         show info about exchanges [Coingecko]")
-        print("   exrates           show exchanges rates [Coingecko]")
+        print("   ex_rates          show exchanges rates [Coingecko]")
 
         print(" ")
         return
@@ -145,6 +148,9 @@ class Controller:
 
 
 def main():
+    sys.stdin.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser(prog="overview", add_help=False)
     c = Controller()
     choices = list(c.mapper.keys()) + list(c.base.keys())

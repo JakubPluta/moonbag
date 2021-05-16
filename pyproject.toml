@@ -1,24 +1,22 @@
 [tool.poetry]
 name = "moonbag"
 version = "0.1.0"
-description = "MoonBag - Crypto CLI that will help you explore crypto world."
-authors = ["jp <plutakuba@gmail.com>"]
+description = "Moonbag is command line application that helps to explore crypto trends, coin prices, exchanges and many others."
+authors = ["jakub <plutakuba@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.7.1"
-numpy = "^1.20.2"
-pandas = "^1.2.4"
+python = "^3.9"
 pycoingecko = "^2.0.0"
-retry = "^0.9.2"
 requests = "^2.25.1"
+pandas = "^1.2.4"
+python-dotenv = "^0.17.1"
+numpy = "^1.20.3"
+retry = "^0.9.2"
+lxml = "^4.6.3"
 bs4 = "^0.0.1"
 cachetools = "^4.2.2"
-python-dotenv = "^0.17.1"
 tabulate = "^0.8.9"
-lxml = "^4.6.3"
-tqdm = "^4.60.0"
-pyreadline = "^2.1"
 
 [tool.poetry.dev-dependencies]
 

@@ -39,3 +39,27 @@ def print_no_api_key_msg():
           "To do that please visit https://min-api.cryptocompare.com/ and get your free key\n"
           "Then go to moonbag.common.keys and add your key to variable CC_API_KEY"
           "CC_API_KEY = <your_key> and restart program")
+
+
+
+
+def columns_mapper():
+    columns = [
+        'MARKET', 'FROMSYMBOL', 'TOSYMBOL',
+        'PRICE', 'VOLUME24HOUR', 'OPENDAY', 'HIGHDAY',
+        'LOWDAY', 'CHANGEPCT24HOUR', 'CHANGEPCTHOUR'
+    ]
+    mp = {
+        'TechnologyAdoptionRating': 'TechRating',
+        'MarketPerformanceRating': 'MarketRating',
+        'AssetLaunchDate': 'Launched',
+        'TOSYMBOL': 'ToSymbol',
+        'PRICE': 'Price',
+        'MEDIAN': "Median",
+        'MKTCAP': 'MarketCap',
+        'SUPPLY': 'Supply',
+        'CHANGEPCT24HOUR': '% change 24h',
+        'CHANGEPCTHOUR': '% change 1h',
+        'TOTALVOLUME24H': 'Volume 24h',
+
+    }

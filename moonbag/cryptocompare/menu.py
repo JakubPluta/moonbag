@@ -1,17 +1,14 @@
+#!/usr/bin/env python
+import sys
+import os
 from moonbag.cryptocompare.cryptocomp import CryptoCompare, API_KEY
 import argparse
 import logging
 from moonbag.common import LOGO, MOON, print_table
-import difflib
 import pandas as pd
-import textwrap
 from argparse import ArgumentError
 from moonbag.cryptocompare.utils import get_closes_matches_by_name, get_closes_matches_by_symbol, print_no_api_key_msg
 from inspect import signature
-from pyreadline import Readline
-from moonbag.common.utils import reconfigure_sys
-
-#readline = Readline()
 
 
 logger = logging.getLogger("compare-menu")
@@ -49,7 +46,8 @@ class Controller:
             'wallets' : self.show_all_wallets,
             'gambling' : self.show_all_gambling,
             'recommended' : self.show_recommended,
-            'social_latest' : self.show_latest_socials,
+            'social' : self.show_latest_socials,
+            'social_hist' : self.show_histo_socials,
         }
 
     @staticmethod
@@ -89,6 +87,9 @@ class Controller:
         print("   gambling          show all available gambling [CryptoCompare]")
         print("   recommended       show all recommendation fro wallets and exchanges [CryptoCompare]")
 
+        print("   social            show latest social stats for given coins symbol   [CryptoCompare]")
+        print("   social_hist       show historical social stats for given coins symbol "
+              "(weekly aggregated) [CryptoCompare]")
         print(" ")
         return
 
@@ -179,11 +180,6 @@ class Controller:
             default=50
         )
 
-        parser.add_argument(
-            "--full", help="show all columns", dest="full", required=False, action='store_true',
-            default=False
-        )
-
         parsy, _ = parser.parse_known_args(args)
         if not parsy:
             return
@@ -198,17 +194,7 @@ class Controller:
             print(f"Empty dataframe returned for {parsy.tosymbol} ")
             return
 
-        columns = [
-            'Id', 'Name','FullName', 'ProofType','Rating',
-            'TechnologyAdoptionRating', 'MarketPerformanceRating',
-            'AssetLaunchDate' ,'FROMSYMBOL', 'TOSYMBOL', 'PRICE',
-            'MEDIAN', 'MKTCAP', 'SUPPLY', 'MaxSupply',
-             'CHANGEPCT24HOUR', 'CHANGEPCTHOUR','TOTALVOLUME24H',
-        ]
-        if parsy.full is True:
-            print_table(df)
-        else:
-            print_table(df[columns])
+        print_table(df, floatfmt='.2f')
 
     def show_top_exchanges(self, args):
         parser = argparse.ArgumentParser(
@@ -510,7 +496,9 @@ class Controller:
         except ValueError as e:
             print(f"{e}")
             return
-        print_table(df)
+        if df.empty:
+            print(f"No data found for {parsy.symbol}")
+        print_table(df,floatfmt='.0f')
 
     def show_top_trading_pairs(self, args):
         parser = argparse.ArgumentParser(
@@ -531,7 +519,7 @@ class Controller:
         except ValueError as e:
             print(f"{e}")
             return
-        print_table(df)
+        print_table(df, floatfmt='.6f')
 
     def show_order_book_snapshot(self, args):
         parser = argparse.ArgumentParser(
@@ -564,10 +552,10 @@ class Controller:
         print_table(df)
 
     def show_all_wallets(self,):
-        print_table(self.client.get_all_wallet_info())
+        print_table(self.client.get_all_wallet_info(), floatfmt='.2f')
 
     def show_all_gambling(self,):
-        print_table(self.client.get_all_gambling_info())
+        print_table(self.client.get_all_gambling_info(), floatfmt='.2f')
 
     def show_recommended(self, args):
         parser = argparse.ArgumentParser(
@@ -601,7 +589,7 @@ class Controller:
 
         if df.empty:
             print(f"Not found recommended {parsy.key} for {parsy.symbol}")
-        print_table(df)
+        print_table(df, floatfmt='.2f')
 
     def show_latest_socials(self, args):
         parser = argparse.ArgumentParser(
@@ -632,22 +620,52 @@ class Controller:
             df = pd.DataFrame()
         print_table(df)
 
+    def show_histo_socials(self, args):
+        parser = argparse.ArgumentParser(
+            prog="socials historical",
+            add_help=True,
+            description="get social historical stats - weekly aggregated",
+        )
+        parser.add_argument(
+            "-c", "--coin", help="symbol or id of coin. Default 7605 - > ETH",
+            dest="symbol", required=False,
+            default=7605
+        )
+
+        parsy, _ = parser.parse_known_args(args)
+        if not parsy:
+            return
+
+        if isinstance(parsy.symbol, str) and parsy.symbol.isalpha():
+            coin_id = self.client.coin_mapping.get(parsy.symbol.upper())
+            if coin_id:
+                df = self.client.get_historical_social_stats(coin_id=coin_id)
+            else:
+                print(f"Could'nt find coin {parsy.symbol}. To see list of coins use coins command")
+                return
+        elif isinstance(parsy.symbol, int) or parsy.symbol.isdigit():
+            df = self.client.get_historical_social_stats(coin_id=int(parsy.symbol))
+        else:
+            df = pd.DataFrame()
+        print_table(df, floatfmt='.0f')
 
 def main():
     c = Controller()
     choices = c.base_commands + list(c.mapper.keys())
+    if sys.platform == "win32": os.system("")
 
     parser = argparse.ArgumentParser(prog="cmc", add_help=False)
     parser.add_argument("cmd", choices=choices)
+
     print(LOGO)
     c.help()
-    reconfigure_sys()
     while True:
+
         if c.client.api_key is None:
             print_no_api_key_msg()
             break
 
-        an_input = input(f"> {MOON} ")
+        an_input = input(f"{MOON}> ")
         try:
             parsy, others = parser.parse_known_args(an_input.split())
             cmd = parsy.cmd
