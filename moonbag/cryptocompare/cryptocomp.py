@@ -7,7 +7,7 @@ from moonbag.cryptocompare.utils import create_dct_mapping_from_df
 import logging
 import textwrap
 
-logger = logging.getLogger('cmc')
+logger = logging.getLogger("cmc")
 
 load_dotenv()
 
@@ -19,7 +19,7 @@ class CryptoCompare(CryptoCompareClient):
         super().__init__(api_key)
         self.api_key = api_key
         self.coin_list = self.get_all_coins_list()
-        self.coin_mapping = create_dct_mapping_from_df(self.coin_list, 'Symbol','Id')
+        self.coin_mapping = create_dct_mapping_from_df(self.coin_list, "Symbol", "Id")
 
     @table_formatter
     def get_price(self, symbol="BTC", currency="USD", **kwargs):
@@ -45,7 +45,7 @@ class CryptoCompare(CryptoCompareClient):
         ]
         data = {k: v for k, v in data.items() if k in columns}
         df = pd.Series(data).to_frame().reset_index()
-        df.columns = ['Metric','Value']
+        df.columns = ["Metric", "Value"]
         return df
 
     @table_formatter
@@ -57,34 +57,35 @@ class CryptoCompare(CryptoCompareClient):
         df.columns = [col.split(".")[-1] for col in list(df.columns)]
         df = wrap_text_in_df(df)
 
-        df.rename(columns={
-            'TechnologyAdoptionRating' : 'TechRating',
-            'MarketPerformanceRating' : 'MarketRating',
-            'AssetLaunchDate' : 'Launched',
-            'TOSYMBOL' : 'ToSymbol',
-            'PRICE' : 'Price',
-            'MEDIAN' : "Median",
-            'MKTCAP' : 'MarketCap',
-            'SUPPLY' : 'Supply',
-            'CHANGEPCT24HOUR' : '% change 24h',
-            'CHANGEPCTHOUR': '% change 1h',
-            'TOTALVOLUME24H' : 'Volume 24h',
-
-
-        }, inplace=True)
+        df.rename(
+            columns={
+                "TechnologyAdoptionRating": "TechRating",
+                "MarketPerformanceRating": "MarketRating",
+                "AssetLaunchDate": "Launched",
+                "TOSYMBOL": "ToSymbol",
+                "PRICE": "Price",
+                "MEDIAN": "Median",
+                "MKTCAP": "MarketCap",
+                "SUPPLY": "Supply",
+                "CHANGEPCT24HOUR": "% change 24h",
+                "CHANGEPCTHOUR": "% change 1h",
+                "TOTALVOLUME24H": "Volume 24h",
+            },
+            inplace=True,
+        )
         columns = [
-            'Name',
-            'FullName',
-            'ProofType',
-            'Rating',
-            'Launched',
-            'ToSymbol',
-            'Price',
-            'MarketCap',
-            'Supply',
-            '% change 24h',
-            '% change 1h',
-            'Volume 24h'
+            "Name",
+            "FullName",
+            "ProofType",
+            "Rating",
+            "Launched",
+            "ToSymbol",
+            "Price",
+            "MarketCap",
+            "Supply",
+            "% change 24h",
+            "% change 1h",
+            "Volume 24h",
         ]
         return df[columns]
 
@@ -95,9 +96,16 @@ class CryptoCompare(CryptoCompareClient):
         ]
         df = pd.json_normalize(data)
         columns = [
-            'MARKET', 'FROMSYMBOL', 'TOSYMBOL',
-            'PRICE','VOLUME24HOUR', 'OPENDAY','HIGHDAY',
-            'LOWDAY','CHANGEPCT24HOUR', 'CHANGEPCTHOUR'
+            "MARKET",
+            "FROMSYMBOL",
+            "TOSYMBOL",
+            "PRICE",
+            "VOLUME24HOUR",
+            "OPENDAY",
+            "HIGHDAY",
+            "LOWDAY",
+            "CHANGEPCT24HOUR",
+            "CHANGEPCTHOUR",
         ]
 
         return df[columns]
@@ -121,9 +129,7 @@ class CryptoCompare(CryptoCompareClient):
     def get_top_list_by_pair_volume(self, currency="USD", limit=100, **kwargs):
         data = self._get_top_list_by_pair_volume(currency, limit, **kwargs)["Data"]
         df = pd.DataFrame(data)
-        columns = ['SYMBOL','NAME','FULLNAME','SUPPLY','VOLUME24HOURTO'
-
-        ]
+        columns = ["SYMBOL", "NAME", "FULLNAME", "SUPPLY", "VOLUME24HOURTO"]
         return df[columns]
 
     @table_formatter
@@ -135,7 +141,7 @@ class CryptoCompare(CryptoCompareClient):
         data = self._get_latest_social_coin_stats(coin_id, **kwargs)["Data"]
         social_stats = {}
 
-        general = pd.Series(data.get('General')).to_frame().reset_index()
+        general = pd.Series(data.get("General")).to_frame().reset_index()
         for social in ["Twitter", "Reddit", "Facebook"]:
             social_stats[social] = data.get(social)
 
@@ -162,7 +168,7 @@ class CryptoCompare(CryptoCompareClient):
                 logger.log(2, e)
         df = df.T.reset_index()
         df = pd.concat([general, df])
-        df.columns = ['Metric','Value']
+        df.columns = ["Metric", "Value"]
         return df
 
     def get_historical_social_stats(
@@ -193,31 +199,26 @@ class CryptoCompare(CryptoCompareClient):
             inplace=True,
         )
         df = wrap_text_in_df(df, w=40)
-        cols = ['time',
-                'fb_likes',
-                #'fb_talking_about',
-                'twitter_followers',
-                #'twitter_following',
-                #'twitter_lists',
-                #'twitter_favourites',
-                #'twitter_statuses',
-                'reddit_subscribers',
-                'reddit_active_users',
-                #'reddit_posts_per_hour',
-                'reddit_posts_per_day',
-                'reddit_comments_per_hour',
-                'reddit_comments_per_day',
-                'code_repo_stars',
-                'code_repo_forks',
-                'code_repo_subscribers',
-                #'code_repo_open_pull_issues',
-                #'code_repo_closed_pull_issues',
-                #'code_repo_open_issues',
-                #'code_repo_closed_issues',
-                'code_repo_contributors'
-                ]
+        cols = [
+            "time",
+            "fb_likes",
+            "twitter_followers",
+            "reddit_subscribers",
+            "reddit_active_users",
+            "reddit_posts_per_day",
+            "reddit_comments_per_hour",
+            "reddit_comments_per_day",
+            "code_repo_stars",
+            "code_repo_forks",
+            "code_repo_subscribers",
+            "code_repo_closed_issues",
+            "code_repo_contributors",
+        ]
         df = df[cols]
-        df.columns = [textwrap.fill(c.replace('_',' '), 13, break_long_words=False) for c in list(df.columns)]
+        df.columns = [
+            textwrap.fill(c.replace("_", " "), 13, break_long_words=False)
+            for c in list(df.columns)
+        ]
         return df
 
     def get_latest_news(self, lang="EN", sort_order="latest", **kwargs):
@@ -232,12 +233,10 @@ class CryptoCompare(CryptoCompareClient):
 
         # 'tags','categories','guid','body'
 
-        df = df[['published_on','title','source','guid']]
+        df = df[["published_on", "title", "source", "guid"]]
 
         df = df.applymap(
-            lambda x: "\n".join(textwrap.wrap(x, width=75))
-            if isinstance(x, str)
-            else x
+            lambda x: "\n".join(textwrap.wrap(x, width=75)) if isinstance(x, str) else x
         )
         return df
 
@@ -249,7 +248,7 @@ class CryptoCompare(CryptoCompareClient):
 
     @property
     def blockchain_coins_list(self):
-        return self.get_blockchain_available_coins_list()['symbol'].to_list()
+        return self.get_blockchain_available_coins_list()["symbol"].to_list()
 
     def get_all_coins_list(self, summary="true", **kwargs):
         data = self._get_all_coins_list(summary, **kwargs)["Data"]
@@ -343,7 +342,7 @@ class CryptoCompare(CryptoCompareClient):
             df = pd.Series(data)
             df["time"] = pd.to_datetime(df["time"], unit="s")
             df = df.to_frame().reset_index()
-            df.columns = ['Metric','Value']
+            df.columns = ["Metric", "Value"]
             return df
         except KeyError as e:
             logger.log(2, e)
@@ -352,9 +351,9 @@ class CryptoCompare(CryptoCompareClient):
     @table_formatter
     def get_historical_blockchain_data(self, symbol="ETH", limit=365, **kwargs):
         try:
-            data = self._get_historical_blockchain_data(symbol, limit, **kwargs)["Data"][
+            data = self._get_historical_blockchain_data(symbol, limit, **kwargs)[
                 "Data"
-            ]
+            ]["Data"]
             df = pd.DataFrame(data)
             df["time"] = pd.to_datetime(df["time"], unit="s")
             df.drop(
@@ -396,10 +395,9 @@ class CryptoCompare(CryptoCompareClient):
     def get_order_book_top(
         self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
     ):
-        data = self._get_order_book_top(symbol.upper(), to_symbol.upper(),
-                                        exchange.capitalize(), **kwargs)["Data"][
-            "RAW"
-        ]
+        data = self._get_order_book_top(
+            symbol.upper(), to_symbol.upper(), exchange.capitalize(), **kwargs
+        )["Data"]["RAW"]
         df = pd.json_normalize(data)
         df.columns = [c.replace(".", "_") for c in df.columns]
         df.drop(df.columns[0], axis=1, inplace=True)
@@ -426,9 +424,11 @@ class CryptoCompare(CryptoCompareClient):
         return pd.DataFrame(data).T
 
     def get_all_exchanges_names(self):
-        exchanges = list(self._get_all_exchanges_and_trading_pairs()['Data']['exchanges'].keys())
+        exchanges = list(
+            self._get_all_exchanges_and_trading_pairs()["Data"]["exchanges"].keys()
+        )
         df = pd.Series(exchanges).to_frame().reset_index()
-        df.columns = ['Index','Name']
+        df.columns = ["Index", "Name"]
         return df
 
     def get_all_wallet_info(self, **kwargs):
@@ -436,13 +436,13 @@ class CryptoCompare(CryptoCompareClient):
         df = pd.DataFrame(data).T
         cols = [
             "Name",
-            #"Security",
+            # "Security",
             "Anonymity",
             "EaseOfUse",
-            #"WalletFeatures",
+            # "WalletFeatures",
             "Coins",
-            #"Platforms",
-            #"SourceCodeUrl",
+            # "Platforms",
+            # "SourceCodeUrl",
             "Avg",
             "Votes",
         ]
@@ -454,9 +454,7 @@ class CryptoCompare(CryptoCompareClient):
 
         df = df[cols].sort_values(by="Votes", ascending=False)
         df = df.applymap(
-            lambda x: "\n".join(textwrap.wrap(x, width=85))
-            if isinstance(x, str)
-            else x
+            lambda x: "\n".join(textwrap.wrap(x, width=85)) if isinstance(x, str) else x
         )
         return df
 
@@ -467,8 +465,8 @@ class CryptoCompare(CryptoCompareClient):
             "Name",
             "GameTypes",
             "Coins",
-            #"GamblingFeatures",
-            #"Platforms",
+            # "GamblingFeatures",
+            # "Platforms",
             "Twitter",
             "Reddit",
             "Avg",
@@ -487,9 +485,7 @@ class CryptoCompare(CryptoCompareClient):
         df = df[columns].sort_values(by="Votes", ascending=False)
 
         df = df.applymap(
-            lambda x: "\n".join(textwrap.wrap(x, width=55))
-            if isinstance(x, str)
-            else x
+            lambda x: "\n".join(textwrap.wrap(x, width=55)) if isinstance(x, str) else x
         )
         return df
 
@@ -502,9 +498,9 @@ class CryptoCompare(CryptoCompareClient):
                 "Security",
                 "Anonymity",
                 "EaseOfUse",
-                #"WalletFeatures",
+                # "WalletFeatures",
                 "Coins",
-                #"Platforms",
+                # "Platforms",
                 "SourceCodeUrl",
                 "Avg",
                 "Votes",
@@ -547,4 +543,3 @@ class CryptoCompare(CryptoCompareClient):
         except KeyError as e:
             logger.log(2, e)
             return pd.DataFrame()
-

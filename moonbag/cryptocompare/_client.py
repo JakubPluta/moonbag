@@ -102,16 +102,12 @@ class CryptoCompareClient:
         return self._make_request(endpoint, payload, **kwargs)
 
     def _get_exchanges_top_symbols_by_volume(
-        self, exchange="Binance", limit=100,**kwargs
+        self, exchange="Binance", limit=100, **kwargs
     ):
         "/data/exchange/top/volume?e=Binance&direction=TO"
         "e=Kraken"
         endpoint = ENDPOINTS["EXCHANGE_TOP_SYMBOLS"]
-        payload = {
-            "e": exchange.capitalize(),
-            "limit": limit,
-            'direction' : 'FROM'
-        }
+        payload = {"e": exchange.capitalize(), "limit": limit, "direction": "FROM"}
         return self._make_request(endpoint, payload, **kwargs)
 
     def _get_top_list_by_pair_volume(self, currency="USD", limit=100, **kwargs):
@@ -328,10 +324,10 @@ class CryptoCompareClient:
 
     def _get_recommendations(self, symbol="BTC", **kwargs):
         """Returns general info about our recommended entities.
-            * wallets,
-            * gambling
-            * mining companies
-            * exchanges
+        * wallets,
+        * gambling
+        * mining companies
+        * exchanges
         """
         endpoint = ENDPOINTS["RECOMMENDED"]
         payload = {"tsym": symbol}

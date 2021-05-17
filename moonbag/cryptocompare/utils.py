@@ -2,7 +2,7 @@ import pandas as pd
 import difflib
 import logging
 
-logger = logging.getLogger('cryptocompare-utils')
+logger = logging.getLogger("cryptocompare-utils")
 
 # TODO Make those algorithms better for name
 def get_closes_matches_by_name(name: str, coins: dict):
@@ -35,31 +35,37 @@ def create_dct_mapping_from_df(df, col1, col2):
 
 
 def print_no_api_key_msg():
-    print("You didn't pass API key for CryptoComapre. You can't use that section.\n"
-          "To do that please visit https://min-api.cryptocompare.com/ and get your free key\n"
-          "Then go to moonbag.common.keys and add your key to variable CC_API_KEY"
-          "CC_API_KEY = <your_key> and restart program")
-
-
+    print(
+        "You didn't pass API key for CryptoComapre. You can't use that section.\n"
+        "To do that please visit https://min-api.cryptocompare.com/ and get your free key\n"
+        "Then go to moonbag.common.keys and add your key to variable CC_API_KEY"
+        "CC_API_KEY = <your_key> and restart program"
+    )
 
 
 def columns_mapper():
     columns = [
-        'MARKET', 'FROMSYMBOL', 'TOSYMBOL',
-        'PRICE', 'VOLUME24HOUR', 'OPENDAY', 'HIGHDAY',
-        'LOWDAY', 'CHANGEPCT24HOUR', 'CHANGEPCTHOUR'
+        "MARKET",
+        "FROMSYMBOL",
+        "TOSYMBOL",
+        "PRICE",
+        "VOLUME24HOUR",
+        "OPENDAY",
+        "HIGHDAY",
+        "LOWDAY",
+        "CHANGEPCT24HOUR",
+        "CHANGEPCTHOUR",
     ]
     mp = {
-        'TechnologyAdoptionRating': 'TechRating',
-        'MarketPerformanceRating': 'MarketRating',
-        'AssetLaunchDate': 'Launched',
-        'TOSYMBOL': 'ToSymbol',
-        'PRICE': 'Price',
-        'MEDIAN': "Median",
-        'MKTCAP': 'MarketCap',
-        'SUPPLY': 'Supply',
-        'CHANGEPCT24HOUR': '% change 24h',
-        'CHANGEPCTHOUR': '% change 1h',
-        'TOTALVOLUME24H': 'Volume 24h',
-
+        "TechnologyAdoptionRating": "TechRating",
+        "MarketPerformanceRating": "MarketRating",
+        "AssetLaunchDate": "Launched",
+        "TOSYMBOL": "ToSymbol",
+        "PRICE": "Price",
+        "MEDIAN": "Median",
+        "MKTCAP": "MarketCap",
+        "SUPPLY": "Supply",
+        "CHANGEPCT24HOUR": "% change 24h",
+        "CHANGEPCTHOUR": "% change 1h",
+        "TOTALVOLUME24H": "Volume 24h",
     }

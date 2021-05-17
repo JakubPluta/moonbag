@@ -36,4 +36,3 @@ def print_table(df: pd.DataFrame, floatfmt=".4f", tablefmt="psql"):
         )
     )
     print("")
-

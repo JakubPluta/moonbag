@@ -4,11 +4,6 @@ import time
 from dotenv import load_dotenv
 import os
 import pandas as pd
-from moonbag.utils import table_formatter
-
-pd.set_option("display.max_columns", None)
-pd.set_option("display.max_rows", None)
-pd.set_option("display.width", None)
 
 load_dotenv()
 API_KEY = os.getenv("WALES_API_KEY")
@@ -20,7 +15,6 @@ def _get_wales_stats(min_value=1000000):
     return requests.get(url=req, params=params).json()["transactions"]
 
 
-@table_formatter
 def get_wales_stats():
     data = _get_wales_stats()
     data = pd.json_normalize(data).sort_values("timestamp", ascending=False)
@@ -39,6 +33,3 @@ def get_wales_stats():
     data["timestamp"] = pd.to_datetime(data["timestamp"], unit="s")
     data.columns = [col.replace(".address", "") for col in data.columns]
     return data.set_index("timestamp")
-
-
-

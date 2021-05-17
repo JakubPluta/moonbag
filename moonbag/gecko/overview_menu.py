@@ -1,18 +1,15 @@
 import argparse
 import pandas as pd
-from tabulate import tabulate
 from moonbag.gecko.gecko import Overview
 import logging
 from moonbag.common import LOGO, MOON, print_table
 from typing import List
-import sys
-#coding: utf8
-sys.stdout.reconfigure(encoding='utf-8')
 
 logger = logging.getLogger("parser")
 
 
 def create_view(name, func, desc, n: List):
+    """Method that wraps function with argparser, with top n argument as default"""
     parser = argparse.ArgumentParser(add_help=True, prog=name, description=desc)
     parser.add_argument(
         "-n",
@@ -64,8 +61,8 @@ class Controller:
             "exchanges": self.o.get_exchanges,
             "derivatives": self.o.get_derivatives,
             "indexes": self.o.get_indexes,
-            "eth_holders": self.o.get_eth_holdings_public_companies_overview,
-            "btc_holders": self.o.get_btc_holdings_public_companies_overview,
+            "eth_holdings": self.o.get_eth_holdings_public_companies_overview,
+            "btc_holdings": self.o.get_btc_holdings_public_companies_overview,
             "news": self.o.get_news,
             "top_defi": self.o.get_top_defi_coins,
             "info_defi": self.o.get_global_defi_info,
@@ -148,9 +145,6 @@ class Controller:
 
 
 def main():
-    sys.stdin.reconfigure(encoding="utf-8")
-    sys.stdout.reconfigure(encoding="utf-8")
-
     parser = argparse.ArgumentParser(prog="overview", add_help=False)
     c = Controller()
     choices = list(c.mapper.keys()) + list(c.base.keys())
@@ -158,7 +152,7 @@ def main():
     print(LOGO)
     c.help()
     while True:
-        an_input = input(f"> {MOON} ")
+        an_input = input(f"{MOON}> ")
         try:
             view = c.get_view(an_input)
             if view is None:

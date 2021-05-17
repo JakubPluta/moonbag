@@ -6,6 +6,7 @@ from pycoingecko import CoinGeckoAPI
 import cachetools.func
 from retry import retry
 import math
+from moonbag.common.utils import wrap_text_in_df, underscores_to_newline_replace
 from moonbag.gecko.utils import (
     changes_parser,
     replace_qm,
@@ -21,11 +22,6 @@ from moonbag.gecko.utils import (
 import logging
 
 logger = logging.getLogger("gecko")
-
-pd.set_option("display.max_columns", None)
-pd.set_option("display.max_rows", None)
-pd.set_option("display.width", None)
-pd.set_option("display.float_format", lambda x: "%.5f" % x)
 
 
 PERIODS = {
@@ -151,7 +147,12 @@ class Overview:
             results.append([name, price, price_usd, url])
         return pd.DataFrame(
             results,
-            columns=[COLUMNS["name"], "price btc", "price_usd", COLUMNS["url"],],
+            columns=[
+                COLUMNS["name"],
+                "price btc",
+                "price_usd",
+                COLUMNS["url"],
+            ],
         )
 
     def _get_news(self, page=1):
@@ -314,7 +315,16 @@ class Overview:
             url = self.BASE + row.find("a")["href"]
 
             row_cleaned = clean_row(row)
-            (name, symbol, _, price, *changes, mcpa, volume, last_added,) = row_cleaned
+            (
+                name,
+                symbol,
+                _,
+                price,
+                *changes,
+                mcpa,
+                volume,
+                last_added,
+            ) = row_cleaned
             change_1h, change_24h, _ = changes_parser(changes)
             results.append(
                 [
@@ -400,12 +410,30 @@ class Overview:
             row_cleaned = clean_row(row)[:-2]
             if len(row_cleaned) == 7:
                 row_cleaned.insert(2, None)
-            (rank, name, pool, *others, _, value_locked, apy1, apy2,) = row_cleaned
+            (
+                rank,
+                name,
+                pool,
+                *others,
+                _,
+                value_locked,
+                apy1,
+                apy2,
+            ) = row_cleaned
             auditors, collateral = collateral_auditors_parse(others)
             auditors = ", ".join([aud.strip() for aud in auditors])
             collateral = ", ".join([coll.strip() for coll in collateral])
             results.append(
-                [rank, name, pool, auditors, collateral, value_locked, apy1, apy2,]
+                [
+                    rank,
+                    name,
+                    pool,
+                    auditors,
+                    collateral,
+                    value_locked,
+                    apy1,
+                    apy2,
+                ]
             )
         return (
             pd.DataFrame(results, columns=columns).set_index("rank").replace({"": None})
@@ -465,15 +493,16 @@ class Overview:
         rows = self.gecko_scraper(url).find("tbody").find_all("tr")
         results = []
         for row in rows:
-            url = self.BASE + row.find("a")["href"]
+
             row_cleaned = clean_row(row)
             row_cleaned.pop(2)
+            url = self.BASE + row.find("a")["href"]
             row_cleaned.append(url)
             if len(row_cleaned) == 11:
                 row_cleaned.insert(4, "?")
             results.append(row_cleaned)
 
-        return (
+        df = (
             pd.DataFrame(
                 results,
                 columns=[
@@ -494,6 +523,13 @@ class Overview:
             .set_index(COLUMNS["rank"])
             .head(n)
         )
+        df.drop(
+            ["fully_diluted_market_cap", "market_cap_to_tvl_ratio"],
+            axis=1,
+            inplace=True,
+        )
+        df.columns = underscores_to_newline_replace(list(df.columns), 10)
+        return df
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_top_dexes(self, n=None):
@@ -590,6 +626,7 @@ class Overview:
             .reset_index()
         )
         df.columns = ["Metric", "Value"]
+        df = wrap_text_in_df(df, w=100)
         return df.head(n)
 
     @retry(tries=2, delay=3, max_delay=5)
@@ -612,7 +649,10 @@ class Overview:
         dfs = []
         for page in range(1, n_of_pages):
             dfs.append(self._get_news(page))
-        return pd.concat(dfs, ignore_index=True).head(n)
+        df = pd.concat(dfs, ignore_index=True).head(n)
+        df = wrap_text_in_df(df, w=65)
+        df.drop("article", axis=1, inplace=True)
+        return df
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_btc_holdings_public_companies_overview(self, n=None):
@@ -628,11 +668,15 @@ class Overview:
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_companies_with_btc(self, n=None):
-        return self._get_companies_assets("bitcoin").head(n)
+        df = self._get_companies_assets("bitcoin").head(n)
+        df.drop("url", axis=1, inplace=True)
+        return df
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_companies_with_eth(self, n=None):
-        return self._get_companies_assets("ethereum").head(n)
+        df = self._get_companies_assets("ethereum").head(n)
+        df.drop("url", axis=1, inplace=True)  # For now removed url
+        return df
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_coin_list(self, n=None):
@@ -692,9 +736,15 @@ class Overview:
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_derivatives(self, n=None):
-        return pd.DataFrame(
+        df =  pd.DataFrame(
             self.client.get_derivatives(include_tickers="unexpired")
         ).head(n)
+        df.drop(['index','last_traded_at','expired_at','index_id'], axis=1, inplace=True)
+
+        df.rename(columns={
+            'price_percentage_change_24h' : '%  change 24h'
+        }, inplace=True)
+        return df
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_exchange_rates(self, n=None):

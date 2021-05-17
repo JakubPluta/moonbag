@@ -66,7 +66,8 @@ def clean_row(row):
 
 
 def convert(word):
-    return ''.join(x.capitalize() or '_' for x in word.split('_') if word.isalpha())
+    return "".join(x.capitalize() or "_" for x in word.split("_") if word.isalpha())
+
 
 def collateral_auditors_parse(args):
     if args and args[0] == "N/A":

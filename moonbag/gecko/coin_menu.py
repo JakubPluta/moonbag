@@ -18,7 +18,7 @@ class Controller:
         self.parser.add_argument("cmd")
         self.base_commands = ["help", "exit", "quit", "r", "q"]
         self.mapper = {
-            "similar" : self.find_similar_coins,
+            "similar": self.find_similar_coins,
             "load": self.load_coin,
             "web": self.show_web,
             "info": self.show_coin_base_info,
@@ -41,17 +41,21 @@ class Controller:
         print("   quit              quit program")
         print("")
         print("Coin View            [Coingecko]")
-        print("    similar          don't remember symbol of coin ? Look for closest matches [Coingecko]")
+        print(
+            "    similar          don't remember symbol of coin ? Look for closest matches [Coingecko]"
+        )
         print("    load             load coin, example: 'load -c uniswap' [Coingecko]")
         print("    coinlist         show list of all coins available in [Coingecko]")
         print("    info             show info about loaded coin [Coingecko]")
         print("    market           show market info about loaded coin [Coingecko]")
-        print("    devs             show development information about loaded coins [Coingecko]"
+        print(
+            "    devs             show development information about loaded coins [Coingecko]"
         )
         print("    ath              show info all time high of loaded coin [Coingecko]")
         print("    atl              show info all time low of loaded coin [Coingecko]")
         print("    web              show web pages founded for loaded coin [Coingecko]")
-        print("    explorers        show blockchain explorers links for loaded coin [Coingecko]"
+        print(
+            "    explorers        show blockchain explorers links for loaded coin [Coingecko]"
         )
         return
 
@@ -63,7 +67,12 @@ class Controller:
             description="Load coin from coingecko\n If you not sure what is the symbol or id of coin use method coinlist",
         )
         parser.add_argument(
-            "-c", "--coin", help="Coin to get", dest="coin", required=True, type=str,
+            "-c",
+            "--coin",
+            help="Coin to get",
+            dest="coin",
+            required=True,
+            type=str,
         )
 
         if not args:
@@ -107,7 +116,9 @@ class Controller:
     def show_list_of_coins():
         print_table(get_coin_list(), "plain")
 
-    def show_scores(self,):
+    def show_scores(
+        self,
+    ):
         if self._is_loaded:
             df = self.coin.scores
             df = df.applymap(
@@ -123,28 +134,40 @@ class Controller:
             df = self.coin.market_data
             print_table(df)
 
-    def show_atl(self,):
+    def show_atl(
+        self,
+    ):
         if self._is_loaded:
             print_table(self.coin.all_time_low)
 
-    def show_ath(self,):
+    def show_ath(
+        self,
+    ):
         if self._is_loaded:
             df = self.coin.all_time_high
             print_table(df)
 
-    def show_developers(self,):
+    def show_developers(
+        self,
+    ):
         if self._is_loaded:
             print_table(self.coin.developers_data)
 
-    def show_bcexplores(self,):
+    def show_bcexplores(
+        self,
+    ):
         if self._is_loaded:
             print_table(self.coin.blockchain_explorers)
 
-    def show_socials(self,):
+    def show_socials(
+        self,
+    ):
         if self._is_loaded:
             print_table(self.coin.social_media)
 
-    def show_web(self,):
+    def show_web(
+        self,
+    ):
         if self._is_loaded:
             print_table(self.coin.websites)
 
@@ -155,8 +178,13 @@ class Controller:
             add_help=True,
             description="Find similar coins",
         )
-        parser.add_argument('-c','--coin',
-             help="Symbol/Name of Coin", dest="symbol", required=True, type=str,
+        parser.add_argument(
+            "-c",
+            "--coin",
+            help="Symbol/Name of Coin",
+            dest="symbol",
+            required=True,
+            type=str,
         )
 
         if not args:
@@ -170,7 +198,7 @@ class Controller:
         coins = get_coin_list().id.to_list()
         sim = difflib.get_close_matches(parsy.symbol, coins, 10)
         df = pd.Series(sim).to_frame().reset_index()
-        df.columns = ['Index', 'Name']
+        df.columns = ["Index", "Name"]
         print_table(df)
 
 
@@ -200,7 +228,9 @@ def main():
             view = c.mapper.get(cmd)
             if view is None:
                 continue
-            elif callable(view):  # If function takes params return func(args), else func()
+            elif callable(
+                view
+            ):  # If function takes params return func(args), else func()
                 if len(signature(view).parameters) > 0:
                     view(others)
                 else:
