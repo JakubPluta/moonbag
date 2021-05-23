@@ -24,7 +24,7 @@ class CryptoCompare(CryptoCompareClient):
     @table_formatter
     def get_price(self, symbol="BTC", currency="USD", **kwargs):
         data = self._get_price(symbol, currency, **kwargs)
-        if data['Response'] == 'Error':
+        if 'Response' in data and data['Response'] == 'Error':
             return pd.DataFrame()
         data = data["RAW"][symbol][currency]
         columns = [
