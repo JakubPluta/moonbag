@@ -174,11 +174,3 @@ class CustomParser:
 customparser = CustomParser()
 build_parser = customparser.build_parser
 
-# p = argparse.ArgumentParser(prog="kupa")
-#
-# pp = build_parser(p, config={"coin" : True, "tosymbol":True,}
-#
-# })
-#
-# #pp = build_parser(p)
-# print(pp._actions)
