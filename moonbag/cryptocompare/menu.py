@@ -13,6 +13,7 @@ from moonbag.cryptocompare.utils import (
     print_no_api_key_msg,
 )
 from inspect import signature
+from moonbag.cryptocompare.utils import MoonParser
 
 
 logger = logging.getLogger("compare-menu")
@@ -132,38 +133,28 @@ class Controller:
         print(" ")
         return
 
-    def show_prices(self, args):
-        parser = argparse.ArgumentParser(
-            prog="prices",
-            add_help=True,
-            description="get prices",
-        )
-        parser.add_argument(
-            "-c",
-            "-fsym",
-            help="symbol of the coin",
-            dest="symbol",
-            required=True,
-            type=str,
-        )
-        parser.add_argument(
-            "-t",
-            "-tsym",
-            help="Second coin in pair. Default USD",
-            dest="tosymbol",
-            required=False,
-            type=str,
-            default="USD",
-        )
-
-        if not args:
-            print("You didn't pass coin symbol. Please use price -c symbol")
-            return
-
+    @staticmethod
+    def _get_prices(args):
+        parser = MoonParser(prog="prices", add_help=True, description="get prices")
+        parser.add_coin_argument()
+        parser.add_to_symbol_argument()
+        parser.add_limit_argument(default=100,)
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
+        return parsy
 
+    @staticmethod
+    def _show_socials(args):
+        parser = MoonParser(
+            prog="socials",
+            add_help=True,
+            description="get latest social stats",
+        )
+        parser.add_coin_argument(default=7605, help="symbol or id of coin. Default 7605 - > ETH",)
+        parsy, _ = parser.parse_known_args(args)
+        return parsy
+
+    def show_prices(self, args):
+        parsy = self._get_prices(args)
         try:
             prices = self.client.get_price(parsy.symbol, parsy.tosymbol)
         except ValueError as e:
@@ -177,39 +168,11 @@ class Controller:
         print_table(self.client.coin_list.reset_index())
 
     def find_similar_coins(self, args):
-        parser = argparse.ArgumentParser(
-            prog="similar",
-            add_help=True,
-            description="Find similar coins",
-        )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="symbol or name of coin",
-            dest="symbol",
-            required=True,
-            type=str,
-        )
-
-        parser.add_argument(
-            "-k",
-            "--key",
-            help="search by symbol or name",
-            dest="key",
-            required=False,
-            type=str,
-            default="symbol",
-            choices=["symbol", "name"],
-        )
-
-        if not args:
-            print("You didn't pass coin symbol. Please use similar -c symbol")
-            return
+        parser = MoonParser(prog="similar",add_help=True,description="Find similar coins")
+        parser.add_coin_argument()
+        parser.add_key_argument(default="symbol", choices=["symbol", "name"], help="search by symbol or name")
 
         parsy, others = parser.parse_known_args(args)
-        if not parsy or parsy.symbol is None:
-            return
-
         coin_df = self.client.coin_list
         coins = dict(zip(coin_df["Symbol"], coin_df["FullName"]))
 
@@ -225,34 +188,12 @@ class Controller:
             print(pd.DataFrame())
 
     def show_top_list_by_market_cap(self, args):
-        parser = argparse.ArgumentParser(
-            prog="topmc",
-            add_help=True,
-            description="get top market cap coins",
-        )
-        parser.add_argument(
-            "-t",
-            "--tsym",
-            help="To symbol - coin in which you want to see market cap data",
-            dest="tosymbol",
-            required=False,
-            type=str,
-            default="USD",
-        )
-        parser.add_argument(
-            "-n",
-            "--num",
-            "--limit",
-            help="top n of coins",
-            dest="limit",
-            required=False,
-            type=int,
-            default=50,
-        )
+        parser = MoonParser(prog="topmc",add_help=True,description="get top market cap coins")
+
+        parser.add_to_symbol_argument(help="To symbol - coin in which you want to see market cap data",)
+        parser.add_limit_argument()
 
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
         try:
             df = self.client.get_top_list_by_market_cap(
                 currency=parsy.tosymbol, limit=parsy.limit
@@ -268,33 +209,15 @@ class Controller:
         print_table(df, floatfmt=".2f")
 
     def show_top_exchanges(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="exchanges",
             add_help=True,
             description="get top exchanges",
         )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="symbol or name of coin",
-            dest="symbol",
-            required=False,
-            type=str,
-            default="BTC",
-        )
-        parser.add_argument(
-            "-t",
-            "--tsym",
-            help="To symbol - coin in which you want to see data",
-            dest="tosymbol",
-            required=False,
-            type=str,
-            default="USD",
-        )
+        parser.add_coin_argument(default="BTC",required=False)
+        parser.add_to_symbol_argument()
 
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
 
         try:
             prices = self.client.get_top_exchanges(parsy.symbol, parsy.tosymbol)
@@ -304,24 +227,10 @@ class Controller:
         print_table(prices)
 
     def show_news(self, args):
-        parser = argparse.ArgumentParser(
-            prog="news",
-            add_help=True,
-            description="latest news",
-        )
-        parser.add_argument(
-            "-s",
-            "--sort",
-            help="Sorting [latest, popular]",
-            dest="sort",
-            required=False,
-            type=str,
-            default="latest",
-            choices=["latest", "popular"],
-        )
+        parser = MoonParser(prog="news",add_help=True,description="latest news",)
+        parser.add_sort_argument()
+
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
 
         try:
             df = self.client.get_latest_news(sort_order=parsy.sort)
@@ -330,55 +239,9 @@ class Controller:
             return
         print_table(df)
 
-    def _get_prices(self, args):
-        parser = argparse.ArgumentParser(
-            prog="histoprices",
-            add_help=True,
-            description="get historical prices",
-        )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin symbol",
-            dest="symbol",
-            required=False,
-            type=str,
-            default="BTC",
-        )
-        parser.add_argument(
-            "-t",
-            "--tsym",
-            help="to symbol [default USD]",
-            dest="tosymbol",
-            required=False,
-            type=str,
-            default="USD",
-        )
-
-        parser.add_argument(
-            "-n",
-            "--num",
-            "--limit",
-            help="last n quotes",
-            dest="limit",
-            required=False,
-            type=int,
-            default=100,
-        )
-
-        if not args:
-            print("You didn't pass coin symbol. Please use -c symbol")
-            return
-
-        parsy, _ = parser.parse_known_args(args)
-        return parsy
-
     def show_day_prices(self, args):
         parsy = self._get_prices(args)
-        if not parsy:
-            return
         try:
-            parsy = self._get_prices(args)
             prices = self.client.get_historical_day_prices(
                 parsy.symbol, parsy.tosymbol, parsy.limit
             )
@@ -390,8 +253,6 @@ class Controller:
 
     def show_hour_prices(self, args):
         parsy = self._get_prices(args)
-        if not parsy:
-            return
         try:
             prices = self.client.get_historical_hour_prices(
                 parsy.symbol, parsy.tosymbol
@@ -404,8 +265,6 @@ class Controller:
 
     def show_minute_prices(self, args):
         parsy = self._get_prices(args)
-        if not parsy:
-            return
         try:
             prices = self.client.get_historical_minutes_prices(
                 parsy.symbol, parsy.tosymbol
@@ -417,24 +276,13 @@ class Controller:
         print_table(prices)
 
     def show_trading_signals(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="topmcap",
             add_help=True,
             description="get top market cap",
         )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin symbol",
-            dest="symbol",
-            required=True,
-            type=str,
-            default="ETH",
-        )
-
+        parser.add_coin_argument()
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
 
         try:
             df = self.client.get_latest_trading_signals(parsy.symbol)
@@ -453,49 +301,19 @@ class Controller:
         print_table(df)
 
     def show_top_orders(self, args):
-        parser = argparse.ArgumentParser(
-            prog="orders",
-            add_help=True,
-            description="get order book for pair of coins",
-        )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin smybol",
-            dest="symbol",
-            required=True,
-            type=str,
-            default="ETH",
-        )
-        parser.add_argument(
-            "-t",
-            "--tsym",
-            help="to symbol, second pair",
-            dest="tsym",
-            required=False,
-            type=str,
-            default="BTC",
-        )
-        parser.add_argument(
-            "-e",
-            "--exchange",
-            help="exchange",
-            dest="exchange",
-            required=False,
-            type=str,
-            default="Binance",
-        )
-
+        parser = MoonParser(prog="orders",add_help=True,description="get order book for pair of coins",)
+        parser.add_coin_argument()
+        parser.add_to_symbol_argument(default="BTC")
+        parser.add_exchange_argument()
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
+
         try:
-            df = self.client.get_order_book_top(
-                symbol=parsy.symbol, to_symbol=parsy.tsym, exchange=parsy.exchange
-            )
+            df = self.client.get_order_book_top(symbol=parsy.symbol, to_symbol=parsy.tosymbol, exchange=parsy.exchange)
         except ValueError as e:
             print(f"{e}, To check list of coins use command: coins ")
             return
+        if df.empty:
+            print(f"Not data found for {parsy.sybmol}/{parsy.tosymbol} on {parsy.exchange}")
         print_table(df)
 
     def show_all_exchanges(
@@ -505,36 +323,15 @@ class Controller:
         print_table(df)
 
     def show_exchanges_by_top_symbol(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="exchange symbols",
             add_help=True,
             description="get order book for pair of coins",
         )
-
-        parser.add_argument(
-            "-e",
-            "--exchange",
-            help="exchange",
-            dest="exchange",
-            required=False,
-            type=str,
-            default="binance",
-        )
-
-        parser.add_argument(
-            "-n",
-            "--num",
-            "--limit",
-            help="last n quotes",
-            dest="limit",
-            required=False,
-            type=int,
-            default=100,
-        )
-
+        parser.add_exchange_argument()
+        parser.add_limit_argument()
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
+
         try:
             df = self.client.get_exchanges_top_symbols_by_volume(
                 exchange=parsy.exchange, limit=parsy.limit
@@ -547,23 +344,13 @@ class Controller:
         print_table(df)
 
     def show_top_list_pair_volume(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="pairvolume",
             add_help=True,
             description="get top list by pair volume",
         )
-        parser.add_argument(
-            "-t",
-            "--tsym",
-            help="To symbol - coin in which you want to see data",
-            dest="tosymbol",
-            required=False,
-            type=str,
-            default="USD",
-        )
+        parser.add_to_symbol_argument()
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
         try:
             df = self.client.get_top_list_by_pair_volume(parsy.tosymbol)
         except ValueError as e:
@@ -573,8 +360,6 @@ class Controller:
 
     def show_daily_coin_volume(self, args):
         parsy = self._get_prices(args)
-        if not parsy:
-            return
         try:
             prices = self.client.get_daily_symbol_volume(
                 parsy.symbol, parsy.tosymbol, parsy.limit
@@ -587,8 +372,6 @@ class Controller:
 
     def show_hourly_coin_volume(self, args):
         parsy = self._get_prices(args)
-        if not parsy:
-            return
         try:
             prices = self.client.get_hourly_symbol_volume(
                 parsy.symbol, parsy.tosymbol, parsy.limit
@@ -605,21 +388,12 @@ class Controller:
         print_table(self.client.get_blockchain_available_coins_list())
 
     def show_latest_blockchain_data(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="blockchain data",
             add_help=True,
             description="get latest block chain data for given coin [To see supported coins use onchain command ",
         )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin symbol",
-            dest="symbol",
-            required=True,
-            type=str,
-            default="ETH",
-        )
-
+        parser.add_coin_argument()
         parsy, _ = parser.parse_known_args(args)
         if not parsy:
             return
@@ -638,34 +412,14 @@ class Controller:
         print_table(df)
 
     def show_histo_blockchain_data(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="blockchain data",
             add_help=True,
             description="get historical block chain data for given coin [To see supported coins use onchain command",
         )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin symbol",
-            dest="symbol",
-            required=True,
-            type=str,
-            default="ETH",
-        )
-        parser.add_argument(
-            "-n",
-            "--num",
-            "--limit",
-            help="number of results",
-            dest="limit",
-            required=False,
-            type=int,
-            default=100,
-        )
-
+        parser.add_coin_argument()
+        parser.add_limit_argument()
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
         try:
             df = self.client.get_historical_blockchain_data(
                 symbol=parsy.symbol, limit=parsy.limit
@@ -678,24 +432,14 @@ class Controller:
         print_table(df, floatfmt=".0f")
 
     def show_top_trading_pairs(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="trading pairs",
             add_help=True,
             description="get top trading pairs",
         )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin symbol",
-            dest="symbol",
-            required=True,
-            type=str,
-            default="ETH",
-        )
-
+        parser.add_coin_argument()
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
+
         try:
             df = self.client.get_top_of_trading_pairs(symbol=parsy.symbol)
         except ValueError as e:
@@ -704,42 +448,16 @@ class Controller:
         print_table(df, floatfmt=".6f")
 
     def show_order_book_snapshot(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="orders snapshot",
             add_help=True,
             description="get order book snapshot for pair of coins",
         )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin symbol",
-            dest="symbol",
-            required=True,
-            type=str,
-            default="ETH",
-        )
-        parser.add_argument(
-            "-t",
-            "--tsym",
-            help="to symbol, second pair",
-            dest="tsym",
-            required=False,
-            type=str,
-            default="BTC",
-        )
-        parser.add_argument(
-            "-e",
-            "--exchange",
-            help="exchange",
-            dest="exchange",
-            required=False,
-            type=str,
-            default="Binance",
-        )
-
+        parser.add_coin_argument()
+        parser.add_to_symbol_argument(default='BTC')
+        parser.add_exchange_argument()
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
+
         try:
             df = self.client.get_order_book_snapshot(
                 symbol=parsy.symbol, to_symbol=parsy.tsym, exchange=parsy.exchange
@@ -760,33 +478,15 @@ class Controller:
         print_table(self.client.get_all_gambling_info(), floatfmt=".2f")
 
     def show_recommended(self, args):
-        parser = argparse.ArgumentParser(
+        parser = MoonParser(
             prog="recommendations",
             add_help=True,
             description="get recommended exchanges and wallets",
         )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="Coin symbol",
-            dest="symbol",
-            required=True,
-            type=str,
-            default="ETH",
-        )
-        parser.add_argument(
-            "-k",
-            "--key",
-            help="What you need recommendations for ? choose from [wallet, exchange]",
-            dest="key",
-            required=True,
-            type=str,
-            choices=["wallet", "exchange"],
-            default="wallet",
-        )
+        parser.add_coin_argument()
+        parser.add_key_argument()
+
         parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
 
         if parsy.key == "exchange":
             func = self.client.get_recommended_exchanges
@@ -804,24 +504,7 @@ class Controller:
         print_table(df, floatfmt=".2f")
 
     def show_latest_socials(self, args):
-        parser = argparse.ArgumentParser(
-            prog="socials",
-            add_help=True,
-            description="get latest social stats",
-        )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="symbol or id of coin. Default 7605 - > ETH",
-            dest="symbol",
-            required=False,
-            default=7605,
-        )
-
-        parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
-
+        parsy = self._show_socials(args)
         if isinstance(parsy.symbol, str) and parsy.symbol.isalpha():
             coin_id = self.client.coin_mapping.get(parsy.symbol.upper())
             if coin_id:
@@ -838,24 +521,7 @@ class Controller:
         print_table(df)
 
     def show_histo_socials(self, args):
-        parser = argparse.ArgumentParser(
-            prog="socials historical",
-            add_help=True,
-            description="get social historical stats - weekly aggregated",
-        )
-        parser.add_argument(
-            "-c",
-            "--coin",
-            help="symbol or id of coin. Default 7605 - > ETH",
-            dest="symbol",
-            required=False,
-            default=7605,
-        )
-
-        parsy, _ = parser.parse_known_args(args)
-        if not parsy:
-            return
-
+        parsy = self._show_socials(args)
         if isinstance(parsy.symbol, str) and parsy.symbol.isalpha():
             coin_id = self.client.coin_mapping.get(parsy.symbol.upper())
             if coin_id:

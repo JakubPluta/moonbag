@@ -94,9 +94,12 @@ class CryptoCompare(CryptoCompareClient):
 
     @table_formatter
     def get_top_exchanges(self, symbol="BTC", currency="USD", limit=100, **kwargs):
-        data = self._get_top_exchanges(symbol, currency, limit, **kwargs)["Data"][
-            "Exchanges"
-        ]
+        try:
+            data = self._get_top_exchanges(symbol, currency, limit, **kwargs)["Data"]["Exchanges"]
+        except KeyError as e:
+            logger.error(e)
+            return pd.DataFrame()
+
         df = pd.json_normalize(data)
         columns = [
             "MARKET",
@@ -398,10 +401,11 @@ class CryptoCompare(CryptoCompareClient):
     def get_order_book_top(
         self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
     ):
-        data = self._get_order_book_top(
-            symbol.upper(), to_symbol.upper(), exchange.capitalize(), **kwargs
-        )["Data"]["RAW"]
-        df = pd.json_normalize(data)
+
+        data = self._get_order_book_top(symbol.upper(), to_symbol.upper(), exchange.capitalize(), **kwargs)["Data"]
+        if not data:
+            return pd.DataFrame()
+        df = pd.json_normalize(data["RAW"])
         df.columns = [c.replace(".", "_") for c in df.columns]
         df.drop(df.columns[0], axis=1, inplace=True)
         return df

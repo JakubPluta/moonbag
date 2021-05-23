@@ -45,15 +45,6 @@ def print_no_api_key_msg():
     )
 
 
-BASE_PARSER_CONFIG =  {
-    "coin" : False,
-    "tosymbol": False,
-    "exchange":False,
-    "limit" : False,
-    'sort' : False,
-    'key' : False,
-}
-
 BASE_PARSER_ARGUMENTS = {
         'coin': dict(
             help='Coin symbol',
@@ -66,7 +57,7 @@ BASE_PARSER_ARGUMENTS = {
             dest='limit',
             required=False,
             type=int,
-            default=100,
+            default=50,
         ),
         'exchange': dict(
             help='Name of exchange',
@@ -85,7 +76,7 @@ BASE_PARSER_ARGUMENTS = {
         'key': dict(
             help="What you need recommendations for ? choose from [wallet, exchange]",
             dest="key",
-            required=True,
+            required=False,
             type=str,
             choices=["wallet", "exchange"],
             default="wallet",
@@ -100,77 +91,40 @@ BASE_PARSER_ARGUMENTS = {
         )
 }
 
-METHODS_MAPPER = {
-    'coin': 'add_coin_argument',
-    'tosymbol': 'add_to_symbol_argument',
-    'limit': 'add_limit_argument',
-    'exchange': 'add_exchange_argument',
-    'sort': 'add_sort_argument',
-    'key': 'add_key_argument',
-}
 
+class MoonParser(argparse.ArgumentParser):
+    list_of_arguments = [
+        'help', 'dest', 'required',
+        'type', 'choices', 'default'
+    ]
 
-class CustomParser:
-
-    @staticmethod
-    def _modify_default_dict_of_arguments(dct: dict, **kwargs):
+    def _modify_default_dict_of_arguments(self, dct: dict, **kwargs):
         if kwargs:
-            list_of_arguments = [
-                'help', 'dest', 'required',
-                'type', 'choices', 'default'
-            ]
-
-            for argument in list_of_arguments:
+            for argument in self.list_of_arguments:
                 if argument in kwargs:
                     dct[argument] = kwargs.get(argument)
         return dct
 
-    @classmethod
-    def add_coin_argument(cls, parser, **kwargs):
-        dct = cls._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['coin'], **kwargs)
-        parser.add_argument("-c","--coin",'--fsym', **dct)
+    def add_coin_argument(self, **kwargs):
+        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['coin'], **kwargs)
+        self.add_argument("-c", "--coin", '--fsym', **dct)
 
-    @classmethod
-    def add_to_symbol_argument(cls,parser, **kwargs):
-        dct = cls._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['tosymbol'], **kwargs)
-        parser.add_argument("-t", "--tsym",'--to', **dct)
+    def add_to_symbol_argument(self, **kwargs):
+        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['tosymbol'], **kwargs)
+        self.add_argument("-t", "--tsym", '--to', **dct)
 
-    @classmethod
-    def add_limit_argument(cls, parser, **kwargs):
-        dct = cls._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['limit'], **kwargs)
-        parser.add_argument("-n","--limit", **dct)
+    def add_limit_argument(self, **kwargs):
+        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['limit'], **kwargs)
+        self.add_argument("-n", "--limit", **dct)
 
-    @classmethod
-    def add_exchange_argument(cls, parser,  **kwargs):
-        dct = cls._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['exchange'], **kwargs)
-        parser.add_argument("-e", "--exchange", **dct)
+    def add_exchange_argument(self, **kwargs):
+        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['exchange'], **kwargs)
+        self.add_argument("-e", "--exchange", **dct)
 
-    @classmethod
-    def add_key_argument(cls, parser, **kwargs):
-        dct = cls._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['key'], **kwargs)
-        parser.add_argument("-k", "--key", **dct)
+    def add_key_argument(self, **kwargs):
+        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['key'], **kwargs)
+        self.add_argument("-k", "--key", **dct)
 
-    @classmethod
-    def add_sort_argument(cls, parser ,**kwargs):
-        dct = cls._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['sort'], **kwargs)
-        parser.add_argument("-s", "--sort", **dct)
-
-    @classmethod
-    def add_custom_argument(cls,  parser , *args, **kwargs):
-        parser.add_argument(*args, **kwargs)
-
-    @staticmethod
-    def build_parser(parser, config=None):
-        if not config:
-            return parser
-        for method_name, method in METHODS_MAPPER.items():
-            if method_name in config and config[method_name] is True:
-                getattr(customparser, method)(parser)
-            elif method_name in config and isinstance(config[method_name], dict):
-                getattr(customparser, method)(parser, **config[method_name])
-        return parser
-
-
-customparser = CustomParser()
-build_parser = customparser.build_parser
-
+    def add_sort_argument(self, **kwargs):
+        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['sort'], **kwargs)
+        self.add_argument("-s", "--sort", **dct)
