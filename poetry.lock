@@ -57,6 +57,19 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
+name = "dryscrape"
+version = "1.0"
+description = "a lightweight Javascript-aware, headless web scraping library for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+lxml = "*"
+webkit_server = ">=1.0"
+xvfbwrapper = "*"
+
+[[package]]
 name = "idna"
 version = "2.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -221,10 +234,26 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 brotli = ["brotlipy (>=0.6.0)"]
 
+[[package]]
+name = "webkit-server"
+version = "1.0"
+description = "a Webkit-based, headless web client"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "xvfbwrapper"
+version = "0.2.9"
+description = "run headless display inside X virtual framebuffer (Xvfb)"
+category = "main"
+optional = false
+python-versions = "*"
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "55120749f2ed16c356de08f0c217ac1c0af28769750a39432db363f9f46a7fc0"
+content-hash = "79add3a1eea48f870437df753c012faadc85418cd5a32999e2d0ff6623456261"
 
 [metadata.files]
 beautifulsoup4 = [
@@ -250,6 +279,9 @@ chardet = [
 decorator = [
     {file = "decorator-5.0.9-py3-none-any.whl", hash = "sha256:6e5c199c16f7a9f0e3a61a4a54b3d27e7dad0dbdde92b944426cb20914376323"},
     {file = "decorator-5.0.9.tar.gz", hash = "sha256:72ecfba4320a893c53f9706bebb2d55c270c1e51a28789361aa93e4a21319ed5"},
+]
+dryscrape = [
+    {file = "dryscrape-1.0.tar.gz", hash = "sha256:a99858786434947266cb81d5634cb1722de48aaf6b9cdffda15b7cd4a8e07340"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
@@ -390,4 +422,10 @@ tabulate = [
 urllib3 = [
     {file = "urllib3-1.26.4-py2.py3-none-any.whl", hash = "sha256:2f4da4594db7e1e110a944bb1b551fdf4e6c136ad42e4234131391e21eb5b0df"},
     {file = "urllib3-1.26.4.tar.gz", hash = "sha256:e7b021f7241115872f92f43c6508082facffbd1c048e3c6e2bb9c2a157e28937"},
+]
+webkit-server = [
+    {file = "webkit-server-1.0.tar.gz", hash = "sha256:836dac18c823bf7737461a2d938c66c7b3601c858897e6c92c7ba0e33574a2bc"},
+]
+xvfbwrapper = [
+    {file = "xvfbwrapper-0.2.9.tar.gz", hash = "sha256:bcf4ae571941b40254faf7a73432dfc119ad21ce688f1fdec533067037ecfc24"},
 ]

@@ -5,7 +5,7 @@ import requests
 
 class EthplorerClient:
     def __init__(self, api_key=None):
-        self.api_key = api_key or 'freekey'
+        self.api_key = api_key or "freekey"
         self.api_query = f"?apiKey={api_key}"
 
     @staticmethod
@@ -39,7 +39,9 @@ class EthplorerClient:
         return resp
 
     def get_address_transactions(self, address):
-        url = f"https://api.ethplorer.io/getAddressTransactions/{address}{self.api_query}"
+        url = (
+            f"https://api.ethplorer.io/getAddressTransactions/{address}{self.api_query}"
+        )
         resp = self._request_call(url)
         return resp
 
@@ -49,12 +51,13 @@ class EthplorerClient:
         return resp
 
     def get_token_history_grouped(self, address):
-        url = f"https://api.ethplorer.io/getTokenHistoryGrouped/{address}{self.api_query}"
+        url = (
+            f"https://api.ethplorer.io/getTokenHistoryGrouped/{address}{self.api_query}"
+        )
         resp = self._request_call(url)
         return resp
 
-    def get_top_token_holders(self,address):
+    def get_top_token_holders(self, address):
         url = f"https://api.ethplorer.io/getTopTokenHolders/{address}{self.api_query}"
         resp = self._request_call(url)
         return resp
-

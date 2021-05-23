@@ -2,7 +2,8 @@ from json import encoder
 from ethplorer._client import EthplorerClient
 import pandas as pd
 from datetime import datetime
-encoder.FLOAT_REPR = lambda o: format(o, '.12f')
+
+encoder.FLOAT_REPR = lambda o: format(o, ".12f")
 
 client = EthplorerClient()
 
@@ -15,28 +16,34 @@ class TokenInfo:
 
     def get_token_history_of_transactions(self, dct_parse=False):
         transactions = []
-        token_history = self.token_history.get('operations')
+        token_history = self.token_history.get("operations")
         if token_history:
             for operation in token_history:
                 operation_dct = {}
-                token_info = operation.get('tokenInfo')
-                operation_dct['timestamp'] = operation.get('timestamp')
+                token_info = operation.get("tokenInfo")
+                operation_dct["timestamp"] = operation.get("timestamp")
                 try:
-                    operation_dct['datetime'] = datetime.fromtimestamp(operation.get('timestamp'))
+                    operation_dct["datetime"] = datetime.fromtimestamp(
+                        operation.get("timestamp")
+                    )
                 except TypeError:
                     pass
-                operation_dct['valueTransferred'] = operation.get('value')
-                operation_dct['transferredFrom'] = operation.get('from')
-                operation_dct['transferredTo'] = operation.get('to')
-                operation_dct['tokenSymbol'] = token_info.get('symbol')
-                operation_dct['tokenName'] = token_info.get('name')
-                operation_dct['totalSupply'] = token_info.get('totalSupply')
+                operation_dct["valueTransferred"] = operation.get("value")
+                operation_dct["transferredFrom"] = operation.get("from")
+                operation_dct["transferredTo"] = operation.get("to")
+                operation_dct["tokenSymbol"] = token_info.get("symbol")
+                operation_dct["tokenName"] = token_info.get("name")
+                operation_dct["totalSupply"] = token_info.get("totalSupply")
                 try:
-                    transferred_pct = round(float(operation.get('value')) / float(token_info.get('totalSupply')), 8)
+                    transferred_pct = round(
+                        float(operation.get("value"))
+                        / float(token_info.get("totalSupply")),
+                        8,
+                    )
                 except ZeroDivisionError:
                     transferred_pct = None
 
-                operation_dct['transferredPctOfTotalSupply'] = transferred_pct
+                operation_dct["transferredPctOfTotalSupply"] = transferred_pct
                 transactions.append(operation_dct)
             if dct_parse:
                 return transactions
@@ -46,7 +53,7 @@ class TokenInfo:
     def get_token_holders(self, dct_parse=False):
         token_holders = self.client.get_top_token_holders(self.token_address)
         if token_holders:
-            holders = token_holders.get('holders')
+            holders = token_holders.get("holders")
             if dct_parse:
                 return holders
             return pd.DataFrame(holders)
@@ -66,13 +73,13 @@ class TokenInfo:
         top_transferred_to = top_transferred_from.sort_values(ascending=False).head(1)
 
         return {
-            "totalTransactions" : len(token_history_cleaned),
-            "firstTransactionDate" : token_history_cleaned['datetime'].min(),
-            "lastTransactionDate" : token_history_cleaned['datetime'].max(),
-            "addressWithHighestNumberOfTransfersTo" : top_transferred_to.index[0],
-            "countTransfersTo" : top_transferred_to.values[0],
+            "totalTransactions": len(token_history_cleaned),
+            "firstTransactionDate": token_history_cleaned["datetime"].min(),
+            "lastTransactionDate": token_history_cleaned["datetime"].max(),
+            "addressWithHighestNumberOfTransfersTo": top_transferred_to.index[0],
+            "countTransfersTo": top_transferred_to.values[0],
             "addressWithHighestNumberOfTransfersFrom": top_transferred_from.index[0],
-            "countTransfersFrom": top_transferred_from.values[0]
+            "countTransfersFrom": top_transferred_from.values[0],
         }
 
 
@@ -89,9 +96,9 @@ class CheckTokenCreator:
 
     @staticmethod
     def check_if_creator_data_exists(token_info):
-        contract_info = token_info.get('contractInfo')
-        if contract_info and 'creatorAddress' in contract_info:
-            return contract_info.get('creatorAddress')
+        contract_info = token_info.get("contractInfo")
+        if contract_info and "creatorAddress" in contract_info:
+            return contract_info.get("creatorAddress")
         else:
             return None
 
@@ -109,31 +116,37 @@ class TokenCreator:
             eth_balance = eth.get("balance")
             eth_current_price = eth.get("price").get("rate")
             usd_balance_value = round(float(eth_balance) * float(eth_current_price), 8)
-            return {"ethBalance" : eth.get("balance"),"ethPrice" : eth.get("price").get("rate"), "usdBalance" : usd_balance_value}
+            return {
+                "ethBalance": eth.get("balance"),
+                "ethPrice": eth.get("price").get("rate"),
+                "usdBalance": usd_balance_value,
+            }
         else:
             return None
 
     def get_transactions_count(self):
-        return self._creator_address_info.get('countTxs')
+        return self._creator_address_info.get("countTxs")
 
     def get_info_about_creator_portfolio(self, dct_parse=False):
         portfolio_items = []
-        portfolio = self._creator_address_info.get('tokens')
+        portfolio = self._creator_address_info.get("tokens")
         if portfolio:
             for token in portfolio:
                 token_dct = {}
-                token_info = token.get('tokenInfo')
-                balance = token.get('balance')
-                token_dct['tokenAddress'] = token_info.get('address')
-                token_dct['symbol'] = token_info.get('symbol')
-                token_dct['name'] = token_info.get('name')
-                token_dct['totalSupply'] = token_info.get('totalSupply')
-                token_dct['balance'] = float(balance)
+                token_info = token.get("tokenInfo")
+                balance = token.get("balance")
+                token_dct["tokenAddress"] = token_info.get("address")
+                token_dct["symbol"] = token_info.get("symbol")
+                token_dct["name"] = token_info.get("name")
+                token_dct["totalSupply"] = token_info.get("totalSupply")
+                token_dct["balance"] = float(balance)
                 try:
-                    pct_of_supply = float(balance) / float(token_info.get('totalSupply'))
+                    pct_of_supply = float(balance) / float(
+                        token_info.get("totalSupply")
+                    )
                 except ZeroDivisionError:
                     pct_of_supply = None
-                token_dct['pctOfTotalSupply'] = round(pct_of_supply, 8)
+                token_dct["pctOfTotalSupply"] = round(pct_of_supply, 8)
                 portfolio_items.append(token_dct)
             if dct_parse:
                 return portfolio_items
@@ -142,38 +155,44 @@ class TokenCreator:
 
     def get_transactions_info(self, dct_parse=False):
         transactions = []
-        operations = self._creator_address_history.get('operations')
+        operations = self._creator_address_history.get("operations")
         if operations:
             for operation in operations:
                 operation_dct = {}
-                token_info = operation.get('tokenInfo')
+                token_info = operation.get("tokenInfo")
                 try:
-                    operation_dct['datetime'] = datetime.fromtimestamp(operation.get('timestamp'))
+                    operation_dct["datetime"] = datetime.fromtimestamp(
+                        operation.get("timestamp")
+                    )
                 except TypeError:
                     pass
 
-                operation_dct['valueTransferred'] = operation.get('value')
-                operation_dct['transferredFrom'] = operation.get('from')
-                operation_dct['transferredTo'] = operation.get('to')
-                if self.creator_address == operation.get('to'):
-                    operation_dct['transferredToCreator'] = True
+                operation_dct["valueTransferred"] = operation.get("value")
+                operation_dct["transferredFrom"] = operation.get("from")
+                operation_dct["transferredTo"] = operation.get("to")
+                if self.creator_address == operation.get("to"):
+                    operation_dct["transferredToCreator"] = True
                 else:
-                    operation_dct['transferredToCreator'] = False
-                if self.creator_address == operation.get('from'):
-                    operation_dct['transferredFromCreator'] = True
+                    operation_dct["transferredToCreator"] = False
+                if self.creator_address == operation.get("from"):
+                    operation_dct["transferredFromCreator"] = True
                 else:
-                    operation_dct['transferredFromCreator'] = False
+                    operation_dct["transferredFromCreator"] = False
 
-                operation_dct['tokenSymbol'] = token_info.get('symbol')
-                operation_dct['tokenName'] = token_info.get('name')
-                operation_dct['totalSupply'] = token_info.get('totalSupply')
+                operation_dct["tokenSymbol"] = token_info.get("symbol")
+                operation_dct["tokenName"] = token_info.get("name")
+                operation_dct["totalSupply"] = token_info.get("totalSupply")
 
                 try:
-                    transferred_pct = round(float(operation.get('value')) / float(token_info.get('totalSupply')),6)
+                    transferred_pct = round(
+                        float(operation.get("value"))
+                        / float(token_info.get("totalSupply")),
+                        6,
+                    )
                 except ZeroDivisionError:
                     transferred_pct = None
 
-                operation_dct['transferredPct'] = transferred_pct
+                operation_dct["transferredPct"] = transferred_pct
                 transactions.append(operation_dct)
             if dct_parse:
                 return transactions
