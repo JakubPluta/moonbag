@@ -736,14 +736,16 @@ class Overview:
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_derivatives(self, n=None):
-        df =  pd.DataFrame(
+        df = pd.DataFrame(
             self.client.get_derivatives(include_tickers="unexpired")
         ).head(n)
-        df.drop(['index','last_traded_at','expired_at','index_id'], axis=1, inplace=True)
+        df.drop(
+            ["index", "last_traded_at", "expired_at", "index_id"], axis=1, inplace=True
+        )
 
-        df.rename(columns={
-            'price_percentage_change_24h' : '%  change 24h'
-        }, inplace=True)
+        df.rename(
+            columns={"price_percentage_change_24h": "%  change 24h"}, inplace=True
+        )
         return df
 
     @retry(tries=2, delay=3, max_delay=5)

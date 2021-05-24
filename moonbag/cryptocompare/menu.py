@@ -138,7 +138,9 @@ class Controller:
         parser = MoonParser(prog="prices", add_help=True, description="get prices")
         parser.add_coin_argument()
         parser.add_to_symbol_argument()
-        parser.add_limit_argument(default=100,)
+        parser.add_limit_argument(
+            default=100,
+        )
         parsy, _ = parser.parse_known_args(args)
         return parsy
 
@@ -149,7 +151,10 @@ class Controller:
             add_help=True,
             description="get latest social stats",
         )
-        parser.add_coin_argument(default=7605, help="symbol or id of coin. Default 7605 - > ETH",)
+        parser.add_coin_argument(
+            default=7605,
+            help="symbol or id of coin. Default 7605 - > ETH",
+        )
         parsy, _ = parser.parse_known_args(args)
         return parsy
 
@@ -168,9 +173,15 @@ class Controller:
         print_table(self.client.coin_list.reset_index())
 
     def find_similar_coins(self, args):
-        parser = MoonParser(prog="similar",add_help=True,description="Find similar coins")
+        parser = MoonParser(
+            prog="similar", add_help=True, description="Find similar coins"
+        )
         parser.add_coin_argument()
-        parser.add_key_argument(default="symbol", choices=["symbol", "name"], help="search by symbol or name")
+        parser.add_key_argument(
+            default="symbol",
+            choices=["symbol", "name"],
+            help="search by symbol or name",
+        )
 
         parsy, others = parser.parse_known_args(args)
         coin_df = self.client.coin_list
@@ -188,9 +199,13 @@ class Controller:
             print(pd.DataFrame())
 
     def show_top_list_by_market_cap(self, args):
-        parser = MoonParser(prog="topmc",add_help=True,description="get top market cap coins")
+        parser = MoonParser(
+            prog="topmc", add_help=True, description="get top market cap coins"
+        )
 
-        parser.add_to_symbol_argument(help="To symbol - coin in which you want to see market cap data",)
+        parser.add_to_symbol_argument(
+            help="To symbol - coin in which you want to see market cap data",
+        )
         parser.add_limit_argument()
 
         parsy, _ = parser.parse_known_args(args)
@@ -214,7 +229,7 @@ class Controller:
             add_help=True,
             description="get top exchanges",
         )
-        parser.add_coin_argument(default="BTC",required=False)
+        parser.add_coin_argument(default="BTC", required=False)
         parser.add_to_symbol_argument()
 
         parsy, _ = parser.parse_known_args(args)
@@ -227,7 +242,11 @@ class Controller:
         print_table(prices)
 
     def show_news(self, args):
-        parser = MoonParser(prog="news",add_help=True,description="latest news",)
+        parser = MoonParser(
+            prog="news",
+            add_help=True,
+            description="latest news",
+        )
         parser.add_sort_argument()
 
         parsy, _ = parser.parse_known_args(args)
@@ -301,19 +320,27 @@ class Controller:
         print_table(df)
 
     def show_top_orders(self, args):
-        parser = MoonParser(prog="orders",add_help=True,description="get order book for pair of coins",)
+        parser = MoonParser(
+            prog="orders",
+            add_help=True,
+            description="get order book for pair of coins",
+        )
         parser.add_coin_argument()
         parser.add_to_symbol_argument(default="BTC")
         parser.add_exchange_argument()
         parsy, _ = parser.parse_known_args(args)
 
         try:
-            df = self.client.get_order_book_top(symbol=parsy.symbol, to_symbol=parsy.tosymbol, exchange=parsy.exchange)
+            df = self.client.get_order_book_top(
+                symbol=parsy.symbol, to_symbol=parsy.tosymbol, exchange=parsy.exchange
+            )
         except ValueError as e:
             print(f"{e}, To check list of coins use command: coins ")
             return
         if df.empty:
-            print(f"Not data found for {parsy.sybmol}/{parsy.tosymbol} on {parsy.exchange}")
+            print(
+                f"Not data found for {parsy.sybmol}/{parsy.tosymbol} on {parsy.exchange}"
+            )
         print_table(df)
 
     def show_all_exchanges(
@@ -454,7 +481,7 @@ class Controller:
             description="get order book snapshot for pair of coins",
         )
         parser.add_coin_argument()
-        parser.add_to_symbol_argument(default='BTC')
+        parser.add_to_symbol_argument(default="BTC")
         parser.add_exchange_argument()
         parsy, _ = parser.parse_known_args(args)
 

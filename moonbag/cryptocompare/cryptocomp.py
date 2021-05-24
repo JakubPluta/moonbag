@@ -24,7 +24,7 @@ class CryptoCompare(CryptoCompareClient):
     @table_formatter
     def get_price(self, symbol="BTC", currency="USD", **kwargs):
         data = self._get_price(symbol, currency, **kwargs)
-        if 'Response' in data and data['Response'] == 'Error':
+        if "Response" in data and data["Response"] == "Error":
             return pd.DataFrame()
         data = data["RAW"][symbol][currency]
         columns = [
@@ -95,7 +95,9 @@ class CryptoCompare(CryptoCompareClient):
     @table_formatter
     def get_top_exchanges(self, symbol="BTC", currency="USD", limit=100, **kwargs):
         try:
-            data = self._get_top_exchanges(symbol, currency, limit, **kwargs)["Data"]["Exchanges"]
+            data = self._get_top_exchanges(symbol, currency, limit, **kwargs)["Data"][
+                "Exchanges"
+            ]
         except KeyError as e:
             logger.error(e)
             return pd.DataFrame()
@@ -402,7 +404,9 @@ class CryptoCompare(CryptoCompareClient):
         self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
     ):
 
-        data = self._get_order_book_top(symbol.upper(), to_symbol.upper(), exchange.capitalize(), **kwargs)["Data"]
+        data = self._get_order_book_top(
+            symbol.upper(), to_symbol.upper(), exchange.capitalize(), **kwargs
+        )["Data"]
         if not data:
             return pd.DataFrame()
         df = pd.json_normalize(data["RAW"])

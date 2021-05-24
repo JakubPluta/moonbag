@@ -46,57 +46,54 @@ def print_no_api_key_msg():
 
 
 BASE_PARSER_ARGUMENTS = {
-        'coin': dict(
-            help='Coin symbol',
-            dest='symbol',
-            required=True,
-            default='ETH',
-        ),
-        'limit': dict(
-            help='Number of results',
-            dest='limit',
-            required=False,
-            type=int,
-            default=50,
-        ),
-        'exchange': dict(
-            help='Name of exchange',
-            dest="exchange",
-            required=False,
-            type=str,
-            default="Binance",
-        ),
-        'tosymbol': dict(
-            help="To symbol - coin in which you want to see data",
-            dest="tosymbol",
-            required=False,
-            type=str,
-            default="USD",
-        ),
-        'key': dict(
-            help="What you need recommendations for ? choose from [wallet, exchange]",
-            dest="key",
-            required=False,
-            type=str,
-            choices=["wallet", "exchange"],
-            default="wallet",
-        ),
-        'sort': dict(
-            help="Sorting [latest, popular]",
-            dest="sort",
-            required=False,
-            type=str,
-            default="latest",
-            choices=["latest", "popular"],
-        )
+    "coin": dict(
+        help="Coin symbol",
+        dest="symbol",
+        required=True,
+        default="ETH",
+    ),
+    "limit": dict(
+        help="Number of results",
+        dest="limit",
+        required=False,
+        type=int,
+        default=50,
+    ),
+    "exchange": dict(
+        help="Name of exchange",
+        dest="exchange",
+        required=False,
+        type=str,
+        default="Binance",
+    ),
+    "tosymbol": dict(
+        help="To symbol - coin in which you want to see data",
+        dest="tosymbol",
+        required=False,
+        type=str,
+        default="USD",
+    ),
+    "key": dict(
+        help="What you need recommendations for ? choose from [wallet, exchange]",
+        dest="key",
+        required=False,
+        type=str,
+        choices=["wallet", "exchange"],
+        default="wallet",
+    ),
+    "sort": dict(
+        help="Sorting [latest, popular]",
+        dest="sort",
+        required=False,
+        type=str,
+        default="latest",
+        choices=["latest", "popular"],
+    ),
 }
 
 
 class MoonParser(argparse.ArgumentParser):
-    list_of_arguments = [
-        'help', 'dest', 'required',
-        'type', 'choices', 'default'
-    ]
+    list_of_arguments = ["help", "dest", "required", "type", "choices", "default"]
 
     def _modify_default_dict_of_arguments(self, dct: dict, **kwargs):
         if kwargs:
@@ -106,25 +103,37 @@ class MoonParser(argparse.ArgumentParser):
         return dct
 
     def add_coin_argument(self, **kwargs):
-        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['coin'], **kwargs)
-        self.add_argument("-c", "--coin", '--fsym', **dct)
+        dct = self._modify_default_dict_of_arguments(
+            BASE_PARSER_ARGUMENTS["coin"], **kwargs
+        )
+        self.add_argument("-c", "--coin", "--fsym", **dct)
 
     def add_to_symbol_argument(self, **kwargs):
-        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['tosymbol'], **kwargs)
-        self.add_argument("-t", "--tsym", '--to', **dct)
+        dct = self._modify_default_dict_of_arguments(
+            BASE_PARSER_ARGUMENTS["tosymbol"], **kwargs
+        )
+        self.add_argument("-t", "--tsym", "--to", **dct)
 
     def add_limit_argument(self, **kwargs):
-        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['limit'], **kwargs)
+        dct = self._modify_default_dict_of_arguments(
+            BASE_PARSER_ARGUMENTS["limit"], **kwargs
+        )
         self.add_argument("-n", "--limit", **dct)
 
     def add_exchange_argument(self, **kwargs):
-        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['exchange'], **kwargs)
+        dct = self._modify_default_dict_of_arguments(
+            BASE_PARSER_ARGUMENTS["exchange"], **kwargs
+        )
         self.add_argument("-e", "--exchange", **dct)
 
     def add_key_argument(self, **kwargs):
-        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['key'], **kwargs)
+        dct = self._modify_default_dict_of_arguments(
+            BASE_PARSER_ARGUMENTS["key"], **kwargs
+        )
         self.add_argument("-k", "--key", **dct)
 
     def add_sort_argument(self, **kwargs):
-        dct = self._modify_default_dict_of_arguments(BASE_PARSER_ARGUMENTS['sort'], **kwargs)
+        dct = self._modify_default_dict_of_arguments(
+            BASE_PARSER_ARGUMENTS["sort"], **kwargs
+        )
         self.add_argument("-s", "--sort", **dct)

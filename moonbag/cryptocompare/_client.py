@@ -1,13 +1,5 @@
-import os
 import requests
-from dotenv import load_dotenv
-import cachetools.func
 from retry import retry
-
-
-load_dotenv()
-
-API_KEY = os.getenv("CC_API_KEY")
 
 ENDPOINTS = {
     "PRICE_MULTI_FULL": "/data/pricemultifull",

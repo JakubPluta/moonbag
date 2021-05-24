@@ -21,6 +21,7 @@ def table_formatter(func):
 
     return wrapper
 
+
 # FIXME Make this func more general
 def wrap_text_in_df(df: pd.DataFrame, w=55):
     return df.applymap(

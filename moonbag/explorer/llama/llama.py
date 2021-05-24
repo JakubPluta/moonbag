@@ -1,9 +1,8 @@
 import requests
 import pandas as pd
 import cachetools.func
-from retry import retry
-from moonbag.utils import table_formatter
-from moonbag.llama.utils import get_slug_mappings
+from moonbag.common.utils import table_formatter
+from explorer.llama.utils import get_slug_mappings
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
