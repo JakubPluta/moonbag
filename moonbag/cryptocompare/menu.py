@@ -339,7 +339,7 @@ class Controller:
             return
         if df.empty:
             print(
-                f"Not data found for {parsy.sybmol}/{parsy.tosymbol} on {parsy.exchange}"
+                f"Not data found for {parsy.symbol}/{parsy.tosymbol} on {parsy.exchange}"
             )
         print_table(df)
 
@@ -487,7 +487,7 @@ class Controller:
 
         try:
             df = self.client.get_order_book_snapshot(
-                symbol=parsy.symbol, to_symbol=parsy.tsym, exchange=parsy.exchange
+                symbol=parsy.symbol, to_symbol=parsy.tosymbol, exchange=parsy.exchange
             )
         except ValueError as e:
             print(f"{e}, To check list of coins use command: coins ")

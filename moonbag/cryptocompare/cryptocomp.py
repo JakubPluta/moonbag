@@ -21,7 +21,6 @@ class CryptoCompare(CryptoCompareClient):
         self.coin_list = self.get_all_coins_list()
         self.coin_mapping = create_dct_mapping_from_df(self.coin_list, "Symbol", "Id")
 
-    @table_formatter
     def get_price(self, symbol="BTC", currency="USD", **kwargs):
         data = self._get_price(symbol, currency, **kwargs)
         if "Response" in data and data["Response"] == "Error":
@@ -51,7 +50,6 @@ class CryptoCompare(CryptoCompareClient):
         df.columns = ["Metric", "Value"]
         return df
 
-    @table_formatter
     def get_top_list_by_market_cap(self, currency="USD", limit=100, **kwargs):
         limit = 10 if limit < 10 else limit
         data = self._get_top_list_by_market_cap(currency, limit, **kwargs)["Data"]
@@ -92,7 +90,6 @@ class CryptoCompare(CryptoCompareClient):
         ]
         return df[columns]
 
-    @table_formatter
     def get_top_exchanges(self, symbol="BTC", currency="USD", limit=100, **kwargs):
         try:
             data = self._get_top_exchanges(symbol, currency, limit, **kwargs)["Data"][
@@ -118,7 +115,6 @@ class CryptoCompare(CryptoCompareClient):
 
         return df[columns]
 
-    @table_formatter
     def get_exchanges_top_symbols_by_volume(
         self, exchange="Binance", limit=100, **kwargs
     ):
@@ -133,14 +129,12 @@ class CryptoCompare(CryptoCompareClient):
             logger.log(2, e)
         return df
 
-    @table_formatter
     def get_top_list_by_pair_volume(self, currency="USD", limit=100, **kwargs):
         data = self._get_top_list_by_pair_volume(currency, limit, **kwargs)["Data"]
         df = pd.DataFrame(data)
         columns = ["SYMBOL", "NAME", "FULLNAME", "SUPPLY", "VOLUME24HOURTO"]
         return df[columns]
 
-    @table_formatter
     def get_top_of_trading_pairs(self, symbol="ETH", limit=50, **kwargs):
         data = self._get_top_of_trading_pairs(symbol, limit, **kwargs)["Data"]
         return pd.DataFrame(data)
@@ -262,7 +256,7 @@ class CryptoCompare(CryptoCompareClient):
         data = self._get_all_coins_list(summary, **kwargs)["Data"]
         return pd.DataFrame(data).T[["Id", "Symbol", "FullName"]]
 
-    @table_formatter
+    
     def get_historical_day_prices(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):
@@ -276,7 +270,7 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    @table_formatter
+    
     def get_historical_hour_prices(
         self, symbol="BTC", currency="USD", limit=60 * 24, **kwargs
     ):
@@ -290,7 +284,7 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    @table_formatter
+    
     def get_historical_minutes_prices(
         self, symbol="BTC", currency="USD", limit=60 * 24, **kwargs
     ):
@@ -304,7 +298,7 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    @table_formatter
+    
     def get_daily_exchange_volume(
         self, currency="USD", exchange="CCCAGG", limit=365, **kwargs
     ):
@@ -315,7 +309,7 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    @table_formatter
+    
     def get_hourly_exchange_volume(
         self, currency="USD", exchange="CCCAGG", limit=60 * 24, **kwargs
     ):
@@ -326,7 +320,7 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    @table_formatter
+    
     def get_daily_symbol_volume(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):
@@ -335,7 +329,7 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df[["time", "top_tier_volume_total", "total_volume_total"]]
 
-    @table_formatter
+    
     def get_hourly_symbol_volume(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):
@@ -356,7 +350,6 @@ class CryptoCompare(CryptoCompareClient):
             logger.log(2, e)
             return pd.DataFrame()
 
-    @table_formatter
     def get_historical_blockchain_data(self, symbol="ETH", limit=365, **kwargs):
         try:
             data = self._get_historical_blockchain_data(symbol, limit, **kwargs)[
