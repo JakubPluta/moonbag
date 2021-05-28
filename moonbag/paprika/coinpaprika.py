@@ -32,10 +32,10 @@ class CoinPaprika(Client):
 
     def get_coin_exchanges_by_id(self, coin_id="eth-ethereum"):
         df = pd.DataFrame(self._get_coin_exchanges_by_id(coin_id))
-        df["fiats"] = df["fiats"].apply(
-            lambda x: [i.get("symbol") for i in x if x and len(x) > 0]
+        df["fiats"] = (
+            df["fiats"].copy().apply(lambda x: len([i["symbol"] for i in x if x]))
         )
-        print(df)
+        df.columns = header_wrapper(df, n=12, replace='_')
         return df
 
     def get_coin_events_by_id(self, coin_id="eth-ethereum"):
@@ -54,8 +54,13 @@ class CoinPaprika(Client):
         if "error" in res:
             print(res)
             return pd.DataFrame()
-        df = pd.DataFrame(res)
-        return df[["date", "user_name", "status", "retweet_count", "like_count"]]
+        df = pd.DataFrame(res)[["date", "user_name", "status", "retweet_count", "like_count"]]
+
+        df = df.applymap(
+            lambda x: "\n".join(textwrap.wrap(x, width=100)) if isinstance(x, str) else x
+        )
+
+        return df
 
     def get_all_contract_platforms(
         self,
