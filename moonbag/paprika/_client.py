@@ -69,10 +69,13 @@ class Client:
         return self._make_request(ENDPOINTS["ohlcv"].format(coin_id), quotes=quotes)
 
     def _get_ohlc_historical(
-        self, coin_id="eth-ethereum", quotes="USD", start="2020-06-15", end=None
+        self, coin_id="eth-ethereum", quotes="USD", start=None, end=None
     ):
         if end is None:
             end = datetime.datetime.now().strftime("%Y-%m-%d")
+
+        if start is None:
+            start = (datetime.datetime.now()-datetime.timedelta(days=365)).strftime("%Y-%m-%d")
         """"string Default: "usd"
         returned data quote (available values: usd btc)"""
         return self._make_request(

@@ -40,3 +40,13 @@ Pull requests are welcome.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Available features. (updated: 29.05.2021)
+- [x] Coingecko
+- [x] Cryptocompare
+- [x] Coinpaprika
+- [ ] Blockchain explorers for most popular chains (ethereum, solana, terra, polka)  
+- [ ] Tests
+- [ ] Charts + TA
+- [ ] Reddit, Twitter, 4Chan
+- [ ] ?? Uniswap (GraphQL)

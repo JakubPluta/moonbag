@@ -65,7 +65,11 @@ class CoinPaprika(Client):
     def get_all_contract_platforms(
         self,
     ):
-        return pd.DataFrame(self._get_all_contract_platforms())
+        return pd.DataFrame(self._get_all_contract_platforms()).reset_index()
+
+    def get_contract_platform(self, platform_id='eth-ethereum'):
+        df = self._get_contract_platforms(platform_id=platform_id)
+        return pd.DataFrame(df).reset_index()
 
     def get_coins_info(self):
         cols = [
@@ -106,8 +110,13 @@ class CoinPaprika(Client):
         df.columns = header_wrapper(df, n=12, replace='_')
         return df.sort_values(by="rank")
 
-    def get_tickers_for_coin(self):
-        df = pd.json_normalize(self._get_tickers_for_coin()).T.reset_index()
+    def get_tickers_for_coin(self, coin_id="btc-bitcoin", quotes='USD'):
+        df = pd.json_normalize(self._get_tickers_for_coin(coin_id, quotes)).T.reset_index()
+        df.columns = ["Metric", "Value"]
+        return df
+
+    def global_market(self):
+        df = pd.Series(self._get_global_market()).to_frame().reset_index()
         df.columns = ["Metric", "Value"]
         return df
 
@@ -175,3 +184,6 @@ class CoinPaprika(Client):
                 )
         return pd.DataFrame(results)
 
+    def get_ohlc(self, coin_id='eth-ethereum', quotes='USD'):
+        data = self._get_ohlc_historical(coin_id, quotes)
+        return pd.DataFrame(data)
