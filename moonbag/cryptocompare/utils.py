@@ -89,6 +89,12 @@ BASE_PARSER_ARGUMENTS = {
         default="latest",
         choices=["latest", "popular"],
     ),
+    "address": dict(
+        help="Token on-chain address",
+        dest="address",
+        required=True,
+        type=str,
+    ),
 }
 
 
@@ -137,3 +143,9 @@ class MoonParser(argparse.ArgumentParser):
             BASE_PARSER_ARGUMENTS["sort"], **kwargs
         )
         self.add_argument("-s", "--sort", **dct)
+
+    def add_address_argument(self, **kwargs):
+        dct = self._modify_default_dict_of_arguments(
+            BASE_PARSER_ARGUMENTS["address"], **kwargs
+        )
+        self.add_argument("-a", "--address", **dct)

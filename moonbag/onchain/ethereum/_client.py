@@ -2,8 +2,13 @@ import pandas as pd
 import json
 import requests
 import logging
-from moonbag.onchain.ethereum.utils import manual_replace, enrich_social_media, split_cols
+from moonbag.onchain.ethereum.utils import (
+    manual_replace,
+    enrich_social_media,
+    split_cols,
+)
 from datetime import datetime
+
 
 class EthplorerClient:
     def __init__(self, api_key=None):
@@ -58,7 +63,3 @@ class EthplorerClient:
     def _get_top_tokens(self):
         url = f"https://api.ethplorer.io/getTopTokens/{self.api_query}"
         return self._request_call(url)
-
-
-
-
