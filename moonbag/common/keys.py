@@ -6,5 +6,8 @@ load_dotenv()
 
 WALES_API_KEY = os.getenv("WALES_API_KEY")
 CC_API_KEY = os.getenv("CC_API_KEY")
-ETH_API_KEY = None
-REDDIT_API_KEY = None
+
+REDDIT_CLIENT_ID = os.getenv('REDDIT_CLIENT_ID') or "Enter your client id"
+REDDIT_CLIENT_SECRET = os.getenv('REDDIT_CLIENT_SECRET') or "Enter your client secret"
+REDDIT_USER_AGENT = os.getenv('REDDIT_USER_AGENT') or "Enter your client user agent"
+
