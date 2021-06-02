@@ -1,9 +1,25 @@
+import time
+
 import pandas as pd
 import textwrap
 from moonbag.explorer.reddit_client._client import RedditClient, praw
 import datetime
 from typing import Union
-from types import SimpleNamespace
+
+CRYPTO_SUBREDDITS = [
+    'CryptoCurrency',
+    'CryptoMoonShots',
+    'SatoshiStreetBets',
+    'AltStreetBets',
+    "altcoin",
+    "dogecoin",
+    "ethtrader",
+    "bitcoin",
+    "btc",
+    "ethereum",
+    "algotrading"
+
+]
 
 def created_date(timestamp):
     return datetime.datetime.fromtimestamp(timestamp)
@@ -114,25 +130,60 @@ class Reddit(RedditClient):
                                          )
         data = results['data']
         results = []
-        for s in data:
-            results.append(
-                dict(
-                    created=created_date(s.get('created_utc')),
-                    comments=s.get('num_comments'),
-                    score=s.get('score'),
-                    subreddit=s.get('subreddit'),
-                    title=s.get('title'),
 
+        if data_type.lower() == 'comment':
+            for s in data:
+                results.append(
+                    dict(
+                        created=created_date(s.get('created_utc')),
+                        #comments=s.get('num_comments'),
+                        score=s.get('score'),
+                        subreddit=s.get('subreddit'),
+                        title=s.get('body'),
 
+                    )
                 )
-            )
+        else:
+            for s in data:
+                results.append(
+                    dict(
+                        created=created_date(s.get('created_utc')),
+                        comments=s.get('num_comments'),
+                        score=s.get('score'),
+                        subreddit=s.get('subreddit'),
+                        title=s.get('title'),
+
+                    )
+                )
         df = pd.DataFrame(results).sort_values(by='score',ascending=False)
         df['title'] = df['title'].apply(
             lambda x: "\n".join(textwrap.wrap(x, width=76)) if isinstance(x, str) else x
         )
         return df
 
-#
-# a = Reddit()
-# from moonbag.common import print_table
-# print_table(a.search(query="Ethereum"))
+    def get_popular_submissions(self):
+        results = []
+        for sub in CRYPTO_SUBREDDITS:
+            print(f"Searching data for subreddit: {sub}")
+            time.sleep(0.3)
+            subm = self.psaw.search_submissions(subreddit=sub, limit=1000, score = ">50", after='7d')
+            for s in subm:
+                results.append(dict(
+                        created=created_date(s.created_utc),
+                        comments=s.num_comments,
+                        score=s.score,
+                        subreddit=s.subreddit,
+                        title=s.title,
+
+                    )
+                )
+
+        df = pd.DataFrame(results).sort_values(by='score', ascending=False)
+        df['title'] = df['title'].apply(
+            lambda x: "\n".join(textwrap.wrap(x, width=76)) if isinstance(x, str) else x
+        )
+        return df
+
+a = Reddit()
+from moonbag.common import print_table
+print_table(a.search(query="Ethereum",data_type='comment'))
