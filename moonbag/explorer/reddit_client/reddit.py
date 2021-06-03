@@ -183,7 +183,3 @@ class Reddit(RedditClient):
             lambda x: "\n".join(textwrap.wrap(x, width=76)) if isinstance(x, str) else x
         )
         return df
-
-a = Reddit()
-from moonbag.common import print_table
-print_table(a.search(query="Ethereum",data_type='comment'))
