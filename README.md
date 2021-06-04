@@ -50,7 +50,7 @@ Pull requests are welcome.
     [x] TerraLuna
 - [ ] Tests
 - [ ] Charts + TA
-- [ ] Reddit, Twitter, 4Chan
-    [x] Reddit
-    [x] 4chan
+- [ ] Twitter, 4Chan
+- [x] Reddit
+    - [x] 4chan
 - [x] Uniswap (GraphQL)
