@@ -30,7 +30,3 @@ def get_dpi():
     )
     df.drop("x", axis=1, inplace=True)
     return df
-
-
-df = get_dpi()
-print_table(df)

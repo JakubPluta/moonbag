@@ -1,16 +1,11 @@
-import json
 import requests
 import time
-from dotenv import load_dotenv
-import os
+from moonbag.common.keys import WALES_API_KEY
 import pandas as pd
-
-load_dotenv()
-API_KEY = os.getenv("WALES_API_KEY")
 
 
 def _get_wales_stats(min_value=1000000):
-    req = f"https://api.whale-alert.io/v1/transactions?api_key={API_KEY}"
+    req = f"https://api.whale-alert.io/v1/transactions?api_key={WALES_API_KEY}"
     params = {"min_value": min_value, "start": int(time.time()) - 3000}
     return requests.get(url=req, params=params).json()["transactions"]
 
@@ -32,4 +27,4 @@ def get_wales_stats():
     )
     data["timestamp"] = pd.to_datetime(data["timestamp"], unit="s")
     data.columns = [col.replace(".address", "") for col in data.columns]
-    return data.set_index("timestamp")
+    return data

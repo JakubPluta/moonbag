@@ -22,7 +22,6 @@ class LLama:
         resp.raise_for_status()
         return resp.json()
 
-    @table_formatter
     def get_protocols(self):
         df = pd.DataFrame.from_dict(self._get_protocols())[
             [
@@ -69,7 +68,6 @@ class LLama:
         resp.raise_for_status()
         return resp.json()
 
-    @table_formatter
     def get_protocol_info(self, protocol: str):
         data = self._get_protocol(protocol)
         for stat in ["tvl", "tokensInUsd"]:
@@ -78,11 +76,10 @@ class LLama:
         df["chains"] = df["chains"].apply(lambda x: ",".join(x))
         return df.T
 
-    @table_formatter
     def get_protocol_total_value_locked(self, protocol: str):
         data = self._get_protocol(protocol).get("tvl")
         if not data:
             return pd.DataFrame()
         df = pd.json_normalize(data)
         df["date"] = pd.to_datetime(df["date"], unit="s")
-        return df.set_index("date")
+        return df

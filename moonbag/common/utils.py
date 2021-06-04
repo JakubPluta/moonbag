@@ -1,6 +1,6 @@
 import textwrap
 import pandas as pd
-
+import datetime
 
 def formatter(x):
     if isinstance(x, int):
@@ -43,3 +43,7 @@ def wrap_headers_in_dataframe(df: pd.DataFrame, n=15, replace=None):
             for c in list(df.columns)
     ]
     return [textwrap.fill(c, n, break_long_words=False) for c in list(df.columns)]
+
+
+def created_date(timestamp):
+    return datetime.datetime.fromtimestamp(timestamp)
