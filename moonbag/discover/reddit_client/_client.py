@@ -4,12 +4,13 @@ from moonbag.common import keys
 from psaw import PushshiftAPI
 import requests
 
+
 class RedditClient:
     def __init__(self):
         self.client = praw.Reddit(
             client_id=keys.REDDIT_CLIENT_ID,
             client_secret=keys.REDDIT_CLIENT_SECRET,
-            user_agent=keys.REDDIT_USER_AGENT
+            user_agent=keys.REDDIT_USER_AGENT,
         )
         self.psaw = PushshiftAPI()
 
@@ -30,5 +31,3 @@ class RedditClient:
         payload = kwargs
         request = requests.get(base_url, params=payload)
         return request.json()
-
-

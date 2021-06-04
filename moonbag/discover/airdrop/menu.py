@@ -7,6 +7,7 @@ from argparse import ArgumentError
 import os
 import sys
 
+
 def airdrops():
     webbrowser.open("https://airdrops.io/")
 
@@ -22,18 +23,25 @@ def airdrops_cmc():
 def airdrop_view(args):
 
     parser = argparse.ArgumentParser(prog="airdrop", add_help=True)
-    parser.add_argument('-w','--web',choices=["cmc","airdrops",'airdropalert'], default='airdrops', required=False, dest="airdrop")
+    parser.add_argument(
+        "-w",
+        "--web",
+        choices=["cmc", "airdrops", "airdropalert"],
+        default="airdrops",
+        required=False,
+        dest="airdrop",
+    )
     parsy, others = parser.parse_known_args(args)
-    if parsy.airdrop == 'cmc':
+    if parsy.airdrop == "cmc":
         airdrops_cmc()
-    elif parsy.airdrop == 'airdrops':
+    elif parsy.airdrop == "airdrops":
         airdrops()
     elif parsy.airdrop == "airdropalert":
         airdrop_alerts()
 
 
 def main():
-    choices = ['airdrop', "quit","q", "r"]
+    choices = ["airdrop", "quit", "q", "r"]
     if sys.platform == "win32":
         os.system("")
 
@@ -52,7 +60,7 @@ def main():
             elif cmd == "r":
                 return True
 
-            if cmd == 'airdrop':
+            if cmd == "airdrop":
                 airdrop_view(others)
 
         except ArgumentError:

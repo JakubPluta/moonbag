@@ -2,11 +2,7 @@ import requests
 import pandas as pd
 import cachetools.func
 from moonbag.common.utils import table_formatter
-from explorer.llama.utils import get_slug_mappings
-
-pd.set_option("display.max_columns", None)
-pd.set_option("display.max_rows", None)
-pd.set_option("display.width", None)
+from moonbag.discover.defi.utils import get_slug_mappings
 
 
 class LLama:
@@ -27,7 +23,7 @@ class LLama:
             [
                 "name",
                 "symbol",
-                "address",
+                # "address",
                 "category",
                 "chains",
                 "change_1h",
@@ -35,7 +31,7 @@ class LLama:
                 "change_7d",
                 "tvl",
                 "url",
-                "description",
+                # "description",
                 # "module",
                 # "audits",
                 # "gecko_id",

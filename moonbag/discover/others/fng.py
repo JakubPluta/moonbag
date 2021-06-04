@@ -8,8 +8,9 @@ import datetime
 
 def get_fng(limit=60):
     url = f"https://api.alternative.me/fng/?limit={limit}"
-    data = requests.get(url=url).json()['data']
-    df = pd.DataFrame(data)[['timestamp','value_classification','value']]
-    df['timestamp'] = df['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp((int(x))))
+    data = requests.get(url=url).json()["data"]
+    df = pd.DataFrame(data)[["timestamp", "value_classification", "value"]]
+    df["timestamp"] = df["timestamp"].apply(
+        lambda x: datetime.datetime.fromtimestamp((int(x)))
+    )
     return df
-
