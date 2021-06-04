@@ -45,12 +45,21 @@ Pull requests are welcome.
 - [x] Coingecko
 - [x] Cryptocompare
 - [x] Coinpaprika
-- [ ] Blockchain explorers for most popular chains (ethereum, solana, terra, polka)
-    [x] Ethereum
-    [x] TerraLuna
+- [x] UniSwap (GraphQL)
+- [x] Funding rates
+- [x] Wales txs
+- [ ] Airdrops
+- [x] DeFi stats
+    - [x] Defi Pulse
+    - [x] Lllama
+- [x] Fear & Greed Index
+- [ ] Blockchain explorers for most popular chains
+    - [x] Ethereum
+    - [x] TerraLuna
 - [ ] Tests
-- [ ] Charts + TA
-- [ ] Twitter, 4Chan
-- [x] Reddit
-    - [x] 4chan
-- [x] Uniswap (GraphQL)
+- [ ] Charts
+- [ ] Technical Analysis
+- [ ] Social media data
+    - [x] Reddit
+    - [x] 4Chan
+    - [ ] BitcoinTalk
