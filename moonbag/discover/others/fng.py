@@ -7,6 +7,8 @@ import datetime
 
 
 def get_fng(limit=60):
+    if not isinstance(limit, int) and limit < 1:
+        limit = 30
     url = f"https://api.alternative.me/fng/?limit={limit}"
     data = requests.get(url=url).json()["data"]
     df = pd.DataFrame(data)[["timestamp", "value_classification", "value"]]

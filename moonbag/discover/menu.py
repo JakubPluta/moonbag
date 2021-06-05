@@ -3,13 +3,15 @@ import sys
 import os
 import argparse
 import logging
+import time
+
 from moonbag.common import LOGO, MOON, print_table
 from argparse import ArgumentError
 from inspect import signature
 from moonbag.cryptocompare.utils import MoonParser
 from moonbag.discover.defi import graph, llama, pulse
 from moonbag.discover.reddit_client import reddit
-from moonbag.discover.wales import wales
+from moonbag.discover.others import wales
 from moonbag.discover.others import fng, funding, fourchan, cryptopanic
 
 logger = logging.getLogger("discover-menu")
@@ -33,7 +35,7 @@ class Controller:
             "fundings": self.show_fundings,
             "4chan": self.show_4chan,
             "wales": self.show_wales,
-            "recent_pairs": self.show_lastly_added_tokens,
+            "uni_pairs": self.show_lastly_added_tokens,
             "dex_trades": self.show_dex_trades,
             "compound": self.show_compound_markets,
             "uni_tokens": self.show_uni_tokens,
@@ -47,21 +49,22 @@ class Controller:
         print("   r                 return to previous menu")
         print("   quit              quit program")
         print("")
-        print("       top_subs ")
-        print("       search_reddit ")
-        print("       search_subs")
-        print("       dpi ")
-        print("       defi")
-        print("       fng")
-        print("       news  ")
-        print("       fundings  ")
-        print("       4chan  ")
-        print("       wales   ")
-        print("recent_pairs  ")
-        print("dex_trades  ")
-        print("compound  ")
-        print("uni_tokens  ")
-        print("uni_swaps  ")
+        print("Discovery mode       ")
+        print("   top_subs          find top submissions on most popular crypto subreddits  [Reddit]")
+        print("   search_subs       show coins base information  [Reddit]")
+        print("   search_reddit     search on reddit with you own query  [Reddit]")
+        print("   dpi               show defi pulse index  [Reddit]")
+        print("   defi              show DeFi protocols stats [LLama]")
+        print("   fng               show fear and greed index for last n days  [Fear and greed]")
+        print("   news              show last crypto news  [Cryptopanic]")
+        print("   fundings          show crypto funding rates  [Defirate]")
+        print("   4chan             show last 4chan submissions  [4chan]")
+        print("   wales             show wales transactions  [Whale-Alert]")
+        print("   uni_pairs         show recently added pairs on UniSwap  [TheGraph]")
+        print("   uni_tokens        show uni tokens   [TheGraph]")
+        print("   uni_swaps         show latest swaps on UniSwap  [TheGraph]")
+        print("   dex_trades        show stats about DeFi dex trades  [TheGraph]")
+        print("   compound          show compound markets  [TheGraph]")
         print(" ")
         return
 
@@ -458,7 +461,9 @@ def main():
             continue
 
         except SystemExit:
-            print("\n")
+            time.sleep(0.1)
+            print("")
+            print("")
             continue
 
 

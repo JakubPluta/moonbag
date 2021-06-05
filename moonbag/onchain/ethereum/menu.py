@@ -210,7 +210,7 @@ def main():
     if sys.platform == "win32":
         os.system("")
 
-    parser = argparse.ArgumentParser(prog="paprika", add_help=False)
+    parser = argparse.ArgumentParser(prog="ethereum", add_help=False)
     parser.add_argument("cmd", choices=choices)
 
     print(LOGO)
@@ -227,6 +227,7 @@ def main():
             elif cmd in ["exit", "quit", "q"]:
                 return False
             elif cmd == "r":
+                print("Returning to on-chain menu")
                 return True
 
             view = c.mapper.get(cmd)
@@ -242,11 +243,12 @@ def main():
 
         except ArgumentError:
             print("The command selected doesn't exist")
-            print("\n")
+            print("")
             continue
 
         except SystemExit:
-            print("\n")
+            print("")
+            print("")
             continue
 
 

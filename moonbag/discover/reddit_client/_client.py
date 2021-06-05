@@ -1,8 +1,8 @@
 import praw
+import requests
 from functools import lru_cache
 from moonbag.common import keys
 from psaw import PushshiftAPI
-import requests
 
 
 class RedditClient:

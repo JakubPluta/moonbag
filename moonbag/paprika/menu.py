@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
+import time
 import argparse
 import logging
 from moonbag.common import LOGO, MOON, print_table
@@ -282,7 +283,9 @@ def main():
             continue
 
         except SystemExit:
-            print("\n")
+            time.sleep(0.1)
+            print("")
+            print("")
             continue
 
 
