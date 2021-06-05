@@ -3,8 +3,8 @@ import sys
 import os
 import argparse
 import logging
-from moonbag.common import LOGO, MOON
 from argparse import ArgumentError
+from moonbag.common import LOGO, MOON
 from moonbag.onchain.ethereum import menu as eth_menu
 from moonbag.onchain.terraluna import menu as terra_menu
 from moonbag.cryptocompare import menu as cc_menu
@@ -13,7 +13,7 @@ from moonbag.gecko import overview_menu as overview_menu
 from moonbag.paprika import menu as paprika_menu
 from moonbag.discover import menu as disc_menu
 
-logger = logging.getLogger("paprika-menu")
+logger = logging.getLogger("main-menu")
 
 
 def help():
@@ -33,7 +33,6 @@ def help():
     print("   ethereum       explore on-chain data for ethereum [Ethplorer]")
     print("   terra          explore on-chain data for terra  [TerraAPI]")
     print("")
-
 
 
 mapper = {

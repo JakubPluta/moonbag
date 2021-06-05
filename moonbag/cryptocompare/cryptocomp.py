@@ -256,7 +256,6 @@ class CryptoCompare(CryptoCompareClient):
         data = self._get_all_coins_list(summary, **kwargs)["Data"]
         return pd.DataFrame(data).T[["Id", "Symbol", "FullName"]]
 
-    
     def get_historical_day_prices(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):
@@ -270,7 +269,6 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    
     def get_historical_hour_prices(
         self, symbol="BTC", currency="USD", limit=60 * 24, **kwargs
     ):
@@ -284,7 +282,6 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    
     def get_historical_minutes_prices(
         self, symbol="BTC", currency="USD", limit=60 * 24, **kwargs
     ):
@@ -298,7 +295,6 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    
     def get_daily_exchange_volume(
         self, currency="USD", exchange="CCCAGG", limit=365, **kwargs
     ):
@@ -309,7 +305,6 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    
     def get_hourly_exchange_volume(
         self, currency="USD", exchange="CCCAGG", limit=60 * 24, **kwargs
     ):
@@ -320,7 +315,6 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df
 
-    
     def get_daily_symbol_volume(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):
@@ -329,7 +323,6 @@ class CryptoCompare(CryptoCompareClient):
         df["time"] = pd.to_datetime(df["time"], unit="s")
         return df[["time", "top_tier_volume_total", "total_volume_total"]]
 
-    
     def get_hourly_symbol_volume(
         self, symbol="BTC", currency="USD", limit=365, **kwargs
     ):

@@ -2,6 +2,7 @@ import textwrap
 import pandas as pd
 import datetime
 
+
 def formatter(x):
     if isinstance(x, int):
         return "{0:.2f}".format(x)
@@ -39,9 +40,9 @@ def underscores_to_newline_replace(cols: list, line: int = 13):
 def wrap_headers_in_dataframe(df: pd.DataFrame, n=15, replace=None):
     if replace:
         return [
-        textwrap.fill(c.replace(replace, " "), n, break_long_words=False)
+            textwrap.fill(c.replace(replace, " "), n, break_long_words=False)
             for c in list(df.columns)
-    ]
+        ]
     return [textwrap.fill(c, n, break_long_words=False) for c in list(df.columns)]
 
 

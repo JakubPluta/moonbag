@@ -20,19 +20,19 @@ class Controller:
         self.parser.add_argument("cmd")
         self.base_commands = ["help", "exit", "quit", "r", "q"]
         self.mapper = {
-            "coins_list" : self.show_coins_list,
+            "coins_list": self.show_coins_list,
             "coins_info": self.show_coins_info,
-            "coins_market" : self.show_coins_market,
-            "exchanges_info" : self.show_exchanges_info,
+            "coins_market": self.show_coins_market,
+            "exchanges_info": self.show_exchanges_info,
             "exchanges_market": self.show_exchanges_market,
-            "coin_exchanges" : self.show_coin_exchanges,
-            "coin_twitter" : self.show_coin_twitter,
-            "coin_events" : self.show_coin_events,
-            "platforms" : self.show_platforms,
-            "contracts" : self.show_contracts,
-            "global_info" : self.show_global_market,
-            "coin_ohlc" : self.show_ohlc,
-            "search" : self.search,
+            "coin_exchanges": self.show_coin_exchanges,
+            "coin_twitter": self.show_coin_twitter,
+            "coin_events": self.show_coin_events,
+            "platforms": self.show_platforms,
+            "contracts": self.show_contracts,
+            "global_info": self.show_global_market,
+            "coin_ohlc": self.show_ohlc,
+            "search": self.search,
         }
 
     @staticmethod
@@ -49,17 +49,33 @@ class Controller:
         print("   coins_info        show coins base information [Coinpaprika]")
         print("   coins_market      show coins market information [Coinpaprika]")
 
-        print("   exchanges_info    show base information about exchanges [Coinpaprika]")
-        print("   exchanges_market  show base information about exchanges [Coinpaprika]")
+        print(
+            "   exchanges_info    show base information about exchanges [Coinpaprika]"
+        )
+        print(
+            "   exchanges_market  show base information about exchanges [Coinpaprika]"
+        )
 
-        print("   platforms         show all platforms with smart contracts  [Coinpaprika]")
-        print("   contracts         show all contracts for given platform platforms. Defautlt eth-ethereum  [Coinpaprika]")
+        print(
+            "   platforms         show all platforms with smart contracts  [Coinpaprika]"
+        )
+        print(
+            "   contracts         show all contracts for given platform platforms. Defautlt eth-ethereum  [Coinpaprika]"
+        )
 
-        print("   coin_exchanges    show all exchanges for given coin. Use coin_id as input [Coinpaprika]")
-        print("   coin_events       show all event for given coin Use coin_id as input [Coinpaprika]")
-        print("   coin_twitter      show twitter timeline for given coin. Use coin_id as input [Coinpaprika]")
+        print(
+            "   coin_exchanges    show all exchanges for given coin. Use coin_id as input [Coinpaprika]"
+        )
+        print(
+            "   coin_events       show all event for given coin Use coin_id as input [Coinpaprika]"
+        )
+        print(
+            "   coin_twitter      show twitter timeline for given coin. Use coin_id as input [Coinpaprika]"
+        )
 
-        print("   coin_ohlc         show coin open-high-low-close prices data for last year. Use coin_id as input [Coinpaprika]")
+        print(
+            "   coin_ohlc         show coin open-high-low-close prices data for last year. Use coin_id as input [Coinpaprika]"
+        )
         print(" ")
         return
 
@@ -69,7 +85,7 @@ class Controller:
             add_help=True,
             description="get coin information",
         )
-        parser.add_limit_argument(default=500, help='Number of coins', dest='limit')
+        parser.add_limit_argument(default=500, help="Number of coins", dest="limit")
         parsy, _ = parser.parse_known_args(args)
         try:
             prices = self.client.get_coins_info()
@@ -84,7 +100,7 @@ class Controller:
             add_help=True,
             description="get market info for all coins",
         )
-        parser.add_limit_argument(default=500, help='Number of coins', dest='limit')
+        parser.add_limit_argument(default=500, help="Number of coins", dest="limit")
         parsy, _ = parser.parse_known_args(args)
         try:
             prices = self.client.get_coins_market_info()
@@ -99,7 +115,7 @@ class Controller:
             add_help=True,
             description="get list of coins",
         )
-        parser.add_limit_argument(default=500, help='Number of coins', dest='limit')
+        parser.add_limit_argument(default=500, help="Number of coins", dest="limit")
         parsy, _ = parser.parse_known_args(args)
         try:
             prices = self.client.get_coins()
@@ -114,7 +130,7 @@ class Controller:
             add_help=True,
             description="show exchanges information",
         )
-        parser.add_limit_argument(default=100, help='Number of records', dest='limit')
+        parser.add_limit_argument(default=100, help="Number of records", dest="limit")
         parsy, _ = parser.parse_known_args(args)
         try:
             prices = self.client.get_exchanges_info()
@@ -130,8 +146,8 @@ class Controller:
             description="show exchanges information",
         )
 
-        parser.add_exchange_argument(default='binance', required=False, dest='exchange')
-        parser.add_limit_argument(default=100, help='Number of records', dest='limit')
+        parser.add_exchange_argument(default="binance", required=False, dest="exchange")
+        parser.add_limit_argument(default=100, help="Number of records", dest="limit")
         parsy, _ = parser.parse_known_args(args)
         try:
             prices = self.client.get_exchanges_market(exchange_id=parsy.exchange)
@@ -201,8 +217,15 @@ class Controller:
             add_help=True,
             description="show all contract platforms",
         )
-        parser.add_argument('-p', '--p','--platform', dest='platform', help='Smart contract platform id. Default: eth-ethereum.',
-                                 required=False, default='eth-ethereum')
+        parser.add_argument(
+            "-p",
+            "--p",
+            "--platform",
+            dest="platform",
+            help="Smart contract platform id. Default: eth-ethereum.",
+            required=False,
+            default="eth-ethereum",
+        )
         parsy, _ = parser.parse_known_args(args)
         try:
             platforms = self.client.get_contract_platform(parsy.platform)
@@ -231,8 +254,8 @@ class Controller:
             add_help=True,
             description="get open-high-low-close prices for given coin",
         )
-        parser.add_coin_argument(default='btc-bitcoin', help='coin id', dest='symbol')
-        parser.add_limit_argument(default=365, help='Number of days', dest='limit')
+        parser.add_coin_argument(default="btc-bitcoin", help="coin id", dest="symbol")
+        parser.add_limit_argument(default=365, help="Number of days", dest="limit")
         parsy, _ = parser.parse_known_args(args)
         try:
             prices = self.client.get_ohlc(coin_id=parsy.symbol)
@@ -247,7 +270,15 @@ class Controller:
             add_help=True,
             description="search coinpaprika",
         )
-        parser.add_argument('-q','--q','--query', required=True, type=str, help="Search query", dest="query")
+        parser.add_argument(
+            "-q",
+            "--q",
+            "--query",
+            required=True,
+            type=str,
+            help="Search query",
+            dest="query",
+        )
         parsy, _ = parser.parse_known_args(args)
 
         try:
@@ -308,5 +339,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

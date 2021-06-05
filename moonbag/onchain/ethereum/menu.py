@@ -21,13 +21,13 @@ class Controller:
         self.mapper = {
             "token_info": self.show_token_info,
             "tx_info": self.show_tx_info,
-            "address_info" : self.show_address_info,
-            "address_tx" : self.show_address_tx,
-            "address_hist" : self.show_address_hist,
+            "address_info": self.show_address_info,
+            "address_tx": self.show_address_tx,
+            "address_hist": self.show_address_hist,
             "top_tokens": self.show_top_tokens,
             "token_holders": self.show_top_token_holders,
             "token_price": self.show_token_price,
-            "token_hist" : self.show_token_history,
+            "token_hist": self.show_token_history,
             "token_txs": self.show_token_txs,
         }
 
@@ -40,7 +40,9 @@ class Controller:
         print("")
         print("Ethplorer        ")
         print("   token_info       show info about erc20 token [Ethplorer]")
-        print("   tx_info          show info about transaction on ethereum blockchain [Ethplorer]")
+        print(
+            "   tx_info          show info about transaction on ethereum blockchain [Ethplorer]"
+        )
         print("   address_info     show info about ethereum address [Ethplorer]")
         print("   address_tx       show ethereum address transactions [Ethplorer]")
         print("   top_tokens       show most popular coin on ethplorer [Ethplorer]")
@@ -49,7 +51,9 @@ class Controller:
 
         print("   token_price      show info about historical token prices [Ethplorer]")
         print("   token_hist       show historical info about erc20 token [Ethplorer]")
-        print("   token_txs        show info about historical token transactions [Ethplorer]")
+        print(
+            "   token_txs        show info about historical token transactions [Ethplorer]"
+        )
 
         print(" ")
         return
@@ -90,7 +94,7 @@ class Controller:
             add_help=True,
             description="get transaction details",
         )
-        parser.add_address_argument(help='Ethereum transaction hash')
+        parser.add_address_argument(help="Ethereum transaction hash")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_tx_info(parsy.address)
@@ -105,7 +109,7 @@ class Controller:
             add_help=True,
             description="get address details",
         )
-        parser.add_address_argument(help='Ethereum address')
+        parser.add_address_argument(help="Ethereum address")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_address_info(parsy.address)
@@ -120,7 +124,7 @@ class Controller:
             add_help=True,
             description="show address transactions details",
         )
-        parser.add_address_argument(help='Ethereum address')
+        parser.add_address_argument(help="Ethereum address")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_address_transactions(parsy.address)
@@ -135,7 +139,7 @@ class Controller:
             add_help=True,
             description="show address history",
         )
-        parser.add_address_argument(help='Ethereum address')
+        parser.add_address_argument(help="Ethereum address")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_address_history(parsy.address)
@@ -150,7 +154,7 @@ class Controller:
             add_help=True,
             description="show top token holders",
         )
-        parser.add_address_argument(help='Ethereum token address')
+        parser.add_address_argument(help="Ethereum token address")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_top_token_holders(parsy.address)
@@ -179,7 +183,7 @@ class Controller:
             add_help=True,
             description="show token prices",
         )
-        parser.add_address_argument(help='Ethereum token address')
+        parser.add_address_argument(help="Ethereum token address")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_token_historical_price(parsy.address)
@@ -194,7 +198,7 @@ class Controller:
             add_help=True,
             description="show token transactions",
         )
-        parser.add_address_argument(help='Ethereum token address')
+        parser.add_address_argument(help="Ethereum token address")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_token_historical_txs(parsy.address)
@@ -249,4 +253,3 @@ def main():
             print("")
             print("")
             continue
-

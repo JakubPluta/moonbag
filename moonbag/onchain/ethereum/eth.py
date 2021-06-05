@@ -36,7 +36,7 @@ class Eth(EthplorerClient):
 
     def get_tx_info(self, tx_hash):
         tx = self._get_tx_info(tx_hash)
-        if 'error' in tx:
+        if "error" in tx:
             return pd.DataFrame(tx).reset_index()
         try:
             tx.pop("logs")
@@ -47,7 +47,9 @@ class Eth(EthplorerClient):
                 if token:
                     operations["token"] = token["name"]
                     operations["tokenAddress"] = token["address"]
-                operations["timestamp"] = datetime.fromtimestamp(operations["timestamp"])
+                operations["timestamp"] = datetime.fromtimestamp(
+                    operations["timestamp"]
+                )
             tx.update(operations)
             df = pd.Series(tx).to_frame().reset_index()
             df.columns = ["Metric", "Value"]
@@ -59,7 +61,7 @@ class Eth(EthplorerClient):
     def get_token_history(self, address):
         op = self._get_token_history(address)
         ops = []
-        if 'error' in op:
+        if "error" in op:
             return pd.DataFrame(op).reset_index()
         try:
             operations = op["operations"]
@@ -80,7 +82,7 @@ class Eth(EthplorerClient):
 
     def get_address_info(self, address):
         addr = self._get_address_info(address)
-        if 'error' in addr:
+        if "error" in addr:
             return pd.DataFrame(addr).reset_index()
         print(
             f"Fetching data for {address}. This address made {addr.get('countTxs')} transactions"
@@ -108,7 +110,7 @@ class Eth(EthplorerClient):
 
     def get_address_transactions(self, address):
         tx = self._get_address_transactions(address)
-        if 'error' in tx:
+        if "error" in tx:
             return pd.DataFrame(tx).reset_index()
         try:
             df = pd.DataFrame(tx)[["timestamp", "from", "to", "hash"]]
@@ -120,7 +122,7 @@ class Eth(EthplorerClient):
 
     def get_address_history(self, address):
         tx = self._get_address_history(address)
-        if 'error' in tx:
+        if "error" in tx:
             return pd.DataFrame(tx).reset_index()
         operations = tx.pop("operations")
         if operations:
@@ -143,7 +145,7 @@ class Eth(EthplorerClient):
 
     def get_top_tokens(self):
         t = self._get_top_tokens()
-        if 'error' in t:
+        if "error" in t:
             return pd.DataFrame(t).reset_index()
         tokens = t["tokens"]
         df = pd.DataFrame(tokens)
@@ -161,7 +163,7 @@ class Eth(EthplorerClient):
 
     def _get_token_price_history_helper(self, address):
         hist = self._get_token_price_history_grouped(address)
-        if 'error' in hist:
+        if "error" in hist:
             return pd.DataFrame(hist).reset_index()
         data = hist["history"]
         current = data.pop("current")

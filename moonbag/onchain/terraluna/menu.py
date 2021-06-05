@@ -21,9 +21,9 @@ class Controller:
         self.mapper = {
             "supply": self.show_supply,
             "staking": self.show_staking,
-            "account_info" : self.show_address_info,
-            "transaction" : self.show_tx_info,
-            "validators" : self.show_validators,
+            "account_info": self.show_address_info,
+            "transaction": self.show_tx_info,
+            "validators": self.show_validators,
         }
 
     @staticmethod
@@ -49,7 +49,7 @@ class Controller:
             add_help=True,
             description="transaction details",
         )
-        parser.add_address_argument(help='transaction hash')
+        parser.add_address_argument(help="transaction hash")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_tx(parsy.address)
@@ -64,7 +64,7 @@ class Controller:
             add_help=True,
             description="get address details",
         )
-        parser.add_address_argument(help='account address')
+        parser.add_address_argument(help="account address")
         parsy, _ = parser.parse_known_args(args)
         try:
             data = self.client.get_account(parsy.address)
@@ -114,6 +114,7 @@ class Controller:
             print(f"{e}")
             return
         print_table(data)
+
 
 def main():
     c = Controller()

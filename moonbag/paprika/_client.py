@@ -75,7 +75,9 @@ class Client:
             end = datetime.datetime.now().strftime("%Y-%m-%d")
 
         if start is None:
-            start = (datetime.datetime.now()-datetime.timedelta(days=365)).strftime("%Y-%m-%d")
+            start = (datetime.datetime.now() - datetime.timedelta(days=365)).strftime(
+                "%Y-%m-%d"
+            )
         """"string Default: "usd"
         returned data quote (available values: usd btc)"""
         return self._make_request(

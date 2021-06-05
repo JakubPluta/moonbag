@@ -50,12 +50,16 @@ class Controller:
         print("   quit              quit program")
         print("")
         print("Discovery mode       ")
-        print("   top_subs          find top submissions on most popular crypto subreddits  [Reddit]")
+        print(
+            "   top_subs          find top submissions on most popular crypto subreddits  [Reddit]"
+        )
         print("   search_subs       show coins base information  [Reddit]")
         print("   search_reddit     search on reddit with you own query  [Reddit]")
         print("   dpi               show defi pulse index  [Reddit]")
         print("   defi              show DeFi protocols stats [LLama]")
-        print("   fng               show fear and greed index for last n days  [Fear and greed]")
+        print(
+            "   fng               show fear and greed index for last n days  [Fear and greed]"
+        )
         print("   news              show last crypto news  [Cryptopanic]")
         print("   fundings          show crypto funding rates  [Defirate]")
         print("   4chan             show last 4chan submissions  [4chan]")

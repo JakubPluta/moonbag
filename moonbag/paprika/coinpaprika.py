@@ -35,7 +35,7 @@ class CoinPaprika(Client):
         df["fiats"] = (
             df["fiats"].copy().apply(lambda x: len([i["symbol"] for i in x if x]))
         )
-        df.columns = header_wrapper(df, n=12, replace='_')
+        df.columns = header_wrapper(df, n=12, replace="_")
         return df
 
     def get_coin_events_by_id(self, coin_id="eth-ethereum"):
@@ -46,7 +46,7 @@ class CoinPaprika(Client):
         data["description"] = data["description"].apply(
             lambda x: "\n".join(textwrap.wrap(x, width=30)) if isinstance(x, str) else x
         )
-        data.drop('id', axis=1, inplace=True)
+        data.drop("id", axis=1, inplace=True)
         return data
 
     def get_coin_twitter_timeline(self, coin_id="eth-ethereum"):
@@ -54,10 +54,14 @@ class CoinPaprika(Client):
         if "error" in res:
             print(res)
             return pd.DataFrame()
-        df = pd.DataFrame(res)[["date", "user_name", "status", "retweet_count", "like_count"]]
+        df = pd.DataFrame(res)[
+            ["date", "user_name", "status", "retweet_count", "like_count"]
+        ]
 
         df = df.applymap(
-            lambda x: "\n".join(textwrap.wrap(x, width=100)) if isinstance(x, str) else x
+            lambda x: "\n".join(textwrap.wrap(x, width=100))
+            if isinstance(x, str)
+            else x
         )
 
         return df
@@ -67,7 +71,7 @@ class CoinPaprika(Client):
     ):
         return pd.DataFrame(self._get_all_contract_platforms()).reset_index()
 
-    def get_contract_platform(self, platform_id='eth-ethereum'):
+    def get_contract_platform(self, platform_id="eth-ethereum"):
         df = self._get_contract_platforms(platform_id=platform_id)
         return pd.DataFrame(df).reset_index()
 
@@ -87,7 +91,7 @@ class CoinPaprika(Client):
         ]
         coins = self._get_coins_info()
         df = pd.DataFrame(coins)[cols]
-        df.columns = header_wrapper(df, n=12, replace='_')
+        df.columns = header_wrapper(df, n=12, replace="_")
         return df.sort_values(by="rank")
 
     def get_coins_market_info(self):
@@ -107,11 +111,13 @@ class CoinPaprika(Client):
         ]
         coins = self._get_coins_info()
         df = pd.DataFrame(coins)[cols]
-        df.columns = header_wrapper(df, n=12, replace='_')
+        df.columns = header_wrapper(df, n=12, replace="_")
         return df.sort_values(by="rank")
 
-    def get_tickers_for_coin(self, coin_id="btc-bitcoin", quotes='USD'):
-        df = pd.json_normalize(self._get_tickers_for_coin(coin_id, quotes)).T.reset_index()
+    def get_tickers_for_coin(self, coin_id="btc-bitcoin", quotes="USD"):
+        df = pd.json_normalize(
+            self._get_tickers_for_coin(coin_id, quotes)
+        ).T.reset_index()
         df.columns = ["Metric", "Value"]
         return df
 
@@ -145,7 +151,7 @@ class CoinPaprika(Client):
             df["fiats"].copy().apply(lambda x: len([i["symbol"] for i in x if x]))
         )
         df = df[cols]
-        df.columns = header_wrapper(df, n=12, replace='_')
+        df.columns = header_wrapper(df, n=12, replace="_")
         df = df.applymap(
             lambda x: "\n".join(textwrap.wrap(x, width=28)) if isinstance(x, str) else x
         )
@@ -166,7 +172,7 @@ class CoinPaprika(Client):
             "trust_score",
         ]
         df = pd.DataFrame(data)[cols]
-        df.columns = header_wrapper(df, n=15, replace='_')
+        df.columns = header_wrapper(df, n=15, replace="_")
         return df
 
     def search(self, q):
@@ -184,6 +190,6 @@ class CoinPaprika(Client):
                 )
         return pd.DataFrame(results)
 
-    def get_ohlc(self, coin_id='eth-ethereum', quotes='USD'):
+    def get_ohlc(self, coin_id="eth-ethereum", quotes="USD"):
         data = self._get_ohlc_historical(coin_id, quotes)
         return pd.DataFrame(data)
