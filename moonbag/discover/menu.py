@@ -440,9 +440,9 @@ def main():
             if cmd == "help":
                 c.help()
             elif cmd in ["exit", "quit", "q"]:
-                return False
-            elif cmd == "r":
                 return True
+            elif cmd == "r":
+                return False
 
             view = c.mapper.get(cmd)
             if view is None:

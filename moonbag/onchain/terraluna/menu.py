@@ -128,7 +128,7 @@ def main():
     c.help()
     while True:
 
-        an_input = input(f"{MOON}> ")
+        an_input = input(f"{MOON}> (terra) ")
         try:
             parsy, others = parser.parse_known_args(an_input.split())
             cmd = parsy.cmd
@@ -136,10 +136,9 @@ def main():
             if cmd == "help":
                 c.help()
             elif cmd in ["exit", "quit", "q"]:
-                return False
-            elif cmd == "r":
-
                 return True
+            elif cmd == "r":
+                return False
 
             view = c.mapper.get(cmd)
             if view is None:
@@ -161,7 +160,3 @@ def main():
             print(" ")
             print(" ")
             continue
-
-
-if __name__ == "__main__":
-    main()

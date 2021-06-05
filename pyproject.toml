@@ -21,6 +21,7 @@ praw = "^7.2.0"
 psaw = "^0.1.0"
 asyncpraw = "^7.2.0"
 aPRAW = "^0.6.8-alpha.0"
+pytest-cov = "^2.12.1"
 
 [tool.poetry.dev-dependencies]
 

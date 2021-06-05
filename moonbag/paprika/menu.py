@@ -32,6 +32,7 @@ class Controller:
             "contracts" : self.show_contracts,
             "global_info" : self.show_global_market,
             "coin_ohlc" : self.show_ohlc,
+            "search" : self.search,
         }
 
     @staticmethod
@@ -240,6 +241,22 @@ class Controller:
             return
         print_table(prices.head(parsy.limit))
 
+    def search(self, args):
+        parser = MoonParser(
+            prog="search",
+            add_help=True,
+            description="search coinpaprika",
+        )
+        parser.add_argument('-q','--q','--query', required=True, type=str, help="Search query", dest="query")
+        parsy, _ = parser.parse_known_args(args)
+
+        try:
+            search = self.client.search(q=parsy.query)
+        except ValueError as e:
+            print(f"{e}")
+            return
+        print_table(search)
+
 
 def main():
     c = Controller()
@@ -262,9 +279,9 @@ def main():
             if cmd == "help":
                 c.help()
             elif cmd in ["exit", "quit", "q"]:
-                return False
-            elif cmd == "r":
                 return True
+            elif cmd == "r":
+                return False
 
             view = c.mapper.get(cmd)
             if view is None:

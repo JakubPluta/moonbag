@@ -124,11 +124,11 @@ class Controller:
 
     @staticmethod
     def quit():
-        return False
+        return True
 
     @staticmethod
     def returner():
-        return True
+        return False
 
     def get_view(self, an_input):
         (known_args, others) = self.parser.parse_known_args(an_input.split())
