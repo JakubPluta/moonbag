@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-from moonbag.cryptocompare.cryptocomp import CryptoCompare, API_KEY
+from moonbag.cryptocompare.cryptocomp import CryptoCompare
 import argparse
 import logging
 from moonbag.common import LOGO, MOON, print_table
@@ -13,7 +13,7 @@ from moonbag.cryptocompare.utils import (
     print_no_api_key_msg,
 )
 from inspect import signature
-from moonbag.cryptocompare.utils import MoonParser
+from moonbag.common.utils import MoonParser
 
 
 logger = logging.getLogger("compare-menu")
@@ -21,7 +21,7 @@ logger = logging.getLogger("compare-menu")
 
 class Controller:
     def __init__(self):
-        self.client = CryptoCompare(API_KEY)
+        self.client = CryptoCompare()
         self.parser = argparse.ArgumentParser(prog="coin", add_help=False)
         self.parser.add_argument("cmd")
         self.base_commands = ["help", "exit", "quit", "r", "q"]

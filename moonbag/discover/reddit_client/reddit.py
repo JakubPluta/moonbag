@@ -157,10 +157,20 @@ class Reddit(RedditClient):
                         title=s.get("title"),
                     )
                 )
-        df = pd.DataFrame(results).sort_values(by="score", ascending=False)
-        df["title"] = df["title"].apply(
-            lambda x: "\n".join(textwrap.wrap(x, width=76)) if isinstance(x, str) else x
-        )
+        if not results or results == []:
+            print("No results found")
+            return pd.DataFrame()
+        else:
+            try:
+                df = pd.DataFrame(results).sort_values(by="score", ascending=False)
+                df["title"] = df["title"].apply(
+                    lambda x: "\n".join(textwrap.wrap(x, width=76))
+                    if isinstance(x, str)
+                    else x
+                )
+            except KeyError as e:
+                print(e)
+                return pd.DataFrame()
         return df.sort_values(by="created", ascending=False)
 
     def get_popular_submissions(self):

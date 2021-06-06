@@ -34,6 +34,14 @@ class CryptoPanic:
         url = f"{self.BASE_URL}/posts/?auth_token={self.api_key}" + f"&kind={kind}"
         print(f"Fetching page: 0")
         first_page = requests.get(url).json()
+
+        if first_page == {
+            "status": "Incomplete",
+            "info": "Missing auth_token parameter",
+        }:
+            print(first_page)
+            return None
+
         data, next_page = first_page["results"], first_page.get("next")
 
         for post in data:
@@ -56,7 +64,12 @@ class CryptoPanic:
 
     def get_posts(self, kind="news"):
         """kind: news or media"""
-        df = pd.DataFrame(self._get_posts(kind))
+        pst = self._get_posts(kind)
+        if not pst:
+            print(
+                "You need to provide API Key to use this feature. \nPlease visit https://cryptopanic.com/developers/api/ and get your API KEY"
+            )
+        df = pd.DataFrame(pst)
         df["title"] = df["title"].apply(
             lambda x: "\n".join(textwrap.wrap(x, width=66)) if isinstance(x, str) else x
         )

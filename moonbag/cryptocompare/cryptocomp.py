@@ -1,25 +1,26 @@
 import pandas as pd
-from dotenv import load_dotenv
 import os
 from moonbag.cryptocompare._client import CryptoCompareClient
-from moonbag.common.utils import table_formatter, wrap_text_in_df
+from moonbag.common.keys import CC_API_KEY
+from moonbag.common.utils import wrap_text_in_df
 from moonbag.cryptocompare.utils import create_dct_mapping_from_df
 import logging
 import textwrap
 
 logger = logging.getLogger("cmc")
 
-load_dotenv()
-
-API_KEY = os.getenv("CC_API_KEY")
-
 
 class CryptoCompare(CryptoCompareClient):
-    def __init__(self, api_key):
+    def __init__(self, api_key=CC_API_KEY):
         super().__init__(api_key)
         self.api_key = api_key
-        self.coin_list = self.get_all_coins_list()
-        self.coin_mapping = create_dct_mapping_from_df(self.coin_list, "Symbol", "Id")
+        try:
+            self.coin_list = self.get_all_coins_list()
+            self.coin_mapping = create_dct_mapping_from_df(
+                self.coin_list, "Symbol", "Id"
+            )
+        except TypeError:
+            logger.warning("Wrong API KEY, Please ")
 
     def get_price(self, symbol="BTC", currency="USD", **kwargs):
         data = self._get_price(symbol, currency, **kwargs)

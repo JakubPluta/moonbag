@@ -23,7 +23,7 @@ LOGO = """
 """
 
 
-def print_table(df: pd.DataFrame, floatfmt=".4f", tablefmt="psql"):
+def print_table(df: pd.DataFrame, floatfmt=".4f", tablefmt="psql"):  # pragma: no cover
     if not isinstance(df, pd.DataFrame):
         raise TypeError("Please use data frame as an input!")
     print(

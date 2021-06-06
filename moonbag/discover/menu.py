@@ -8,7 +8,7 @@ import time
 from moonbag.common import LOGO, MOON, print_table
 from argparse import ArgumentError
 from inspect import signature
-from moonbag.cryptocompare.utils import MoonParser
+from moonbag.common.utils import MoonParser
 from moonbag.discover.defi import graph, llama, pulse
 from moonbag.discover.reddit_client import reddit
 from moonbag.discover.others import wales
@@ -85,6 +85,11 @@ class Controller:
             dest="key",
         )
         parsy, _ = parser.parse_known_args(args)
+
+        if self.reddit is None:
+            print("You need to provide Reddit Credentials to use this API")
+            return
+
         try:
             top_subs = self.reddit.discover_top_submissions(parsy.key)
         except ValueError as e:
@@ -93,6 +98,9 @@ class Controller:
         print_table(top_subs)
 
     def show_popular_submissions(self, args):
+        if self.reddit.client is None:
+            print("You need to provide Reddit Credentials to use this API")
+            return
         parser = MoonParser(
             prog="reddit sumissions",
             add_help=True,
@@ -142,6 +150,9 @@ class Controller:
         print_table(search_data)
 
     def search_subs(self, args):
+        if self.reddit.client is None:
+            print("You need to provide Reddit Credentials to use this API")
+            return
         parser = MoonParser(
             prog="reddit search",
             add_help=True,

@@ -7,7 +7,7 @@ import logging
 from moonbag.common import LOGO, MOON, print_table
 from argparse import ArgumentError
 from inspect import signature
-from moonbag.cryptocompare.utils import MoonParser
+from moonbag.common.utils import MoonParser
 from moonbag.paprika.coinpaprika import CoinPaprika
 
 logger = logging.getLogger("paprika-menu")

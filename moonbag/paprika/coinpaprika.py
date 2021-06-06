@@ -192,4 +192,7 @@ class CoinPaprika(Client):
 
     def get_ohlc(self, coin_id="eth-ethereum", quotes="USD"):
         data = self._get_ohlc_historical(coin_id, quotes)
+        if "error" in data:
+            print(data["error"])
+            return pd.DataFrame()
         return pd.DataFrame(data)

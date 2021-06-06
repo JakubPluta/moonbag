@@ -1,0 +1,7 @@
+[run]
+omit =
+    tests/*
+    /myenv/*
+    moonbag/tests/*
+    *__init__.py*
+    *keys.py*

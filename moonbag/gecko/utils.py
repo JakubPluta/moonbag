@@ -35,7 +35,7 @@ def calculate_time_delta(date: str):
     return (now - date).days
 
 
-def get_eth_addresses_for_cg_coins(file):
+def get_eth_addresses_for_cg_coins(file):  # pragma: no cover
     with open(file, "r") as f:
         data = json.load(f)
         df = pd.DataFrame(data)
@@ -57,7 +57,7 @@ def replace_qm(df):
     return df
 
 
-def get_url(url, elem):
+def get_url(url, elem):  # pragma: no cover
     return url + elem.find("a")["href"]
 
 
@@ -69,7 +69,7 @@ def convert(word):
     return "".join(x.capitalize() or "_" for x in word.split("_") if word.isalpha())
 
 
-def collateral_auditors_parse(args):
+def collateral_auditors_parse(args):  # pragma: no cover
     if args and args[0] == "N/A":
         collateral = args[1:]
         auditors = []
@@ -93,7 +93,7 @@ def changes_parser(changes):
         for i in range(3 - len(changes)):
             changes.append(None)
     else:
-        changes = [None for i in range(3)]
+        changes = [None for _ in range(3)]
     return changes
 
 

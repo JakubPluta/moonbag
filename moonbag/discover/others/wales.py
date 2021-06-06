@@ -8,12 +8,23 @@ import textwrap
 def _get_wales_stats(min_value=1000000):
     req = f"https://api.whale-alert.io/v1/transactions?api_key={WALES_API_KEY}"
     params = {"min_value": min_value, "start": int(time.time()) - 3000}
-    return requests.get(url=req, params=params).json()["transactions"]
+    return requests.get(url=req, params=params).json()
 
 
 def get_wales_stats():
+    if not WALES_API_KEY:
+        print(
+            "You need to provide whale-alert api key.\n Please visit: https://api.whale-alert.io/v1 to get your key\n"
+        )
+        return pd.DataFrame()
+
     data = _get_wales_stats()
-    data = pd.json_normalize(data).sort_values("timestamp", ascending=False)
+    if data == {"result": "error", "message": "invalid api_key"}:
+        print("Wrong API KEY.")
+        return pd.DataFrame()
+    data = pd.json_normalize(data["transactions"]).sort_values(
+        "timestamp", ascending=False
+    )
     data.drop(
         [
             "id",
