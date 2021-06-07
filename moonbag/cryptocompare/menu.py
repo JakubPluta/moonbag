@@ -511,7 +511,7 @@ class Controller:
             description="get recommended exchanges and wallets",
         )
         parser.add_coin_argument()
-        parser.add_key_argument()
+        parser.add_key_argument(help="search wallets or exchanges", choices=["exchange", "wallet"])
 
         parsy, _ = parser.parse_known_args(args)
 
