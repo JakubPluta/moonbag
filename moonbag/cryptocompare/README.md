@@ -61,7 +61,6 @@ arguments:
 ```
 orders -c LUNA -t BTC -e binance
 ```
-
 ### 9. orders_snap
 show  order book snapshot for given pair and exchange. LUNA/BTC,Binance [CryptoCompare]
 arguments:
@@ -180,7 +179,6 @@ show all recommendation for wallets and exchanges [CryptoCompare]
 arguments:
   -c , --coin  # coin symbol
   -k, --key {exchange,wallet} # recommended exchanges or wallets for given coin
-
 ```
 recommended -c ETH -k wallet
 ```
