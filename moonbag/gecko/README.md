@@ -3,7 +3,65 @@ There are to options to use CoinGecko views:
 - gecko_coin - view in which you can see data for particular coin
 - gecko_view - view in which you can see different data for defi, nft, top gainer, news etc.
 
-## gecko_view:
+
+## gecko_coin - see data for given coin
+
+### 1. similar
+primitive way to find coin names, and symbols with by search query
+required argument -c, --coin # coin name
+```
+similar -c uniswap
+```
+### 2. load
+load coin from CoinGecko.
+required argument -c, --coin # coin symbol
+```
+load -c uniswap
+```
+### 3. coinlist
+show all available coins
+```
+coinlist
+```
+### 4. info
+show info for loaded coin
+```
+info
+```
+### 5. market
+show market date for loaded coin
+```
+market
+```
+### 6. devs
+show data about coin development (Github, Bitbucket). For most coins data is unavailable
+```
+devs
+```
+### 7. ath
+show info all time high of loaded coin
+```
+ath
+```
+### 8. atl
+show info all time low of loaded coin
+```
+atl
+```
+### 9. web
+show web pages founded for loaded coin
+```
+web
+```
+### 10. explorers
+show blockchain explorers links for loaded coin
+```
+explorers
+```
+
+
+
+## gecko_view - see overall crypto data
 
 ### 1. news
 show data for latest crypto news

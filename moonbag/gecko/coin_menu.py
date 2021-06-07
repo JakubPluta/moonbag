@@ -216,7 +216,6 @@ def main():
         try:
             parsy, others = parser.parse_known_args(an_input.split())
             cmd = parsy.cmd
-
             if cmd == "help":
                 c.help()
             elif cmd in ["exit", "quit", "q"]:
@@ -225,6 +224,8 @@ def main():
                 return False
 
             view = c.mapper.get(cmd)
+            if c.coin:
+                print("\n>>> Loaded coin: ", c.coin, " <<<")
             if view is None:
                 continue
             elif callable(
@@ -234,7 +235,6 @@ def main():
                     view(others)
                 else:
                     view()
-
         except ArgumentError:
             print("The command selected doesn't exist")
             print("\n")
