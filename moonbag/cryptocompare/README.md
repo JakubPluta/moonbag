@@ -4,8 +4,8 @@ After that go to moonbag/common/keys.py and paste it under CC_API_KEY = <paste y
 or do that in .env file if you this approach
 
 ### 1. news
-show latest crypto news [CryptoCompare]
-arguments:
+show latest crypto news [CryptoCompare] <br>
+arguments: <br>
     -s, --sort {latest,popular}
 ```
 news -s latest
