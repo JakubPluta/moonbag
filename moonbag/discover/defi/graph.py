@@ -2,6 +2,8 @@ import datetime
 from moonbag.common.utils import created_date
 import requests
 import pandas as pd
+from moonbag.common.keys import BIT_QUERY_API
+import logging
 
 
 class GraphClient:
@@ -13,15 +15,20 @@ class GraphClient:
     def run_query(
         url, query
     ):  # A simple function to use requests.post to make the API call. Note the json= section.
-        request = requests.post(url, json={"query": query})
+        headers = {"x-api-key" : BIT_QUERY_API}
+        request = requests.post(url, json={"query": query},
+                                headers=headers
+                                )
         if request.status_code == 200:
             return request.json()["data"]
         else:
-            raise Exception(
-                "Query failed to run by returning code of {}. {}".format(
-                    request.status_code, query
+            print(
+                "Query failed to run by returning code of {}.".format(
+                    request.status_code
                 )
             )
+            if request.status_code == 403:
+                print("Please visit https://graphql.bitquery.io/ and generate you free api key")
 
     def get_uni_tokens(self, skip=0):
         q = (
@@ -38,7 +45,12 @@ class GraphClient:
         """
             % skip
         )
+
         data = self.run_query(self.UNI, q)
+        if not data:
+            print("Couldnt find data")
+            return pd.DataFrame()
+
         return pd.DataFrame(data["tokens"])
 
     def get_dex_trades_by_protocol(self):
@@ -55,6 +67,9 @@ class GraphClient:
 
         """
         data = self.run_query(self.BQ, q)
+        if not data:
+            print("Couldnt find data")
+            return pd.DataFrame()
         return pd.DataFrame(data["ethereum"]["dexTrades"])
 
     def get_dex_trades_monthly(self):
@@ -112,6 +127,9 @@ class GraphClient:
             min_tx,
         )
         data = self.run_query(self.UNI, q)
+        if not data:
+            print("Couldnt find data")
+            return pd.DataFrame()
         df = pd.json_normalize(data["pairs"])
         df["createdAtTimestamp"] = df["createdAtTimestamp"].apply(
             lambda x: created_date(int(x))
@@ -152,6 +170,9 @@ class GraphClient:
 
         """
         data = self.run_query(self.UNI, q)
+        if not data:
+            print("Couldnt find data")
+            return pd.DataFrame()
         df = pd.json_normalize(data["pairs"])
 
         df = df[df["token0.name"] != "You don't blacklist delta.financial"]
@@ -181,8 +202,11 @@ class GraphClient:
          }
         }
         """
-        data = self.run_query(self.UNI, q)["uniswapFactory"]
-        return pd.Series(data).reset_index()
+        data = self.run_query(self.UNI, q)
+        if not data:
+            print("Couldnt find data")
+            return pd.DataFrame()
+        return pd.Series(data["uniswapFactory"]).reset_index()
 
     def get_compound_markets(self):
         q = """
@@ -202,8 +226,12 @@ class GraphClient:
 
 
         """
-        data = self.run_query(self.CMP, q)["markets"]
-        return pd.DataFrame(data)
+
+        data = self.run_query(self.CMP, q)
+        if not data:
+            print("Couldnt find data")
+            return pd.DataFrame()
+        return pd.DataFrame(data["markets"])
 
     def get_last_swaps_uni(self):
         q = """
@@ -224,8 +252,11 @@ class GraphClient:
 
         """
 
-        data = self.run_query(self.UNI, q)["swaps"]
-        df = pd.json_normalize(data)
+        data = self.run_query(self.UNI, q)
+        if not data:
+            print("Couldnt find data")
+            return pd.DataFrame()
+        df = pd.json_normalize(data["swaps"])
 
         df["timestamp"] = df["timestamp"].apply(lambda x: created_date(int(x)))
         df.columns = ["amountUSD", "timestamp", "token0", "token1"]

@@ -239,7 +239,7 @@ class CryptoCompare(CryptoCompareClient):
         df = df[["published_on", "title", "source", "guid"]]
 
         df = df.applymap(
-            lambda x: "\n".join(textwrap.wrap(x, width=75)) if isinstance(x, str) else x
+            lambda x: "\n".join(textwrap.wrap(x, width=66)) if isinstance(x, str) else x
         )
         return df
 
@@ -391,9 +391,13 @@ class CryptoCompare(CryptoCompareClient):
         self, symbol="LUNA", to_symbol="BTC", exchange="binance", **kwargs
     ):
 
-        data = self._get_order_book_top(
+        r = self._get_order_book_top(
             symbol.upper(), to_symbol.upper(), exchange.capitalize(), **kwargs
-        )["Data"]
+        )
+        if 'Error' in r['Response']:
+            print(r['Message'])
+
+        data = r["Data"]
         if not data:
             return pd.DataFrame()
         df = pd.json_normalize(data["RAW"])

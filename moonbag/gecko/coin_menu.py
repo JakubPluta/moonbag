@@ -105,7 +105,7 @@ class Controller:
         if self._is_loaded:
             df = self.coin.base_info.reset_index()
             df = df.applymap(
-                lambda x: "\n".join(textwrap.wrap(x, width=150))
+                lambda x: "\n".join(textwrap.wrap(x, width=120))
                 if isinstance(x, str)
                 else x
             )

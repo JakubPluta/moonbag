@@ -9,6 +9,7 @@
 
 ## About The Project   
 Moonbag is Python Crypto CLI for exploring crypto trends, coins, DeFi protocols, NFTs and many others.
+It's highly inspired by the famous GamestonkTerminal
 
 ## Let's fly to the Moon
 ### Installation 
@@ -43,6 +44,7 @@ You need to visit following places to get your API KEYS (all of them are free)
 * Wales: https://docs.whale-alert.io/#introduction (https://whale-alert.io/signup)
 * Cryptopanic: https://cryptopanic.com/developers/api/
 * Ethplorer: https://ethplorer.io/wallet/#api (It's not mandatory, u can use this API without key)
+* BitQuery: https://bitquery.io/pricing
 
 After you get your keys, you need to update it. You can do that in:
 * /moonbag/common/keys.py
@@ -57,6 +59,7 @@ REDDIT_CLIENT_ID = <Enter your client id>
 REDDIT_CLIENT_SECRET = <Enter your client secret>
 REDDIT_USER_AGENT = <Enter your client user agent>
 CRYPTO_PANIC_API = <Enter your key>
+BIT_QUERY_API = <Enter your key>
 ```
 ##### Adding keys to .env file.
 * Create .env file in your main folder
@@ -68,6 +71,7 @@ REDDIT_CLIENT_ID=<Enter your client id>
 REDDIT_CLIENT_SECRET=<Enter your client secret>
 REDDIT_USER_AGENT=<Enter your client user agent>
 CRYPTO_PANIC_API=<Enter your key>
+BIT_QUERY_API = <Enter your key>
 ```
 
 ## 7. Start Moon Bag terminal:

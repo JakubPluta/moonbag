@@ -136,7 +136,7 @@ class Controller:
     @staticmethod
     def _get_prices(args):
         parser = MoonParser(prog="prices", add_help=True, description="get prices")
-        parser.add_coin_argument()
+        parser.add_coin_argument(required=True)
         parser.add_to_symbol_argument()
         parser.add_limit_argument(
             default=100,
@@ -230,7 +230,7 @@ class Controller:
             description="get top exchanges",
         )
         parser.add_coin_argument(default="BTC", required=False)
-        parser.add_to_symbol_argument()
+        parser.add_to_symbol_argument(default="USD")
 
         parsy, _ = parser.parse_known_args(args)
 
@@ -325,9 +325,9 @@ class Controller:
             add_help=True,
             description="get order book for pair of coins",
         )
-        parser.add_coin_argument()
+        parser.add_coin_argument(default="ETH", required=False)
         parser.add_to_symbol_argument(default="BTC")
-        parser.add_exchange_argument()
+        parser.add_exchange_argument(default="binance")
         parsy, _ = parser.parse_known_args(args)
 
         try:
@@ -480,7 +480,7 @@ class Controller:
             add_help=True,
             description="get order book snapshot for pair of coins",
         )
-        parser.add_coin_argument()
+        parser.add_coin_argument(default="LUNA", required=False)
         parser.add_to_symbol_argument(default="BTC")
         parser.add_exchange_argument()
         parsy, _ = parser.parse_known_args(args)

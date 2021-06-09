@@ -51,6 +51,7 @@ class Eth(EthplorerClient):
                     operations["timestamp"]
                 )
             tx.update(operations)
+            tx.pop("input")
             df = pd.Series(tx).to_frame().reset_index()
             df.columns = ["Metric", "Value"]
         except KeyError as e:

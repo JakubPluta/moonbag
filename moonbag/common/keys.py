@@ -13,3 +13,4 @@ REDDIT_CLIENT_SECRET = os.getenv(
 )  # or "Enter your client secret"
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT")  # "Enter your client user agent"
 CRYPTO_PANIC_API = os.getenv("CRYPTO_PANIC_API")  # or "Enter your client user agent"
+BIT_QUERY_API = os.getenv("BIT_QUERY_API")

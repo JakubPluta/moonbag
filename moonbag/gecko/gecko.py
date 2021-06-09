@@ -6,6 +6,7 @@ from pycoingecko import CoinGeckoAPI
 import cachetools.func
 from retry import retry
 import math
+import textwrap
 from moonbag.common.utils import wrap_text_in_df, underscores_to_newline_replace
 from moonbag.gecko.utils import (
     changes_parser,
@@ -582,10 +583,8 @@ class Overview:
             row_cleaned.append(link)
             row_cleaned.pop(3)
             results.append(row_cleaned)
-        return (
-            pd.DataFrame(
-                results,
-                columns=[
+        df = pd.DataFrame(
+                results,columns=[
                     COLUMNS["rank"],
                     COLUMNS["name"],
                     COLUMNS["symbol"],
@@ -597,10 +596,11 @@ class Overview:
                     COLUMNS["market_cap"],
                     COLUMNS["url"],
                 ],
-            )
-            .set_index(COLUMNS["rank"])
-            .head(n)
+            ).set_index(COLUMNS["rank"]).head(n)
+        df = df.applymap(
+            lambda x: "\n".join(textwrap.wrap(x, width=55)) if isinstance(x, str) else x
         )
+        return df
 
     @retry(tries=2, delay=3, max_delay=5)
     def get_nft_of_the_day(self, n=None):

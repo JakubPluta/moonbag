@@ -53,7 +53,7 @@ class Controller:
         print(
             "   top_subs          find top submissions on most popular crypto subreddits  [Reddit]"
         )
-        print("   search_subs       show coins base information  [Reddit]")
+        print("   search_subs       search for new submissions in given subreddit  [Reddit]")
         print("   search_reddit     search on reddit with you own query  [Reddit]")
         print("   dpi               show defi pulse index  [Reddit]")
         print("   defi              show DeFi protocols stats [LLama]")
