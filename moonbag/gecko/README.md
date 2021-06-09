@@ -9,14 +9,14 @@ There are to options to use CoinGecko views:
 ### 1. similar
 primitive way to find coin names, and symbols with by search query  
 required argument 
-* -c, --coin # coin name
+* -c, --coin [coin symbol]
 ```
 similar -c uniswap
 ```
 ### 2. load
 load coin from CoinGecko.  
 required argument 
-* -c, --coin # coin symbol
+* -c, --coin [coin symbol]
 ```
 load -c uniswap
 ```
@@ -68,77 +68,77 @@ explorers
 ### 1. news
 show data for latest crypto news  
 optional arguments  
- * -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 news -n 30 # displays 30 news
 ```
 ### 2. trending
 show data for most trending coins on CoinGecko  
 optional arguments  
- * -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 trending -n 30 # display 30 trending coins
 ```
 ### 3. recently  
 show data for recently added coins on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 recently -n 30 # display 30 trending coins
 ```
 ### 4. most_visited  
 show data for most visited coins on CoinGecko  
 optional arguments
- * -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 most_visited -n 30
 ```
 ### 5. most_voted  
 show data for most voted coins on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 most_voted -n 30
 ```
 ### 5. gainers
 show data for top gainers on CoinGecko  
 optional arguments
- * -n, --num # number of records that you want to see  
+ * -n, --num [number of records that you want to see] 
 ```
 gainers -n 30
 ```
 ### 6. losers
 show data for biggest losers on CoinGecko  
 optional arguments
- * -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 losers -n 30
 ```
 ### 7. top_sentiment  
 show data for coins with most positive sentiment on CoinGecko  
 optional arguments
- * -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 top_sentiment -n 30
 ```
 ### 8. top_volume
 show data for coins with highest volume on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 top_volume -n 30
 ```
 ### 9. top_dexes  
 show data for top decentralized exchanges on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 top_dexes -n 30
 ```
 ### 10. top_defi
 show data for top defi coins on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 top_defi -n 30
 ```
@@ -150,21 +150,21 @@ info_defi
 ### 12. yield_farms  
 show data for top yield farms  on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 yield_farms
 ```
 ### 13. stables
 show data for stablecoins on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 stables
 ```
 ### 14. top_nft
 show data for top non-fungible tokens on CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 top_nft
 ```
@@ -181,35 +181,35 @@ nft_of_day
 ### 17. categories
 show top crypto categories  CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 categories -n 30
 ```
 ### 18. derivatives
 show derivatives  CoinGecko [long waiting time 15 sec]  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 derivatives -n 30
 ```
 ### 19. indexes
 show indexes CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 indexes -n 30
 ```
 ### 20. fin_products  
 show crypto financial products CoinGecko  
 optional arguments 
-* -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 fin_products -n 30
 ```
 ### 21. fin_platforms  
 show crypto financial platforms CoinGecko  
 optional arguments
- * -n, --num # number of records that you want to see
+ * -n, --num [number of records that you want to see]
 ```
 fin_platforms -n 30
 ```

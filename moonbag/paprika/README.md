@@ -9,7 +9,7 @@ global_info
 ### 2. search
 try to find coin, exchange [Coinpaprika]
 arguments:  
-* -q, --query # search query
+* -q, --query [search query]
 ```
 search -q uni
 ```
@@ -21,28 +21,28 @@ coins
 ### 4. coins_info  
 show base information about cryptocurrencies [Coinpaprika]  
 arguments:  
- * -n, --limit # number of results  
+ * -n, --limit [number of results] 
 ```
 coins_info -n 100
 ```
 ### 5. coins_market  
 show market information about cryptocurrencies [Coinpaprika]  
 arguments:  
- * -n, --limit # number of results  
+ * -n, --limit [number of results]   
 ```
 coins_market -n 100
 ```
 ### 6. exchanges_info
 show crypto exchanges information [Coinpaprika]  
 arguments:  
- * -n, --limit # number of results  
+ * -n, --limit [number of results]  
 ```
 exchanges_info -n 100
 ```
 ### 7. exchanges_market
 show crypto exchanges market information [Coinpaprika]  
 arguments:  
- * -n, --limit # number of results  
+ * -n, --limit [number of results] 
 ```
 exchanges_market -n 100
 ```
@@ -55,7 +55,7 @@ platforms
 show all contract platforms.  Default: eth-ethereum. 
 To find platform name use, "platforms" command  
 arguments:   
-* -p , --platform  # platform id  
+* -p , --platform   [platform id]
 ```
 contracts -p eth-ethereum
 ```
@@ -64,7 +64,7 @@ contracts -p eth-ethereum
 show all exchanges for given coin. Use coin_id as input [Coinpaprika]   
 For now you need to use coin_id like : eth-ethereum (to find all coins_ids use coins_list command)  
 arguments:  
-* -c , --coin  # coin symbol
+* -c , --coin  [coin symbol]
 ```
 coin_exchanges -c eth-ethereum
 ```
@@ -72,7 +72,7 @@ coin_exchanges -c eth-ethereum
 show all event for given coin Use coin_id as input [Coinpaprika]   
 For now you need to use coin_id like : eth-ethereum (to find all coins_ids use coins_list command)  
 arguments:  
-* -c , --coin  # coin symbol
+* -c , --coin  [coin symbol]
 ```
 coin_events -c eth-ethereum
 ```
@@ -80,7 +80,7 @@ coin_events -c eth-ethereum
 show twitter timeline for given coin. Use coin_id as input [Coinpaprika]   
 For now you need to use coin_id like : eth-ethereum (to find all coins_ids use coins_list command)  
 arguments:  
-* -c , --coin  # coin symbol
+* -c , --coin [coin symbol]
 ```
 coin_twitter -c eth-ethereum
 ```
@@ -88,7 +88,7 @@ coin_twitter -c eth-ethereum
 show coin open-high-low-close prices data for last year. Use coin_id as input [Coinpaprika]   
 For now you need to use coin_id like : eth-ethereum (to find all coins_ids use coins_list command)  
 arguments:  
-* -c , --coin  # coin symbol
+* -c , --coin [coin symbol]
 ```
 coin_ohlc -c eth-ethereum
 ```

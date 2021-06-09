@@ -9,14 +9,14 @@ top_subs
 ### 2. search_subs
 show given subreddit for most popular submissions in last days  [Reddit]  
 required argument   
-* -s, --subreddit # subreddit name
+* -s, --subreddit [subreddit name]
 ```
 search_subs -s CryptoMoonShots
 ```
 ### 3. search_reddit
 search on reddit with you own query  [Reddit]     
 required argument  
-* -q, --query # your query 
+* -q, --query [your query]
 ```
 search_reddit -q ethereum
 ```
@@ -33,7 +33,7 @@ defi
 ### 6. fng
 show fear and greed index for last n days  [Fear and greed]   
 required argument  
-* -n, --limit # last N days
+* -n, --limit [last N days]
 ```
 fng -n 30
 ```
@@ -59,18 +59,18 @@ wales
 ```
 ### 11.  uni_pairs
 show recently added pairs on UniSwap  [TheGraph]  
-optional arguments:        
-  -d, --d, --days  # last n of days
-  -v, --v, --volume # min volume
-  -l, --l, --liquid # min liquidity
-  -t --t --txs # min transactions
+optional arguments:          
+  -d, --d, --days  [last n of days]  
+  -v, --v, --volume  [min volume]  
+  -l, --l, --liquid  [min liquidity]  
+  -t --t --txs [min transactions]  
 ```
  uni_pairs  -d 20 -v 1000 -l 1000 -t 100
 ```
 ### 10. uni_tokens 
 show tokens available on UniSwap  [TheGraph]   
 optional arguments:        
-  -s, --skip # you can only query 1000 records. 
+  -s, --skip [you can only query 1000 records.]
 ```
 # first page
 uni_tokens

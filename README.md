@@ -8,11 +8,10 @@
     ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝
 
 ## About The Project   
-Moonbag is Python Crypto CLI for exploring crypto trends, coins, DeFi protocols, NFTs and many others.
+Moonbag is Python Crypto CLI for exploring crypto trends, coins, DeFi protocols, NFTs and others.  
 It's highly inspired by the famous GamestonkTerminal
 
-## Let's fly to the Moon
-### Installation 
+## Installation 
 
 ## 1. Clone Repository:
 ```
@@ -22,7 +21,7 @@ git clone https://github.com/JakubPluta/moonbag.git
 ```
 cd moonbag/
 ```
-## 3. Create and activate virtual environment:**
+## 3. Create and activate virtual environment:
 ```
 python -m venv env
 source env/Scripts/activate
@@ -81,16 +80,17 @@ python moon.py
 ```
 
 ## Disclaimer:
-Project is in alpha stage. There will be a lot of issues, bugs. Please feel free to report bugs.
+Project is in alpha stage. The test coverage is close to 0. Be aware that there
+there will be a lot of issues, bugs. Feel free to report all faced bugs. 
 Improvements, new functionalities and tests will be added systematically.
 
 ## Contributing
-If you have an idea for improvement, new features -> Pull requests are welcome.
+If you have an idea for improvement, new features. Pull requests are welcome.  
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
 
-## Available features. (updated: 5.06.2021)
+## Available features. (updated: 09.06.2021)
 - [x] Coingecko
 - [x] Cryptocompare
 - [x] Coinpaprika
