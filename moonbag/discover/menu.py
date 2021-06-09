@@ -447,7 +447,7 @@ def main():
     c.help()
     while True:
 
-        an_input = input(f"{MOON}> ")
+        an_input = input(f"{MOON}> (discover) ")
         try:
             parsy, others = parser.parse_known_args(an_input.split())
             cmd = parsy.cmd
@@ -469,6 +469,8 @@ def main():
                     view(others)
                 else:
                     view()
+            else:
+                print("Command not found")
 
         except ArgumentError:
             print("The command selected doesn't exist")

@@ -152,7 +152,7 @@ def main():
     print(LOGO)
     c.help()
     while True:
-        an_input = input(f"{MOON}> ")
+        an_input = input(f"{MOON}> (gecko_view) ")
         try:
             view = c.get_view(an_input)
             if view is None:

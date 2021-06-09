@@ -53,7 +53,7 @@ def main():
     if sys.platform == "win32":
         os.system("")
 
-    parser = argparse.ArgumentParser(prog="onchain", add_help=False)
+    parser = argparse.ArgumentParser(prog="moonbag", add_help=False)
     parser.add_argument("cmd", choices=choices)
 
     show_help = True
@@ -81,7 +81,7 @@ def main():
             continue
 
         except SystemExit:
-            print("")
+            print("The command selected doesn't exist")
             print("")
             continue
 

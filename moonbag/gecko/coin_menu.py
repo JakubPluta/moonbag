@@ -211,7 +211,7 @@ def main():
     print(LOGO)
     c.help()
     while True:
-        an_input = input(f"> {MOON} ")
+        an_input = input(f"{MOON}> (gecko_coin) ")
 
         try:
             parsy, others = parser.parse_known_args(an_input.split())

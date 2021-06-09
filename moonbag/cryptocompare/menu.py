@@ -582,7 +582,7 @@ def main():
             print_no_api_key_msg()
             break
 
-        an_input = input(f"{MOON}> ")
+        an_input = input(f"{MOON}> (cryptocompare) ")
         try:
             parsy, others = parser.parse_known_args(an_input.split())
             cmd = parsy.cmd
