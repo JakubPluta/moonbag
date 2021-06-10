@@ -60,6 +60,15 @@ def main():
     print(LOGO)
 
     while True:
+
+        try:
+            sys.stdin.reconfigure(encoding="utf-8")
+            sys.stdout.reconfigure(encoding="utf-8")
+            sys.stdout.encoding = 'cp65001'
+
+        except Exception as e:
+            print(e, "\n")
+
         home = False
 
         if show_help:

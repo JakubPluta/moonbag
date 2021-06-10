@@ -77,6 +77,12 @@ BIT_QUERY_API = <Enter your key>
 # In main directory write in terminal:
 python moon.py
 ```
+If you are running moonbag on windows with bash terminal, and you are facing issues with encoding. Try to write at the beginning 
+```bash
+chcp.com 65001
+set PYTHONIOENCODING=utf-8
+```
+
 
 ## Disclaimer:
 Project is in alpha stage. The test coverage is close to 0. Be aware that there

@@ -294,6 +294,12 @@ def main():
     choices = c.base_commands + list(c.mapper.keys())
     if sys.platform == "win32":
         os.system("")
+    try:
+        sys.stdin.reconfigure(encoding="utf-8")
+        sys.stdout.reconfigure(encoding="utf-8")
+
+    except Exception as e:
+        print(e, "\n")
 
     parser = argparse.ArgumentParser(prog="paprika", add_help=False)
     parser.add_argument("cmd", choices=choices)
