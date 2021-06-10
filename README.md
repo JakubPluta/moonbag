@@ -1,17 +1,10 @@
-# Moon Bag Terminal
+<h1 align="center">
+  Moon Bag Terminal
+</h1>
 
 <p align="center">
   <img width="500" height="500" src="logo.png">
 </p>
-
-
-                    ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗██████╗  █████╗  ██████╗ 
-                    ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔══██╗██╔══██╗██╔════╝ 
-                    ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║██████╔╝███████║██║  ███╗
-                    ██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║██╔══██╗██╔══██║██║   ██║
-                    ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝██║  ██║╚██████╔╝
-                    ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝
-
 ## About The Project   
 Moonbag is Python Crypto CLI for exploring crypto trends, coins, DeFi protocols, NFTs and others.  
 It's highly inspired by the famous GamestonkTerminal
